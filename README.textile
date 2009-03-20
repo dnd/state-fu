@@ -1,3 +1,10 @@
+#!/usr/bin/env ruby
+# <--//
+require 'redcloth'
+puts RedCloth.new( DATA.read ).to_html
+# //-->
+__END__
+
 h1. Zen / Koan
 
 h3. Why pile your classes full of business logic, when you can teach them to meditate until they find enlightenment?
@@ -7,6 +14,7 @@ h3. Why pile your classes full of business logic, when you can teach them to med
 This is a ground-up rewrite of Stateful. 
 
 It should:
+
  * be a powerful DSL for building state machines, describing complex workflows and domain logic, and managing much of the state in a typical application.
  * play nicely with, but not require, ActiveRecord and / or Rails.
 
