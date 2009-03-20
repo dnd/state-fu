@@ -1,0 +1,17 @@
+h1. Zen / Koan
+
+h3. Why pile your classes full of business logic, when you can teach them to meditate until they find enlightenment?
+
+[ EXPERIMENTAL / STUB / PROTOTYPE ]
+
+This is a ground-up rewrite of Stateful. 
+
+It should:
+ * be a powerful DSL for building state machines, describing complex workflows and domain logic, and managing much of the state in a typical application.
+ * play nicely with, but not require, ActiveRecord and / or Rails.
+
+Interested parties should install cucumber and run `rake features`. 
+
+Your feedback is valued.
+
+Those seeking a production-ready alternative should see jbarnette-stateful or rubyist-aasm.
