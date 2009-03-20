@@ -1,0 +1,11 @@
+Feature: Specify states in a class
+  In order to define the default path for a class
+  Developers should be able to
+  use a specify block within a class definition
+
+  Scenario: Simplest possible stateful class
+    Given there is an empty class Foo
+    And Foo includes Zen
+    And Foo.zen.path() {} is called
+    When I call Foo.stateful
+    Then I should get the default path for Foo
