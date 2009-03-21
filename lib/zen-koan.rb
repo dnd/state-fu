@@ -1,9 +1,9 @@
 require 'zen/core_ext'
 require 'zen/helper'
-require 'zen/binding'
 require 'zen/space'
 require 'zen/koan'
 require 'zen/meditation'
+require 'zen/persistence'
 require 'zen/api/default'
 require 'zen/api/stateful'
 

@@ -41,15 +41,11 @@ module Zen
     alias_method :parse!, :learn!
     alias_method :parse, :learn!
 
-    # the Koan teaches a Klass how to meditate on it:
-    def teach!( klass, method_name, field_name = nil )
-      field_name ||= method_name.to_s.downcase.tr(' ', '_') + "_state"
+    # the Koan teaches a class how to meditate on it:
+    def teach!( klass, name, field_name = nil )
+      field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
-      if Zen::Space.class_koans[klass][method_name]
-        raise("#{klass} already knows a Koan by the name #{method_name}.")
-      else
-        Zen::Space.class_koans[klass][method_name] = self
-      end
+      Zen::Space.inject!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
   end

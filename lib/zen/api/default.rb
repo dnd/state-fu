@@ -7,12 +7,12 @@ module Zen
           Zen::Koan.for_class( self, name, options, &block )
         end
 
-        def koans( name=nil )
-          Zen::Space.class_koans[self][name && name.to_sym]
+        def koans()
+          Zen::Space.class_koans[self]
         end
 
         def koan_names()
-          koans.keys
+          Zen::Space.class_koans[self].keys
         end
       end
 
