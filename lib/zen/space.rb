@@ -1,32 +1,29 @@
 module Zen
   class Space
-    cattr_accessor :named_koans, :class_koans, :bindings
 
-    # hash[ Klass ][ nil ] # => return the Klass's default
-    # hash[ Klass ].om     # => return the Klass's default
-    module LazyHash
-      def om; self[Zen::DEFAULT_KOAN]; end;
-      def om; self[Zen::DEFAULT_KOAN]; end;
-    end
+    cattr_accessor :named_koans, :class_koans
+
+    # class_koans[ Class ][ method_name ] # => a Zen::Koan
+    # class_koans[ Klass ][ nil ]         # => the Klass's default Koan
+    # class_koans[ Klass ].om             # => the Klass's default Koan
     LAZY_HASH = lambda do |h, k|
-      if k.nil? && x = self[Zen::DEFAULT_KOAN]
-        x
+      m = Module.new do
+        def om; self[Zen::DEFAULT_KOAN]; end;
+      end
+      if k.nil? && k = self[Zen::DEFAULT_KOAN]
+        k
       else
-        h[k]= Hash.new().extend( LazyHash )
+        h[k]= Hash.new().extend( m )
       end
     end
 
     class << self
-      def forget!
+      def beginners_mind!
         @@named_koans = Hash.new
         @@class_koans = Hash.new( &LAZY_HASH )
-        @@bindings    = Hash.new( &LAZY_HASH )
       end
-      alias_method :reset!,          :forget!
-      alias_method :init!,           :forget!
-      alias_method :beginners_mind!, :forget!
+      alias_method :reset!,          :beginners_mind!
     end
-
     beginners_mind!
   end
 end

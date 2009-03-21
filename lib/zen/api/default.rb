@@ -24,20 +24,11 @@ module Zen
 
         def om( name=Zen::DEFAULT_KOAN )
           name = name.to_sym
-          if binding = Zen::Space.bindings[self.class][name]
-            _om[name] ||= Zen::Meditation.new( binding, self )
+          if koan = Zen::Space.class_koans[self.class][name]
+            _om[name] ||= Zen::Meditation.new( koan, self )
             _om[name]
           end
         end
-
-        # def bindings
-        #   Zen::Space.bindings[self.class]
-        # end
-
-        def koans( name = nil )
-          self.class.koans( name )
-        end
-
 
         def meditations( koan_name = nil)
           if koan_name
@@ -48,7 +39,10 @@ module Zen
         end
         alias_method :oms, :meditations
 
-        def om!( *names )
+        # instantiate all meditations
+        # it's useful to call this before_create w/
+        # ActiveRecord classes.
+        def meditate!( *names )
           if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
             names = koan_names()
           end

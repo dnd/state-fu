@@ -4,40 +4,35 @@ module Zen
   class Koan
     include Helper
 
-    # access koans by name in global space - mainly for sharing koans
-    # between classes
+    # analogous to self.for_class, but keeps koans in
+    # global space, not tied to a specific class.
     def self.[] name, options, &block
       # ...
     end
 
     # meta-constructor; expects to be called via Klass.koan()
     def self.for_class(klass, name, options, &block)
+      options.symbolize_keys!
       name = name.to_sym
-      koan = Zen::Space.class_koans()[ klass ][ name ]
+      koan = Zen::Space.class_koans[ klass ][ name ]
       if block_given?
         if koan
           puts koan.inspect
           koan.learn!( &block )
         else
           koan = new( name, options, &block )
-          koan.teach!( klass, name, options )
+          koan.teach!( klass, name, options[:field_name] )
           koan
-          # => Zen::Binding.new( klass, name, koan, options )
         end
-      else # no block
+      else
         koan
       end
     end
 
-    def self.meditate_on()
-    end
-
-    ##
-    ##
-
     def initialize( *a, &block )
     end
 
+    # merge the commands in &block with the existing koan
     def learn!( &block )
       puts koan.inspect + " learnt"
     end
@@ -46,35 +41,16 @@ module Zen
     alias_method :parse!, :learn!
     alias_method :parse, :learn!
 
-    # the Koan will instruct the klass.
-    def teach!( klass, method_name, options=DEFAULT_OPTIONS )
-      Zen::Binding.new( klass, method_name, self, options )
+    # the Koan teaches a Klass how to meditate on it:
+    def teach!( klass, method_name, field_name = nil )
+      field_name ||= method_name.to_s.downcase.tr(' ', '_') + "_state"
+      field_name   = field_name.to_sym
+      if Zen::Space.class_koans[klass][method_name]
+        raise("#{klass} already knows a Koan by the name #{method_name}.")
+      else
+        Zen::Space.class_koans[klass][method_name] = self
+      end
     end
     alias_method :bind!, :teach!
-    alias_method :install!, :teach!
-    alias_method :meditate!, :teach!
-
-    protected
-    def self.valid_indexes?(  )
-    end
-
-    def self.extract_index *a
-      name = nil
-      if validate_name(a) # [MyClass, :mylabel]
-        name = a
-      elsif a.length == 0
-        name = [self, DEFAULT_LABEL]
-      elsif a.length == 1
-        arg = a.first
-        if arg.is_a?( Class )
-          name = [arg, DEFAULT_LABEL]
-        elsif [Symbol].include?( arg.class )
-          name = [self, arg]
-        end
-      end
-      raise name.inspect unless name.nil? || validate_name( name )
-      name
-    end
-
   end
 end

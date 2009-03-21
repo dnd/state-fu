@@ -1,54 +1,36 @@
+=begin
 module Zen
-  #
-  #
   class Binding
-    include Zen::Helper
+#    include Zen::Helper
 
-    @@after_initialize = []
-
-    def self.after_initialize( method_to_call )
-      @@after_initialize << method_to_call
-    end
-
-    # ensure you require 'active_record' first if you're going to use it.
-    if Object.const_defined?( 'ActiveRecord' )
-      include Zen::Persistence::ActiveRecord
-    end
-
-    attr_reader :klass, :koan, :method_name, :options
-
-    def initialize( klass, method_name, koan, options=DEFAULT_OPTIONS )
-      options.symbolize_keys!
-      @klass       = klass
-      @koan        = koan
-      @method_name = method_name.to_sym
-      @field_name  = options[:field_name] # a symbol / string, or nil (default)
-      @meta        = options.delete(:meta)
-
-      field_name=( field_name )
-
-      if Zen::Space.bindings[@klass][@method_name]
-        raise("#{klass} already knows this koan as #{@method_name}.")
+    def self.instruct!( klass, koan, method_name, field_name = nil )
+      method_name  = method_name.to_sym
+      field_name ||= method_name.to_s.downcase.tr(' ', '_') + "_state"
+      field_name   = field_name.to_sym
+      if Zen::Space.class_koans[klass][method_name]
+        raise("#{klass} already knows a Koan by the name #{method_name}.")
       else
-        Zen::Space.bindings[@klass][@method_name] = self
-        Zen::Space.class_koans[@klass][@method_name] = @koan
+        Zen::Space.class_koans[klass][method_name] = koan
       end
-      bind!
-      @@after_initialize.each { |sym| send(sym) if method(sym) }
+      # Define a method to return a meditation on the Koan,
+      # through which it may be enlightened
+      # Not used in the default case, where object.om suffices.
+      _ivar_name    = "@_#{method_name}"
+      klass.class_eval do
+        unless _klass.respond_to?( _method_name ) || _method_name == Zen::DEFAULT_KOAN
+          mc.send( :define_method, _method_name ) do
+            send( Zen::DEFAULT_KOAN, _method_name )
+          end
+        end
+      end
+      # TODO add persister here
     end
+  end
+end
 
-    def field_name=( fn )
-      fn          = @method_name if fn.blank?
-      @field_name = fn.to_s.downcase.tr(' ', '_') + "_state"
-    end
+__END__
 
-    protected
-
-    def instance_variable_name_for_binding
-      "@#{method_name}"
-    end
-
-    def bind!
+    def bind_to_class!
       # define these here so they're available in the closure below
       _binding      = self
       _ivar_name    = instance_variable_name_for_binding()
@@ -96,4 +78,4 @@ module Zen
 
   end
 end
-
+=end
