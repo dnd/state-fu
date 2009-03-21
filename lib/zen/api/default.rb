@@ -17,11 +17,12 @@ module Zen
       end
 
       module InstanceMethods
-
+        protected
         def _om
           @_om ||= {}
         end
 
+        public
         def om( name=Zen::DEFAULT_KOAN )
           name = name.to_sym
           if koan = Zen::Space.class_koans[self.class][name]
@@ -30,7 +31,7 @@ module Zen
           end
         end
 
-        def meditations( koan_name = nil)
+        def meditations( koan_name = nil )
           if koan_name
             _om[koan_name.to_sym]
           else
@@ -44,7 +45,7 @@ module Zen
         # ActiveRecord classes.
         def meditate!( *names )
           if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
-            names = koan_names()
+            names = self.class.koan_names()
           end
           names.map { |n| om( n ) }
         end

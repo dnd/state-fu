@@ -108,7 +108,8 @@ describe "A pristine class Klass with Zen included:" do
         end
       end
 
-      it "does NOT inherit it's parent class' Koan !!" do
+      # sorry, Darwinism, not Lamarckism.
+      it "does NOT inherit it's parent class' Koans !!" do
         Child.koan.should be_nil
       end
 

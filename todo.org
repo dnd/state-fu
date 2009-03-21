@@ -1,0 +1,53 @@
+# +STARTUP:hidestars
+# TODO / DEVELOPMENT NOTES
+
+# Note: most of the value of this kind of list is in the act of
+# writing it.
+
+# i.e., don't expect it to be up to date.
+
+* Bugs
+** Koans are not inherited. Is this a bug?
+   To make them inheritable we'd be back to needing a Binding
+   or some other substantial complexity.
+   I don't think it's worth it.
+
+* Features / Todo
+
+** Documentation
+*** high-level overviews
+**** of the API / syntax
+**** of the behind-the-scenes action and how classes relate
+
+** Koans should be
+*** duplicable
+**** store blocks passed to them in an array so that they can be replayed?
+**** use a recorder pattern?
+*** castable to string / json / ... without looking like ass
+*** able to generate dot / graphviz
+*** $@ from Stateful
+
+** Class/object API
+*** should be interchangeable
+
+** Contexts
+*** should be extensible by the user to create a custom DSL
+**** how to work this into the DSL? Scope?
+
+** Definition syntax
+*** use e.g. state(:foo) { |s| ... } or state(:foo) { ... } ?
+**** consider the merits carefully
+     discussion here
+**** support both?
+***** 'pretty version' as default
+***** 'nasty version' for advanced stuff / use as a full DSL
+
+* Specs pending
+
+* Code smells
+
+* Other
+** testing w/ heckle, rcov
+** decide where to use Cucumber & where Rspec
+** benchmark / tune for performance
+*** Cuc. for user-facing API; Rspec for internals?
