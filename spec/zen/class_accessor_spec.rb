@@ -100,5 +100,26 @@ describe "A pristine class Klass with Zen included:" do
         Klass.koan_names.should include :two
       end
     end
+
+    describe "An empty class Child which inherits from Klass" do
+      before() do
+        Object.send(:remove_const, 'Child' ) if Object.const_defined?( 'Child' )
+        class Child < Klass
+        end
+      end
+
+      it "does NOT inherit it's parent class' Koan !!" do
+        Child.koan.should be_nil
+      end
+
+      it "should know the Koan after calling Klass.koan.teach!( Child )" do
+        Child.koan.should be_nil
+        Klass.koan.teach!( Child )
+        Child.koan.should_not be_nil
+        Child.koan.should == Klass.koan
+      end
+
+    end
+
   end
 end

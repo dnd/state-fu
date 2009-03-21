@@ -42,7 +42,7 @@ module Zen
     alias_method :parse, :learn!
 
     # the Koan teaches a class how to meditate on it:
-    def teach!( klass, name, field_name = nil )
+    def teach!( klass, name=Zen::DEFAULT_KOAN, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
       Zen::Space.inject!( klass, self, name, field_name )
