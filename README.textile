@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
-# <--//
-require 'redcloth'
-puts RedCloth.new( DATA.read ).to_html
-# //-->
+require 'redcloth'; puts RedCloth.new( DATA.read ).to_html
 __END__
 
 h1. Zen / Koan

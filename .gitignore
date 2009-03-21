@@ -1,0 +1,12 @@
+.swo
+.swp
+.#*
+#*#
+*~
+*.tar
+*.gz
+
+stateful/*
+
+pkg
+doc

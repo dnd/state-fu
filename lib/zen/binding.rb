@@ -31,6 +31,7 @@ module Zen
         raise("#{klass} already knows this koan as #{@method_name}.")
       else
         Zen::Space.bindings[@klass][@method_name] = self
+        Zen::Space.class_koans[@klass][@method_name] = @koan
       end
       bind!
       @@after_initialize.each { |sym| send(sym) if method(sym) }

@@ -2,9 +2,19 @@ module Zen
   class Space
     cattr_accessor :named_koans, :class_koans, :bindings
 
-    module HashDefault; def om; self[Zen::DEFAULT_KOAN]; end; end
-
-    LAZY_HASH = lambda { |h, k| h[k]= Hash.new().extend( HashDefault ) }
+    # hash[ Klass ][ nil ] # => return the Klass's default
+    # hash[ Klass ].om     # => return the Klass's default
+    module LazyHash
+      def om; self[Zen::DEFAULT_KOAN]; end;
+      def om; self[Zen::DEFAULT_KOAN]; end;
+    end
+    LAZY_HASH = lambda do |h, k|
+      if k.nil? && x = self[Zen::DEFAULT_KOAN]
+        x
+      else
+        h[k]= Hash.new().extend( LazyHash )
+      end
+    end
 
     class << self
       def forget!

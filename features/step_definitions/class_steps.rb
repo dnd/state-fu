@@ -1,8 +1,7 @@
 # encoding: utf-8
 require 'spec/expectations'
 $:.unshift(File.dirname(__FILE__) + '/../../lib')
-require 'zen'
-# require 'cucumber/formatters/unicode'
+require 'zen-koan'
 
 Before do
   @result = :false
@@ -39,10 +38,6 @@ When /^I call (@[^\.]+)\.([^\.]+)\(\)$/ do |inst, method|
   @result = instance_variable_get( inst ).send(method)
 end
 
-#When /^I call Empy\.koan\(\) \{\}$/ do |klass|
-#  @result = Empty.koan() { }
-#end
-
 When /^I call ([^@\.]+)\.koan\(\) \{\}$/ do |klass|
   @result = Object.const_get(klass).send(:koan, &lambda{} )
 end
@@ -60,16 +55,3 @@ Then /^the result should be nil$/ do
   @result.should be_nil
 end
 
-
-#Then /^I should get a Zen::Koan bound to (.*)$/ do |inst|
-#  @result.should be_kind_of(Zen::Koan)
-#  pending
-#end
-
-#Then /^I should get a Zen::Path with no states$/ do
-#  @result.should be_kind_of(Zen::Path)
-#end
-
-#Then /^Nothing.zen should be a Zen::Binding$/ do
-#  Nothing.zen.should be_kind_of(Zen::Binding)
-#end
