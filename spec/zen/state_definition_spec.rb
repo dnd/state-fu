@@ -118,17 +118,58 @@ describe "Adding states to a Koan" do
     end
   end
 
-  describe "calling state(:egg, :chick, :bird) in the koan block" do
+  describe "calling koan() { states(:egg, :chick, :bird, :poultry => true) }" do
 
     it "should create 3 states" do
       Klass.koan().should be_nil
-      Klass.koan() { state :egg, :chick, :bird }
+      Klass.koan() { states(:egg, :chick, :bird, :poultry => true) }
       Klass.koan().state_names().should == [:egg, :chick, :bird]
+      Klass.koan().states.length.should == 3
+      Klass.koan().states.map(&:name).should == [:egg, :chick, :bird]
       Klass.koan().states().each do |s|
+        s.options[:poultry].should be_true
         s.should be_kind_of(Zen::State)
       end
+
+      describe "merging options" do
+        it "should merge options when states are mentioned more than once" do
+          Klass.koan() { states(:egg, :chick, :bird, :poultry => true) }
+          koan = Klass.koan
+          koan.states.length.should == 3
+
+          # make sure they're the same states
+          states_1 = koan.states
+          Klass.koan(){ states( :egg, :chick, :bird, :covering => 'feathers')}
+          states_1.should == koan.states
+
+          # ensure options were merged
+          koan.states().each do |s|
+            s.options[:poultry].should be_true
+            s.options[:covering].should == 'feathers'
+            s.should be_kind_of(Zen::State)
+          end
+        end
+      end
+    end
+  end
+
+  describe "adding events inside a state block" do
+    before do
+      @lambda = ->{ Klass.koan(){ state(:egg){ event(:hatch, :to => :chick) }}}
     end
 
+    it "should not throw an error" do
+      @lambda.should_not raise_error
+    end
+
+    describe "Klass.koan(){ state(:egg){ event(:hatch, :to => :chick) }}}" do
+      before() do
+        Klass.koan(){ state(:egg){ event(:hatch, :to => :chick) }}
+      end
+      it "should add an event :hatch to the koan" do
+      end
+    end
   end
 
 end
+

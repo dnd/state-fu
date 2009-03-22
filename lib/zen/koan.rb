@@ -65,5 +65,29 @@ module Zen
       events.map(&:name)
     end
 
+    def define_event( name, options={}, &block )
+      name = name.to_sym
+      options.symbolize_keys!
+      if existing_event = self.events[name]
+        existing_event.update!( options, &block)
+      else
+        new_event = Zen::Event.new( self, name, options, &block )
+        self.events << new_event
+        new_event
+      end
+    end
+
+    def define_state( name, options={}, &block )
+      name = name.to_sym
+      options.symbolize_keys!
+      if existing_state = self.states[name]
+        existing_state.update!(options, &block)
+      else
+        new_state = Zen::State.new( self, name, options, &block )
+        self.states << new_state
+        new_state
+      end
+    end
+
   end
 end

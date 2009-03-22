@@ -1,10 +1,9 @@
 module Zen
   module Interfaces
+
+    # Code shared between Zen::State & Zen::Event
     module StateAndEvent
-
-      # DRY up duplicated code
       attr_reader :koan, :name, :options
-
       def initialize(koan, name, options={}, &block)
         @koan    = koan
         @name    = name.to_sym
@@ -26,7 +25,9 @@ module Zen
       end
     end
 
+    # included in the respective classes
     State = StateAndEvent
     Event = StateAndEvent
+
   end
 end
