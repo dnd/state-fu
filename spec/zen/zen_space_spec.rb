@@ -6,16 +6,14 @@ Zen::Space.reset!
 ##
 ##
 describe Zen::Space do
+  include MySpecHelper
 
   before(:each) do
-    c_name = "Klass"
-    # this is just for paranoia:
-    Object.send(:remove_const, c_name ) if Object.const_defined?( c_name )
-    Zen::Space.reset!
-    class Klass
-      include Zen
-    end
+    reset!
+    make_pristine_class 'Klass'
+    @k = Klass.new()
   end
+
   describe "Before any Koan is defined" do
     it "should return {} given Zen::Space.class_koans()" do
       Zen::Space.should respond_to(:class_koans)

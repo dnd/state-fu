@@ -7,14 +7,9 @@ Zen::Space.reset!
 ##
 
 describe "A pristine class Klass with Zen included:" do
+  include MySpecHelper
   before(:each) do
-    c_name = "Klass"
-    # this is just for paranoia:
-    Object.send(:remove_const, c_name ) if Object.const_defined?( c_name )
-    Zen::Space.reset!
-    class Klass
-      include Zen
-    end
+    make_pristine_class 'Klass'
   end
 
   it "should return nil given Klass.koan()" do
@@ -121,6 +116,5 @@ describe "A pristine class Klass with Zen included:" do
       end
 
     end
-
   end
 end

@@ -21,6 +21,7 @@ module Zen
           koan.learn!( &block )
         else
           koan = new( name, options, &block )
+          koan.learn!( &block )
           koan.teach!( klass, name, options[:field_name] )
           koan
         end
@@ -29,12 +30,19 @@ module Zen
       end
     end
 
+    ##
+    ##
+    ##
+
+    attr_accessor :states
+
     def initialize( *a, &block )
+      @states = []
     end
 
     # merge the commands in &block with the existing koan
     def learn!( &block )
-      puts koan.inspect + " learnt"
+      Zen::Reader.parse( self, &block )
     end
     alias_method :merge!, :learn!
     alias_method :merge, :learn!
@@ -48,5 +56,10 @@ module Zen
       Zen::Space.inject!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
+
+    def state_names
+      states.map(&:name)
+    end
+
   end
 end

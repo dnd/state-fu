@@ -7,27 +7,22 @@ Zen::Space.reset!
 ##
 
 describe "An instance of Klass with Zen included:" do
+  include MySpecHelper
   before(:each) do
-    c_name = "Klass"
-    # this is just for paranoia:
-    Object.send(:remove_const, c_name ) if Object.const_defined?( c_name )
-    Zen::Space.reset!
-    class Klass
-      include Zen
-    end
-    @i = Klass.new
+    make_pristine_class 'Klass'
+    @k = Klass.new()
   end
 
   it "should return nil given .om()" do
-    @i.om().should be_nil
+    @k.om().should be_nil
   end
 
   it "should return {} given .meditations()" do
-    @i.meditations().should == {}
+    @k.meditations().should == {}
   end
 
   it "should return [] given .meditate!()" do
-    @i.meditate!.should == []
+    @k.meditate!.should == []
   end
 
   describe "Having called Klass.koan() with an empty block:" do
@@ -38,35 +33,35 @@ describe "An instance of Klass with Zen included:" do
     end
 
     it "should return a Zen::Meditation given .om()" do
-      @i.om().should be_kind_of( Zen::Meditation )
+      @k.om().should be_kind_of( Zen::Meditation )
     end
 
     describe "before .om() or .meditate!" do
       it "should return {} given .meditations()" do
-        @i.meditations().should == {}
+        @k.meditations().should == {}
       end
     end
 
     describe "after .om()" do
       it "should return { :om => <Zen::Meditation>} given .meditations()" do
-        @i.om()
-        @i.meditations().length.should == 1
-        @i.meditations().keys.should == [:om]
-        @i.meditations().values.first.should be_kind_of( Zen::Meditation )
+        @k.om()
+        @k.meditations().length.should == 1
+        @k.meditations().keys.should == [:om]
+        @k.meditations().values.first.should be_kind_of( Zen::Meditation )
       end
     end
 
     describe "after .meditate!()" do
       it "should return { :om => <Zen::Meditation>} given .meditations()" do
-        @i.meditate!()
-        @i.meditations().length.should == 1
-        @i.meditations().keys.should == [:om]
-        @i.meditations().values.first.should be_kind_of( Zen::Meditation )
+        @k.meditate!()
+        @k.meditations().length.should == 1
+        @k.meditations().keys.should == [:om]
+        @k.meditations().values.first.should be_kind_of( Zen::Meditation )
       end
     end
 
     it "should return [<Zen::Meditation>] given .meditate!()" do
-      @i.meditate!.length.should == 1
+      @k.meditate!.length.should == 1
     end
 
     describe "Having called Klass.koan(:two) with an empty block:" do
@@ -76,23 +71,23 @@ describe "An instance of Klass with Zen included:" do
       end
 
       it "should return the same Meditation given .om() and .om(:om)" do
-        @i.om().should be_kind_of( Zen::Meditation )
-        @i.om().should == @i.om(:om)
+        @k.om().should be_kind_of( Zen::Meditation )
+        @k.om().should == @k.om(:om)
       end
 
       it "should return a Zen::Meditation given .om(:two)" do
-        @i.om(:two).should be_kind_of( Zen::Meditation )
-        @i.om(:two).should_not == @i.om(:om)
+        @k.om(:two).should be_kind_of( Zen::Meditation )
+        @k.om(:two).should_not == @k.om(:om)
       end
 
       it "should return nil given .om(:hibiscus)" do
-        @i.om(:hibiscus).should be_nil
+        @k.om(:hibiscus).should be_nil
       end
 
       it "should return [<Zen::Meditation>,<Zen::Meditation>] given .meditate!" do
-        @i.meditate!.should be_kind_of( Array )
-        @i.meditate!.length.should == 2
-        @i.meditate!.each { |m| m.should be_kind_of( Zen::Meditation ) }
+        @k.meditate!.should be_kind_of( Array )
+        @k.meditate!.length.should == 2
+        @k.meditate!.each { |m| m.should be_kind_of( Zen::Meditation ) }
       end
     end
   end
