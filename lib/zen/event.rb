@@ -42,7 +42,7 @@ module Zen
     # any states referenced here will be created if they do not exist.
     def to *args
       options       = args.extract_options!.symbolize_keys!
-      self.target   = sanitize_arg( args )
+      self.target   = args
       @options.merge!( options )
     end
 
@@ -60,33 +60,34 @@ module Zen
     end
 
     def static?( *arg )
-      arg = [:origin, :target] if arg.empty?
+      arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
+      return nil if arg.any?(&:nil?)
       arg.all? do |a|
-        x = self.send(a)
-        x.is_a?(Array)
+        a.is_a?(Array)
       end
     end
 
     # simple?( :origin ) # is the origin a single state?
     # simple?()          # is either the origin or target a single state?
     def simple?( *arg )
-      arg = [:origin, :target] if arg.empty?
+      arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
+      return nil if arg.any?(&:nil?)
       arg.all? do |a|
-        x = self.send(a)
-        x.is_a?(Array) && x.length == 1 && x.first.is_a?( Zen::State )
+        a.is_a?(Array) && a.length == 1 && a.first.is_a?( Zen::State )
       end
     end
 
     # simple?( :origin ) # is the origin evaluated at runtime?
     # simple?()          # is either the origin or target evaluated at runtime?
     def dynamic?( *arg )
-      arg = [:origin, :target] if arg.empty?
-      arg.any? {|a| self.send(a).is_a?(Proc) }
+      arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
+      return nil if arg.any?(&:nil?)
+      arg.any? {|a| a.is_a?(Proc) }
     end
 
     private
 
-    # I know, it's hideous. Luckily you really shouldn't have to touch it.
+    # Fugly, it's true. Luckily you really shouldn't have to touch it.
     # Sanitizes and sets @origin or @target to either a Proc, or array
     # of Zen::States (creating any named but not yet in existence)
     def _set_state_list( attr, arg )
@@ -107,7 +108,7 @@ module Zen
               raise(ArgumentError, "#{arg} should be a symbol, [symbols], or a Proc")
             end
       value = arg.is_a?(Proc) ? arg : koan.find_or_create_states_by_name( arg )
-      instance_variable_set( "@#{attr}", value )
+      instance_variable_set( "@#{attr.to_s}", value )
     end
   end
 
