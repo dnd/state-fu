@@ -75,9 +75,7 @@ describe Zen::Space do
         koans.should be_kind_of(Hash)
         koans.should_not be_empty
         koans.length.should == 2
-        koans.keys.should include :om
-        koans.keys.should include :two
-        koans.values.length.should == 2
+        koans.keys.sort.should == [:om, :two]
         koans.values.each { |v| v.should be_kind_of( Zen::Koan ) }
       end
 

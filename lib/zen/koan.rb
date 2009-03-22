@@ -17,7 +17,6 @@ module Zen
       koan = Zen::Space.class_koans[ klass ][ name ]
       if block_given?
         if koan
-          puts koan.inspect
           koan.learn!( &block )
         else
           koan = new( name, options, &block )
@@ -37,7 +36,7 @@ module Zen
     attr_accessor :states
 
     def initialize( *a, &block )
-      @states = []
+      @states = [].extend( ArraySmartIndex )
     end
 
     # merge the commands in &block with the existing koan

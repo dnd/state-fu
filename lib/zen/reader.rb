@@ -3,7 +3,7 @@ module Zen
 
     attr_reader :koan
 
-    def self.parse(koan, &block)
+    def self.parse( koan, &block)
       reader = new( koan )
       reader.instance_eval( &block )
     end
@@ -13,11 +13,18 @@ module Zen
     end
 
     def state( *args, &block )
-      s = Zen::State.new( *args )
-      # s.instance_eval &block
-      koan.states << s
+      options = args.extract_options!.symbolize_keys!
+      args.each do |name|
+        if existing_state = koan.states[name.to_sym]
+          existing_state.update!(options, &block)
+          existing_state
+        else
+          new_state = Zen::State.new( name, options, &block )
+          koan.states << new_state
+          new_state
+        end
+      end
     end
-
 
   end
 end
