@@ -52,3 +52,5 @@
 ** benchmark / tune for performance
 *** Cuc. for user-facing API; Rspec for internals?
 
+## FLEXIBLE INSTANCE EVAL API:
+https://gist.github.com/da794635f7f223350e13

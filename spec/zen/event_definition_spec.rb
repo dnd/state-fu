@@ -31,10 +31,19 @@ describe "Adding events to a Koan" do
         -> { Klass.koan(){ event {} } }.should raise_error(ArgumentError)
       end
 
-      it "should create the states mentioned in .from() in the .event() block" do
+      it "should create 2 states given koan.event() { from :dead, :to => :alive } " do
         Klass.koan do
           event :die do
-            self.from :dead, :to => :alive
+            from :dead, :to => :alive
+          end
+        end
+        Klass.koan.state_names.should == [:dead, :alive]
+      end
+
+      it "should create 2 states given koan.event() { |s| s.from :dead, :to => :alive } " do
+        Klass.koan do
+          event :die do |s|
+            s.from :dead, :to => :alive
           end
         end
         Klass.koan.state_names.should == [:dead, :alive]

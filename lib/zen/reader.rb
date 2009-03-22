@@ -18,7 +18,7 @@ module Zen
       if existing_event = koan.events[:name]
         existing_event.update!( options, &block)
       else
-        new_event = Zen::Event.new( name, options, &block )
+        new_event = Zen::Event.new( @koan, name, options, &block )
         koan.events << new_event
         new_event
       end
@@ -30,7 +30,7 @@ module Zen
         if existing_state = koan.states[name.to_sym]
           existing_state.update!(options, &block)
         else
-          new_state = Zen::State.new( name, options, &block )
+          new_state = Zen::State.new( koan, name, options, &block )
           koan.states << new_state
           new_state
         end
