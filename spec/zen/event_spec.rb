@@ -6,17 +6,17 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
 describe Zen::Event do
   include MySpecHelper
+  before do
+    @koan = mock('Koan')
+  end
 
-  describe "When there is an empty koan" do
+  describe "Instance methods" do
+    it("is") { pending "needing specs for all methods" }
     before do
-      reset!
-      make_pristine_class 'Klass'
-      Klass.koan() { }
+      name    = :germinate
+      options = {:meta => "Hi Mum"}
+      @event  = Zen::Event.new( @koan, :germinate, options )
     end
-
-    it "should ..."
-
-    it "should be created given valid arguments"
 
     describe "from()" do
     end
