@@ -10,9 +10,9 @@ module Zen
         @options = options.symbolize_keys!
         if block_given?
           case block.arity
-          when 1
+          when 1     # lambda{ |state| ... }.arity
             yield self
-          when 0
+          when -1, 0 # lambda{ }.arity ( -1 in ruby 1.8.x but 0 in 1.9.x )
             instance_eval &block
           end
         end
