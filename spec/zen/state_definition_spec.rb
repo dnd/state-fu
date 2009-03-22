@@ -13,11 +13,11 @@ describe "Adding states to a Koan" do
     @k = Klass.new()
   end
 
-  it "Should allow me to call state(:egg) in the block passed to koan" do
+  it "should allow me to call koan() { state(:egg) }" do
     -> {Klass.koan(){ state :egg } }.should_not raise_error()
   end
 
-  describe "having called state(:egg) in the block passed to a koan" do
+  describe "having called koan() { state(:egg) }" do
 
     before(:each) do
       Klass.koan(){ state :egg }
@@ -51,11 +51,11 @@ describe "Adding states to a Koan" do
     end
 
 
-    it "Should allow me to call state(:chick) in the block passed to koan" do
+    it "should allow me to call koan(){ state(:chick) }" do
       -> {Klass.koan(){ state :chick } }.should_not raise_error()
     end
 
-    describe "having called state(:chick) in the block passed to a koan" do
+    describe "having called koan() { state(:chick) }" do
       before do
         Klass.koan() { state :chick }
       end
@@ -75,13 +75,28 @@ describe "Adding states to a Koan" do
 
     end
 
-    describe "calling state(:bird) {|s| .. } in the block passed to a koan" do
+    describe "calling koan() { state(:bird) {|s| .. } }" do
 
       it "should yield the state to the block as |s|" do
         _state = nil
         Klass.koan() do
           state(:bird) do |s|
             _state = s
+          end
+        end
+        _state.should be_kind_of(Zen::State)
+        _state.name.should == :bird
+      end
+
+    end
+
+    describe "calling koan() { state(:bird) {  .. } }" do
+
+      it "should instance_eval the block as the state" do
+        _state = nil
+        Klass.koan() do
+          state(:bird) do
+            _state = self
           end
         end
         _state.should be_kind_of(Zen::State)

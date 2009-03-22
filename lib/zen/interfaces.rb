@@ -1,10 +1,10 @@
 module Zen
   module Interfaces
     module StateAndEvent
+
       # DRY up duplicated code
       attr_reader :koan, :name, :options
 
-      # TODO - do something with options
       def initialize(koan, name, options={}, &block)
         @koan    = koan
         @name    = name.to_sym
