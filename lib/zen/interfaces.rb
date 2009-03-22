@@ -23,6 +23,11 @@ module Zen
         self.instance_eval &block if block_given?
         self
       end
+
+      # sneaky way to make some comparisons a bit cleaner
+      def to_sym
+        name
+      end
     end
 
     # included in the respective classes

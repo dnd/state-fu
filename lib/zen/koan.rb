@@ -89,5 +89,17 @@ module Zen
       end
     end
 
+    def find_or_create_states_by_name( *names )
+      names.flatten.select do |s|
+        s.is_a?(Symbol)
+      end.map do |name|
+        unless _state = states[name]
+          _state = Zen::State.new( self, name )
+          states << _state
+          _state
+        end
+      end
+    end
+
   end
 end
