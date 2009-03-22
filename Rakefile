@@ -4,7 +4,7 @@ require 'cucumber/rake/task'
 require "date"
 require "fileutils"
 require "rubygems"
-require "rake/gempackagetask"
+# require "rake/gempackagetask"
 
 require "./lib/zen/version.rb"
 
@@ -28,7 +28,7 @@ end
 #   s.summary           = "Teach your Ruby objects the path to enlightenment."
 #   s.description       = s.summary
 #   s.author            = "David Lee"
-#   s.email             = "davidlee@rubyist.net.au"
+#   s.email             = "david@rubyist.net.au"
 #   s.homepage          = "http://github.com/davidlee/zen-koan"
 #   s.require_path      = "lib"
 #   s.files             = %w(README.rdoc Rakefile) + Dir.glob("{lib,spec}/**/*")
