@@ -33,10 +33,11 @@ module Zen
     ##
     ##
 
-    attr_accessor :states
+    attr_reader :states, :events
 
     def initialize( *a, &block )
       @states = [].extend( ArraySmartIndex )
+      @events = [].extend( ArraySmartIndex )
     end
 
     # merge the commands in &block with the existing koan
@@ -52,12 +53,16 @@ module Zen
     def teach!( klass, name=Zen::DEFAULT_KOAN, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
-      Zen::Space.inject!( klass, self, name, field_name )
+      Zen::Space.insert!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
 
     def state_names
       states.map(&:name)
+    end
+
+    def event_names
+      events.map(&:name)
     end
 
   end

@@ -67,6 +67,12 @@ namespace :spec do
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts  = ["--format", "nested","--backtrace","--color"]
   end
+
+  desc "Run autotest"
+  task :auto do |t|
+    ENV["RSPEC"] = 'true'
+    exec 'autotest'
+  end
 end
 task :default => 'spec:run'
 
