@@ -31,7 +31,7 @@ describe "Adding events to a Koan outside a state block" do
       end
 
       it "should require a name when calling koan.event()" do
-        -> { Klass.koan(){ event {} } }.should raise_error(ArgumentError)
+        lambda { Klass.koan(){ event {} } }.should raise_error(ArgumentError)
       end
 
       it "should add 2 states to the koan called: [:dead, :alive] " do

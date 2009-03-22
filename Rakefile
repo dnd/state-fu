@@ -84,3 +84,8 @@ task :irb do |t|
   exec 'irb -I lib -r zen-koan'
 end
 
+desc 'Runs rdoc on the project lib directory'
+task :doc do |t|
+  exec 'rdoc lib/'
+end
+

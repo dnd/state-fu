@@ -14,7 +14,7 @@ describe "Adding states to a Koan" do
   end
 
   it "should allow me to call koan() { state(:egg) }" do
-    -> {Klass.koan(){ state :egg } }.should_not raise_error()
+    lambda {Klass.koan(){ state :egg } }.should_not raise_error()
   end
 
   describe "having called koan() { state(:egg) }" do
@@ -52,7 +52,7 @@ describe "Adding states to a Koan" do
 
 
     it "should allow me to call koan(){ state(:chick) }" do
-      -> {Klass.koan(){ state :chick } }.should_not raise_error()
+      lambda {Klass.koan(){ state :chick } }.should_not raise_error()
     end
 
     describe "having called koan() { state(:chick) }" do
@@ -155,7 +155,7 @@ describe "Adding states to a Koan" do
 
   describe "adding events inside a state block" do
     before do
-      @lambda = ->{ Klass.koan(){ state(:egg){ event(:hatch, :to => :chick) }}}
+      @lambda = lambda{ Klass.koan(){ state(:egg){ event(:hatch, :to => :chick) }}}
     end
 
     it "should not throw an error" do
