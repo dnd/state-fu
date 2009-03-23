@@ -5,7 +5,10 @@ module Zen
 
     # WARNING duplicated in Zen::Reader
     def event( name, options={}, &block )
-      koan.define_event( name, options, &block )
+      target  = options.delete(:to)
+      evt     = koan.define_event( name, options, &block )
+      evt.from self
+      evt.to( target ) if target
     end
 
   end

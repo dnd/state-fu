@@ -22,6 +22,10 @@ module Zen
     end
 
     # state definition
+    def initial_state( *args, &block )
+      koan.initial_state= state( *args, &block)
+    end
+
     def state( name, options={}, &block )
       koan.define_state( name, options, &block )
     end
@@ -31,5 +35,12 @@ module Zen
       args.each { |name| state( name.to_sym, options, &block) }
     end
 
+    def from *args
+      raise "from(*origin, :to => *target) must be inside an event block"
+    end
+
+    # def from *args
+    #
+    # end
   end
 end

@@ -12,9 +12,11 @@ describe "A pristine class Klass with Zen included:" do
     make_pristine_class 'Klass'
   end
 
-  it "should return nil given Klass.koan()" do
+  it "should return a new Koan bound to the class given Klass.koan()" do
     Klass.should respond_to(:koan)
-    Klass.koan.should be_nil
+    Klass.koan.should be_kind_of(Zen::Koan)
+    koan = Klass.koan
+    Klass.koan.should == koan
   end
 
   it "should return {} given Klass.koans()" do
@@ -71,9 +73,12 @@ describe "A pristine class Klass with Zen included:" do
         Klass.koan(:two).should be_kind_of( Zen::Koan )
       end
 
-      it "should return nil given Klass.koan(:three)" do
+      it "should return a new Koan given Klass.koan(:three)" do
         Klass.should respond_to(:koan)
-        Klass.koan(:three).should be_nil
+        Klass.koan(:three).should be_kind_of( Zen::Koan )
+        three = Klass.koan(:three)
+        Klass.koan(:three).should == three
+        # Zen::Space.class_koans[Klass][:three].should == :three
       end
 
       it "should return { :om => <Zen::Koan>, :two => <Zen::Koan> } given Klass.koans()" do
@@ -105,13 +110,12 @@ describe "A pristine class Klass with Zen included:" do
 
       # sorry, Darwinism, not Lamarckism.
       it "does NOT inherit it's parent class' Koans !!" do
-        Child.koan.should be_nil
+        Child.koan.should_not == Klass.koan
       end
 
       it "should know the Koan after calling Klass.koan.teach!( Child )" do
-        Child.koan.should be_nil
+        Child.koan.should_not == Klass.koan
         Klass.koan.teach!( Child )
-        Child.koan.should_not be_nil
         Child.koan.should == Klass.koan
       end
 

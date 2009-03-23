@@ -21,8 +21,9 @@ module Zen
     def self.insert!( klass, koan, name, field_name )
       name                       = name.to_sym
       field_name                 = field_name.to_sym
-      if @@class_koans[klass][name]
-        raise("#{klass} already knows a Koan #{koan} by the name #{name}.")
+      existing_koan              = @@class_koans[klass][name]
+      if existing_koan && !existing_koan.empty?
+        raise("#{klass} already knows a non-empty Koan #{koan} by the name #{name}.")
       else
         @@class_koans[klass][name] = koan
         @@field_names[klass][name] = field_name

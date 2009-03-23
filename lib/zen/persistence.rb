@@ -1,18 +1,19 @@
 module Zen
-  class Persistence
+  module Persistence
 
-    def self.active_record_column?( klass, field_name )
+    def self.active_record_column?( obj, field_name )
+      klass = obj.class
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
         klass.ancestors.include?( ::ActiveRecord::Base ) &&
         klass.columns.map(&:name).include?( field_name.to_s )
     end
 
-    def self.for( klass, name, field_name )
-      if active_record_column?
-        ActiveRecord.new( klass, name, field_name )
+    def self.for( meditation, field_name )
+      if active_record_column?( meditation.disciple, field_name )
+        self::ActiveRecord.new( meditation, field_name )
       else
-        Attribute.new( klass, name, field_name )
+        self::Attribute.new( meditation, field_name )
       end
     end
 
