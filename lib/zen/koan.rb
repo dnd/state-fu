@@ -11,7 +11,7 @@ module Zen
     end
 
     # meta-constructor; expects to be called via Klass.koan()
-    def self.for_class(klass, name, options, &block)
+    def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
       koan = Zen::Space.class_koans[ klass ][ name ]
@@ -33,11 +33,12 @@ module Zen
     ##
     ##
 
-    attr_reader :states, :events
+    attr_reader :states, :events, :options
 
-    def initialize( *a, &block )
-      @states = [].extend( ArraySmartIndex )
-      @events = [].extend( ArraySmartIndex )
+    def initialize( name, options={}, &block )
+      @states  = [].extend( ArraySmartIndex )
+      @events  = [].extend( ArraySmartIndex )
+      @options = options
     end
 
     # merge the commands in &block with the existing koan

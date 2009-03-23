@@ -3,7 +3,10 @@ module Zen
     module Default
 
       module ClassMethods
-        def koan( name=Zen::DEFAULT_KOAN, options=Zen::DEFAULT_OPTIONS, &block )
+        # koan( name=:om, options[:field_name], &block )
+        def koan( *args, &block )
+          options = args.extract_options!.symbolize_keys!
+          name    = args[0] || Zen::DEFAULT_KOAN
           Zen::Koan.for_class( self, name, options, &block )
         end
 

@@ -21,16 +21,17 @@ describe Zen::Meditation do
       mdn.koan.should == Klass.koan
       mdn.disciple.should == @obj
       mdn.method_name.should == :om
-      mdn.field_name.should == :om_state
+      mdn.field_name.should  == :om_state
     end
   end
+
   describe "constructor" do
     it "should create a new Meditation given valid arguments" do
       pending
     end
   end
 
-  describe "For a class' default Koan which has two states and a method" do
+  describe "For Klass.koan() with two states and an event" do
     before do
       reset!
       make_pristine_class('Klass')
@@ -39,7 +40,6 @@ describe Zen::Meditation do
           event :age, :to => :old
         end
         state :old
-
         # initial_state :fetus
       end
       @koan   = Klass.koan()
@@ -56,14 +56,22 @@ describe Zen::Meditation do
       koan.events.first.target.should_not be_nil
     end
 
-    describe "For a non-ActiveRecord class" do
-      describe ".state()" do
-        it "initial current_state" do
-          @om.respond_to?(:current_state).should == true
-          @om.current_state.should be_kind_of( Zen::State )
-          @om.current_state.name.should == :new
-        end
+
+    describe ".state()" do
+      it "should default to koan.initial_state when no initial_state is explicitly defined" do
+        @om.respond_to?(:current_state).should == true
+        @om.current_state.should be_kind_of( Zen::State )
+        @om.current_state.name.should == :new
+        @om.koan.initial_state.name.should == :new
       end
+
+      it "should default to the koan's initial_state if one is set" do
+        Klass.koan() { initial_state :fetus }
+        Klass.koan.states.first.name.should      == :new
+        Klass.koan.initial_state.name.should     == :fetus
+        Klass.new().om.current_state.name.should == :fetus
+      end
+
     end
   end
 
