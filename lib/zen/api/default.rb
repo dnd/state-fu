@@ -63,7 +63,7 @@ module Zen
         #
         public
         def om( koan_name=Zen::DEFAULT_KOAN )
-          name = name.to_sym
+          name = koan_name.to_sym
           if koan = Zen::Space.class_koans[self.class][name]
             _om[name] ||= Zen::Meditation.new( koan, self, name )
           end
