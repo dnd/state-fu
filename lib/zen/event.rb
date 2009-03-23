@@ -102,11 +102,11 @@ module Zen
     end
 
     def needs( *args, &block )
-      STDERR.puts "<Event.needs: NOT IMPLEMENTED>"
+      Logger.info "<Event.needs: NOT IMPLEMENTED>"
     end
 
     def prohibits( *args, &block )
-      STDERR.puts "<Event.prohibits: NOT IMPLEMENTED>"
+      Logger.info "<Event.prohibits: NOT IMPLEMENTED>"
     end
 
     private

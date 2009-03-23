@@ -11,11 +11,44 @@ module Zen
       end
     end
   end  # ArrayNameAccessor
-  #
-  #
+
+
   module Helper
-    def assert_argument_type( arg, *valid_types )
-    end
+    module OrderedHash
+      def []( index )
+        begin
+          super( index )
+        rescue TypeError
+          x = self.detect do |i|
+            i.first == index
+          end # if index.class ...
+          x && x[1]
+        end
+      end
+
+      def []=( index, value )
+        begin
+          super( index, value )
+        rescue TypeError
+          x = self.detect do |i|
+            i.first == index
+          end # if index.class ...
+          if x
+            x[1] = value
+          else
+            self << [index, value].extend(OrderedHash)
+          end
+        end
+      end
+
+      def keys
+        map(&:first)
+      end
+
+      def values
+        map(&:last)
+      end
+    end  # OrderedHash
   end
 
 end

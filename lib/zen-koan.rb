@@ -1,6 +1,7 @@
 require 'zen/core_ext'
 require 'zen/log'
 require 'zen/helper'
+require 'zen/hooks'
 require 'zen/space'
 require 'zen/koan'
 require 'zen/meditation'

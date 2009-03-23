@@ -39,6 +39,9 @@ module Zen
       raise "from(*origin, :to => *target) must be inside an event block"
     end
 
+    def all_states *a, &b
+      Logger.info "<Zen::Reader.all_states not implemented>"
+    end
     # def from *args
     #
     # end

@@ -26,6 +26,7 @@ describe "A simple Koan definition" do
       # we can instance_eval in the context of our disciple instance :)
       #
       # maybe. or maybe that's just sick.
+
       @koan_spec = lambda do
         Klass.koan(:account, :method_proxy => true ) do
 
@@ -42,7 +43,7 @@ describe "A simple Koan definition" do
           end
 
           event :login, :from => [:confirmed, :active], :to => :active do
-            on_execute :handle_login do
+            execute :handle_login do
               halt_unless :password_correct?
               halt_if     :dodgy_user_agent?
               obj.generate_new_cookie!
@@ -56,14 +57,15 @@ describe "A simple Koan definition" do
           event :delete do
             from :ALL, :except => :deleted
             to :deleted
-            after_execute do
+            after do
               obj.destroy!
             end
           end
 
           all_states do
-            after_execute(:save!)
+            after(:save!)
           end
+
         end
       end # koan
     end # before

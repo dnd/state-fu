@@ -1,13 +1,6 @@
 require 'logger'
 
 module Zen
-
-  def self.logger
-    unless defined? @@logger
-      @@logger       = ::Logger.new( STDOUT )
-      @@logger.level = ::Logger::WARN
-    end
-    @@logger
-  end
-
+  Logger       = ::Logger.new( STDOUT )
+  Logger.level = ::Logger.const_get( (ENV["ZEN_LOGLEVEL"] || 'WARN').upcase )
 end

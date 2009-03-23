@@ -14,10 +14,11 @@ module Zen
         @current_state = find_current_state()
 
         if current_state.nil?
-          Zen.logger.info("Note: #{object} has an undefined current state.")
-          Zen.logger.info("Note: Koan #{koan} has no states") if koan.states.empty?
+          Logger.info("Object has an undefined state: #{object}")
+          Logger.info("Koan has no states: #{koan}") if koan.states.empty?
         else
           persist!
+          Logger.debug("Object state reconstituted at #{current_state.name}: #{object}") if koan.states.empty?
         end
       end
 

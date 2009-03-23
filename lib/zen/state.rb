@@ -11,5 +11,15 @@ module Zen
       evt.to( target ) if target
     end
 
+    def on_entry *args, &block
+      args.unshift :entry
+      define_hook *args, &block
+      # TODO
+    end
+
+    def on_execute *args, &block
+      # TODO
+    end
+
   end
 end

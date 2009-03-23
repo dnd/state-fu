@@ -10,6 +10,7 @@ module Zen
 
       field_name     = Zen::Space.field_names[object.class][@method_name]
       @persister     = Zen::Persistence.for( self, field_name )
+      Logger.info( "Persister added: #@persister ")
     end
 
     def field_name
