@@ -23,13 +23,15 @@ describe Zen::State do
         evt_name = :bubble
         proc     = Proc.new(){}
         options  = {:meta => "snoo" }
+        state    = Zen::State.new(@koan, :flux)
         event    = mock("Event")
+        event.should_receive(:from).with( state )
         @koan.should_receive(:define_event).
           with( evt_name, options , &proc ).
           once.
           and_return( event )
-        state    = Zen::State.new(@koan, :flux)
         state.event( evt_name, options, &proc )
+        pending "test extraction of target"
       end
     end
   end

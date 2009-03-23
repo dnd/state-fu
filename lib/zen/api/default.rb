@@ -26,7 +26,7 @@ module Zen
         def om( name=Zen::DEFAULT_KOAN )
           name = name.to_sym
           if koan = Zen::Space.class_koans[self.class][name]
-            _om[name] ||= Zen::Meditation.new( koan, self )
+            _om[name] ||= Zen::Meditation.new( koan, self, name )
             _om[name]
           end
         end

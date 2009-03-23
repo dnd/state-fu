@@ -17,10 +17,10 @@ module Zen
       koan = Zen::Space.class_koans[ klass ][ name ]
       if block_given?
         if koan
-          koan.learn!( &block )
+          koan.apply!( &block )
         else
           koan = new( name, options, &block )
-          koan.learn!( &block )
+          koan.apply!( &block )
           koan.teach!( klass, name, options[:field_name] )
           koan
         end
@@ -41,13 +41,9 @@ module Zen
     end
 
     # merge the commands in &block with the existing koan
-    def learn!( &block )
+    def apply!( &block )
       Zen::Reader.parse( self, &block )
     end
-    alias_method :merge!, :learn!
-    alias_method :merge, :learn!
-    alias_method :parse!, :learn!
-    alias_method :parse, :learn!
 
     # the Koan teaches a class how to meditate on it:
     def teach!( klass, name=Zen::DEFAULT_KOAN, field_name = nil )
@@ -56,6 +52,15 @@ module Zen
       Zen::Space.insert!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
+
+    def initial_state=( zen_state )
+      raise(ArgumentError,zen_state.inspect ) unless zen_state.is_a?(Zen::State)
+      @initial_state = zen_state
+    end
+
+    def initial_state()
+      @initial_state ||= states.first
+    end
 
     def state_names
       states.map(&:name)
@@ -69,10 +74,11 @@ module Zen
       name = name.to_sym
       options.symbolize_keys!
       if existing_event = self.events[name]
-        existing_event.update!( options, &block)
+        existing_event.apply!( options, &block)
       else
         new_event = Zen::Event.new( self, name, options, &block )
         self.events << new_event
+        new_event.apply!(&block)
         new_event
       end
     end
@@ -81,19 +87,21 @@ module Zen
       name = name.to_sym
       options.symbolize_keys!
       if existing_state = self.states[name]
-        existing_state.update!(options, &block)
+        existing_state.apply!(options, &block)
       else
         new_state = Zen::State.new( self, name, options, &block )
         self.states << new_state
+        new_state.apply!(&block)
         new_state
       end
     end
 
     def find_or_create_states_by_name( *names )
+      # raise names.inspect if names.flatten.any? { |n| n.is_a? Zen::State }
       names.flatten.select do |s|
-        s.is_a?(Symbol)
+        s.is_a?( Symbol ) || s.is_a?( Zen::State )
       end.map do |name|
-        unless _state = states[name]
+        unless _state = states[name.to_sym]
           _state = Zen::State.new( self, name )
           states << _state
           _state

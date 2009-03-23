@@ -22,6 +22,10 @@ module Zen
     end
 
     # state definition
+    def initial_state( *args, &block )
+      koan.initial_state= state( *args, &block)
+    end
+
     def state( name, options={}, &block )
       koan.define_state( name, options, &block )
     end

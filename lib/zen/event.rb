@@ -54,11 +54,17 @@ module Zen
       _set_state_list( :target, arg )
     end
 
-    # do we have an origin and target?
-    def complete?
-      [origin, target].flatten.compact.length == 2
+    # complete?(:origin) # do we have an origin?
+    # complete?          # do we have an origin and target?
+    def complete?( *arg )
+      arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
+      arg.all? do |x|
+        (!x.nil? && (x.is_a?(Proc) || !x.empty? ))
+      end
     end
 
+    # static?( :origin ) # is the origin non-nil and not a Proc?
+    # static?()          # are both the origin & target non-nil and not a Proc?
     def static?( *arg )
       arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
       return nil if arg.any?(&:nil?)
@@ -68,7 +74,7 @@ module Zen
     end
 
     # simple?( :origin ) # is the origin a single state?
-    # simple?()          # is either the origin or target a single state?
+    # simple?()          # are both the origin & target a single state?
     def simple?( *arg )
       arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
       return nil if arg.any?(&:nil?)
@@ -77,8 +83,8 @@ module Zen
       end
     end
 
-    # simple?( :origin ) # is the origin evaluated at runtime?
-    # simple?()          # is either the origin or target evaluated at runtime?
+    # dynamic?( :origin ) # is the origin evaluated at runtime?
+    # dynamic?()          # are either the origin or target evaluated at runtime?
     def dynamic?( *arg )
       arg = ( arg.empty? ? [:origin, :target] : arg ).map{ |a| send(a) }
       return nil if arg.any?(&:nil?)

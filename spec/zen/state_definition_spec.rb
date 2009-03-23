@@ -133,6 +133,7 @@ describe "Adding states to a Koan" do
 
       describe "merging options" do
         it "should merge options when states are mentioned more than once" do
+          Zen::Space.reset!
           Klass.koan() { states(:egg, :chick, :bird, :poultry => true) }
           koan = Klass.koan
           koan.states.length.should == 3

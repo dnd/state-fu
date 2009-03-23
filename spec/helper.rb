@@ -25,7 +25,7 @@ module MySpecHelper
 
   def reset!
     @class_names ||= []
-    @class_names.each do |n|
+    @class_names.each do |class_name|
       Object.send(:remove_const, class_name ) if Object.const_defined?( class_name )
     end
     @class_names = []

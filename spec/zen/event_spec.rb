@@ -11,7 +11,6 @@ describe Zen::Event do
   end
 
   describe "Instance methods" do
-    it("is") { pending "needing specs for all methods" }
     before do
       @name         = :germinate
       @options      = {:speed => :slow}
