@@ -28,12 +28,17 @@ module Zen
     # both can be supplied as a symbol, array of symbols or a proc
     # if a proc, ...
     # any states referenced here will be created if they do not exist.
-    def from *args
+    def from *args, &block
       options           = args.extract_options!.symbolize_keys!
       self.origin       = args
       to                = options.delete(:to)
       to && self.target = to
-      @options.merge!( options )
+      # @options.merge!( options )
+      if block_given?
+        apply!( options, &block )
+      else
+        apply!( options )
+      end
     end
 
     # set @target
@@ -43,7 +48,12 @@ module Zen
     def to *args
       options       = args.extract_options!.symbolize_keys!
       self.target   = args
-      @options.merge!( options )
+      # @options.merge!( options )
+      if block_given?
+        apply!( options, &block )
+      else
+        apply!( options )
+      end
     end
 
     def origin=( arg )
@@ -91,12 +101,21 @@ module Zen
       arg.any? {|a| a.is_a?(Proc) }
     end
 
+    def needs( *args, &block )
+      STDERR.puts "<Event.needs: NOT IMPLEMENTED>"
+    end
+
+    def prohibits( *args, &block )
+      STDERR.puts "<Event.prohibits: NOT IMPLEMENTED>"
+    end
+
     private
 
     # Fugly, it's true. Luckily you really shouldn't have to touch it.
     # Sanitizes and sets @origin or @target to either a Proc, or array
     # of Zen::States (creating any named but not yet in existence)
     def _set_state_list( attr, arg )
+
       raise( ArgumentError, attr) unless [:origin, :target].include?(attr)
       return false if arg.nil?
       arg = case arg

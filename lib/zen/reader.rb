@@ -35,5 +35,12 @@ module Zen
       args.each { |name| state( name.to_sym, options, &block) }
     end
 
+    def from *args
+      raise "from(*origin, :to => *target) must be inside an event block"
+    end
+
+    # def from *args
+    #
+    # end
   end
 end

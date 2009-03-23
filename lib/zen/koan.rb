@@ -14,19 +14,14 @@ module Zen
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      koan = Zen::Space.class_koans[ klass ][ name ]
-      if block_given?
-        if koan
-          koan.apply!( &block )
-        else
-          koan = new( name, options, &block )
-          koan.apply!( &block )
-          koan.teach!( klass, name, options[:field_name] )
-          koan
-        end
-      else
-        koan
+      unless koan = Zen::Space.class_koans[ klass ][ name ]
+        koan = new( name, options, &block )
+        koan.teach!( klass, name, options[:field_name] )
       end
+      if block_given?
+        koan.apply!( &block )
+      end
+      koan
     end
 
     ##
@@ -53,6 +48,10 @@ module Zen
       Zen::Space.insert!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
+
+    def empty?
+      states.empty?
+    end
 
     def initial_state=( zen_state )
       raise(ArgumentError,zen_state.inspect ) unless zen_state.is_a?(Zen::State)

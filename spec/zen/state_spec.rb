@@ -22,16 +22,16 @@ describe Zen::State do
       it "should piggyback on @koan.define_event()" do
         evt_name = :bubble
         proc     = Proc.new(){}
-        options  = {:meta => "snoo" }
+        options  = {:meta => "snoo", :to => :potato }
         state    = Zen::State.new(@koan, :flux)
         event    = mock("Event")
         event.should_receive(:from).with( state )
+        event.should_receive(:to).with( :potato )
         @koan.should_receive(:define_event).
           with( evt_name, options , &proc ).
           once.
           and_return( event )
         state.event( evt_name, options, &proc )
-        pending "test extraction of target"
       end
     end
   end
