@@ -8,7 +8,7 @@ describe "A simple Koan definition" do
 
   include MySpecHelper
 
-  describe "When there is an empty koan" do
+  describe "When there is a koan describing user logins" do
     before(:all) do
       reset!
       make_pristine_class 'Klass'
@@ -70,10 +70,12 @@ describe "A simple Koan definition" do
       end # koan
     end # before
 
-    it "should not throw an error" do
+    it "parsing it should not throw an error" do
       @koan_spec.should_not raise_error()
       @koan_spec.call()
-      # yay
+    end
+
+    describe ".." do
     end
   end # describe_1
 end

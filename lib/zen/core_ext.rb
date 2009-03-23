@@ -1,6 +1,9 @@
 require 'rubygems'
-# TODO - factor this out
-require 'active_support'
+
+require 'active_support/core_ext/hash'
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/class'
+require 'active_support/core_ext/blank'
 
 # for ruby 1.8.x
 class Symbol
