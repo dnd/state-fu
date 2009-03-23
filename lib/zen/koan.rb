@@ -11,7 +11,7 @@ module Zen
     end
 
     # meta-constructor; expects to be called via Klass.koan()
-    def self.for_class(klass, name, options, &block)
+    def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
       koan = Zen::Space.class_koans[ klass ][ name ]
