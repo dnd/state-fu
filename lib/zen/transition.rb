@@ -96,7 +96,7 @@ module Zen
     end
 
     #
-    # Let's duck punch this bitch
+    # Try to give as many options (chances) as possible
     #
 
     alias_method :disciple,       :object

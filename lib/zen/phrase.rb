@@ -11,7 +11,7 @@ module Zen
       @hooks   = Zen::Hooks.for( self )
     end
 
-    # sneaky way to make some comparisons / duck punching a bit cleaner
+    # sneaky way to make some comparisons / duck typing a bit cleaner
     alias_method :to_sym,  :name
 
     def add_hook slot, name, value

@@ -14,7 +14,7 @@ unless Object.const_defined?('ActiveSupport')
 end
 
 class Symbol
-  unless instance_methods.include?(:'<=>2')
+  unless instance_methods.include?(:'<=>')
     # Logger.log ..
     def <=> other
       self.to_s <=> other.to_s

@@ -8,24 +8,25 @@
 ==================================================
 * TODOs
 ** event fire method on disciple.
-**
-
-
-
-
-
-
-
-
-
+** koan units
+** other units
+** integration specs
+** settle on rr or rspec (!) mocking
 
 ====================================================
+
 * Bugs
 ** Koans are not inherited. Is this a bug?
    To make them inheritable we'd be back to needing a Binding
    or some other substantial complexity.
    I don't think it's worth it.
-** About 800 - 1000 LOC
+
+* Decisions
+** removed ability to have procs as origin / target states
+*** not worth the complexity / fugly code
+*** can use guard conditions on states to test if they're available
+*** performance
+*** can use conditions on events to check if something's valid at transition time
 
 * Wishlist
 ** auto transitions and default arguments
@@ -36,9 +37,16 @@
 ** conditionals / halting
 *** halt!
 *** halt_if | halt_unless
-*** needs
+*** needs / requires
+
 ** TESTED Persistence w/ Marshall.dump / reload
    works a treat as long as you got no procs
+*** useful though?
+*** other formats?
+**** YAML
+**** JSON
+**** nested hash as basic interchange format?
+*** avoid procs if possible, or provide alternatives, to keep these options open
 
 ** Documentation
 *** high-level overviews
@@ -49,13 +57,15 @@
 ** auto-order-by :position option
 ** array mixins to help move stuff around
 
-** Koans should be
-*** duplicable
+** Koans should
+*** be deep-copyable
 **** store blocks passed to them in an array so that they can be replayed?
 **** use a recorder pattern?
-*** castable to string / json / ... without looking like ass
+**** -> common interchange format? ie, hash / marshal.dump / yaml ?
+*** cast to string / json / ... without looking like ass
 *** able to generate dot / graphviz
-*** $@ from Stateful
+
+*
 
 ** Class/object API
 *** should be interchangeable
