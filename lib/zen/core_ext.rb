@@ -1,5 +1,7 @@
 require 'rubygems'
 
+# todo : remove this once its exclusion no longer breaks anything on any platforms
+require 'activesupport'
 
 require 'active_support/core_ext/array'
 require 'active_support/core_ext/blank'
@@ -9,7 +11,7 @@ require 'active_support/core_ext/hash'
 
 class Symbol
   unless instance_methods.include?(:'<=>')
-    Logger.debug "monkeypatching Symbol <=> for ruby 1.8.x"
+    # Logger.log ..
     def <=> other
       self.to_s <=> other.to_s
     end
