@@ -56,11 +56,28 @@ end
 #   end
 # end
 namespace :spec do
-  desc "Run specs"
-  Spec::Rake::SpecTask.new(:run) do |t|
+  desc "Run both units and integration specs"
+  task :both => [:units, :integration]
+
+  desc "Run all specs"
+  Spec::Rake::SpecTask.new(:all) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts = ["--options", "spec/spec.opts"]
   end
+
+  desc "Run unit specs"
+  Spec::Rake::SpecTask.new(:units) do |t|
+    t.spec_files = FileList["spec/units/*_spec.rb"]
+    t.spec_opts = ["--options", "spec/spec.opts"]
+  end
+  task :unit => :units
+
+  desc "Run integration specs"
+  Spec::Rake::SpecTask.new(:integration) do |t|
+    t.spec_files = FileList["spec/integration/*_spec.rb"]
+    t.spec_opts = ["--options", "spec/spec.opts"]
+  end
+  task :system => :integration
 
   desc "Print Specdoc for all specs (eaxcluding plugin specs)"
   Spec::Rake::SpecTask.new(:doc) do |t|
@@ -75,7 +92,6 @@ namespace :spec do
     exec 'autospec'
   end
 end
-task :default => 'spec:run'
 
 desc "Keep things tidy"
 task :clean => :clobber_package
@@ -90,3 +106,4 @@ task :doc do |t|
   exec 'rdoc lib/'
 end
 
+task :default => 'spec:all'

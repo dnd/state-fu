@@ -78,29 +78,31 @@ describe "Adding states to a Koan" do
     describe "calling koan() { state(:bird) {|s| .. } }" do
 
       it "should yield the state to the block as |s|" do
-        _state = nil
+        reader = nil
         Klass.koan() do
           state(:bird) do |s|
-            _state = s
+            reader = s
           end
         end
-        _state.should be_kind_of(Zen::State)
-        _state.name.should == :bird
+        reader.should be_kind_of( Zen::Reader )
+        reader.phrase.should be_kind_of( Zen::State )
+        reader.phrase.name.should == :bird
       end
 
     end
 
     describe "calling koan() { state(:bird) {  .. } }" do
 
-      it "should instance_eval the block as the state" do
-        _state = nil
+      it "should instance_eval the block as a Zen::Reader" do
+        reader = nil
         Klass.koan() do
           state(:bird) do
-            _state = self
+            reader = self
           end
         end
-        _state.should be_kind_of(Zen::State)
-        _state.name.should == :bird
+        reader.should be_kind_of(Zen::Reader)
+        reader.phrase.should be_kind_of(Zen::State)
+        reader.phrase.name.should == :bird
       end
 
     end

@@ -37,6 +37,13 @@ describe Zen::Event do
           it "should ..."
         end
 
+        describe "reader" do
+          it "should return a Zen::Reader"
+          it "should have the event's koan"
+          it "should have the event as the phrase"
+          it "should eval ..."
+        end
+
         describe '.from()' do
           describe "given @event.from :initial, :to => :final" do
             describe "setting attributes" do

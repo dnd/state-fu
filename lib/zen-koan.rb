@@ -21,15 +21,14 @@ require 'zen/phrase'
 require 'zen/state'
 require 'zen/event'
 require 'zen/hooks'
-require 'zen/api/default'
-require 'zen/api/stateful'
+require 'zen/interface'
 
 module Zen
   DEFAULT_KOAN    = :om
 
   def self.included( klass )
-    klass.extend(         API::Default::ClassMethods )
-    klass.send( :include, API::Default::InstanceMethods )
+    klass.extend(         Interface::ClassMethods )
+    klass.send( :include, Interface::InstanceMethods )
   end
 end
 

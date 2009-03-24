@@ -2,6 +2,7 @@ module Zen
   module Helper
 
     module InstanceMethods
+
       def apply!( options={}, &block )
         @options.merge!( options.symbolize_keys! )
         return self unless block_given?

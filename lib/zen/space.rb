@@ -1,23 +1,24 @@
 module Zen
+  # Provides a place to stash references.
+  # In most cases you won't need to access it directly, though
+  # calling reset! before each of your tests/specs can be helpful.
   class Space
     cattr_reader :named_koans, :class_koans, :field_names
 
     # class_koans[ Class ][ method_name ] # => a Zen::Koan
     # class_koans[ Klass ][ nil ]         # => the Klass's default Koan
-    # class_koans[ Klass ].om             # => the Klass's default Koan
-    # field_names[ Class ][ method_name ] # => name of persistence field
+    # field_names[ Class ][ method_name ] # => name of attribute / db field
 
+    # return the default koan, or an empty hash, given a missing index.
     LAZY_HASH = lambda do |h, k|
-      m = Module.new do
-        def om; self[Zen::DEFAULT_KOAN]; end;
-      end
-      if k.nil? && k = self[Zen::DEFAULT_KOAN]
-        k
+      if k.nil?
+        self[ Zen::DEFAULT_KOAN ]
       else
-        h[k]= Hash.new().extend( m )
+        h[k]= Hash.new()
       end
     end
 
+    # Add a koan to Zen::Space and register it with a given class, by a given name.
     def self.insert!( klass, koan, name, field_name )
       name                       = name.to_sym
       field_name                 = field_name.to_sym
@@ -33,6 +34,8 @@ module Zen
       alias_method :insert,  :insert!
     end
 
+    # Clears all koans and their bindings to classes.
+    # Also initializes the hashes we use to store our references.
     def self.beginners_mind!
       @@named_koans = Hash.new
       @@class_koans = Hash.new( &LAZY_HASH )
