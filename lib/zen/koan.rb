@@ -54,7 +54,7 @@ module Zen
     end
 
     def initial_state=( state )
-      unless zen_state.is_a?( Zen::State )
+      unless state.is_a?( Zen::State )
         state = states[ state.to_sym ] || raise( ArgumentError, state.inspect )
       end
       @initial_state = state
