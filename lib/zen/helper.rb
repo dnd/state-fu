@@ -1,10 +1,12 @@
 module Zen
+  # Use modules to extend Hash / Array instances.
+  # This allows us to add custom accessors to collections of objects
 
-  # TODO clean up structure
-
-  # retrieve by name
   module StateOrEventArray
 
+    # Pass a symbol to the array and get the object with that .name
+    # [<Foo @name=:bob>][:bob]
+    # => <Foo @name=:bob>
     def []( idx )
       begin
         super( idx )
@@ -26,18 +28,6 @@ module Zen
   module StateArray
     include StateOrEventArray
 
-    def from( origin, include_dynamic = false )
-      select { |e| e.respond_to?(:from?) && e.from?( origin, include_dynamic ) }
-    end
-
-    def to( target, include_dynamic = false )
-      select { |e| e.respond_to?(:to?) && e.to?( target, include_dynamic ) }
-    end
-
-    def dynamic
-      select { |e| e.respond_to?(:dynamic?) && e.dynamic? }
-    end
-
   end
 
   module EventArray
@@ -54,7 +44,11 @@ module Zen
 
 
   module Helper
+    # Unlike most implementations, this extends Array. It's small,
+    # though won't be very fast on lookup with many items. Internally
+    # objects are stored as a list of [:key, 'value'] pairs.
     module OrderedHash
+      # if given a symbol / string, return the
       def []( index )
         begin
           super( index )
