@@ -18,7 +18,7 @@ module Zen
           Logger.info("Koan has no states: #{koan}") if koan.states.empty?
         else
           persist!
-          Logger.debug("Object state reconstituted at #{current_state.name}: #{object}") if koan.states.empty?
+          Logger.debug("Object resumes at #{current_state.name}: #{object}")
         end
       end
 
@@ -28,8 +28,7 @@ module Zen
           koan.initial_state
         else
           state_name = string.to_sym
-          state      = koan.states[ state_name ]
-          state || raise( Zen::InvalidStateName, string )
+          state      = koan.states[ state_name ] || raise( Zen::InvalidStateName, string )
         end
       end
 
@@ -45,13 +44,12 @@ module Zen
         object.class
       end
 
-      def method_name
-        meditation.method_name
-      end
+#      def method_name
+#        meditation.method_name
+#      end
 
       def current_state=( state )
-        raise(ArgumentError, state.inspect) unless
-          state.is_a?(Zen::State)
+        raise(ArgumentError, state.inspect) unless state.is_a?(Zen::State)
         @current_state = state
         persist!
       end

@@ -1,16 +1,56 @@
 module Zen
 
-  module ArraySmartIndex
-    def []( index )
+  # TODO clean up structure
+
+  # retrieve by name
+  module StateOrEventArray
+
+    def []( idx )
       begin
-        super( index )
-      rescue TypeError
-        self.detect do |i|
-          i.name == index.to_sym
-        end if index.respond_to?(:to_sym)
+        super( idx )
+      rescue TypeError => e
+        if idx.respond_to?(:to_sym)
+          self.detect { |i| i.respond_to?(:name) && i.name == idx.to_sym }
+        else
+          raise e
+        end
       end
     end
-  end  # ArrayNameAccessor
+
+    def names
+      map(&:name)
+    end
+
+  end
+
+  module StateArray
+    include StateOrEventArray
+
+    def from( origin, include_dynamic = false )
+      select { |e| e.respond_to?(:from?) && e.from?( origin, include_dynamic ) }
+    end
+
+    def to( target, include_dynamic = false )
+      select { |e| e.respond_to?(:to?) && e.to?( target, include_dynamic ) }
+    end
+
+    def dynamic
+      select { |e| e.respond_to?(:dynamic?) && e.dynamic? }
+    end
+
+  end
+
+  module EventArray
+    include StateOrEventArray
+
+    def from( origin )
+      select { |e| e.respond_to?(:from?) && e.from?( origin ) }
+    end
+
+    def to( target )
+      select { |e| e.respond_to?(:to?) && e.to?( target ) }
+    end
+  end
 
 
   module Helper
@@ -19,10 +59,7 @@ module Zen
         begin
           super( index )
         rescue TypeError
-          x = self.detect do |i|
-            i.first == index
-          end # if index.class ...
-          x && x[1]
+          ( x = self.detect { |i| i.first == index }) && x[1]
         end
       end
 
@@ -30,14 +67,8 @@ module Zen
         begin
           super( index, value )
         rescue TypeError
-          x = self.detect do |i|
-            i.first == index
-          end # if index.class ...
-          if x
-            x[1] = value
-          else
-            self << [index, value].extend(OrderedHash)
-          end
+          ( x = self.detect { |i| i.first == index }) ?
+          x[1] = value : self << [ index, value ].extend( OrderedHash )
         end
       end
 
@@ -48,7 +79,7 @@ module Zen
       def values
         map(&:last)
       end
-    end  # OrderedHash
-  end
 
-end
+    end  # OrderedHash
+  end    # Helper
+end      # Zen

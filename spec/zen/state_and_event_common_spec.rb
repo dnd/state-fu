@@ -7,18 +7,15 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 describe "Common functionality shared between Zen::State & Zen::Event" do
 
   include MySpecHelper
-
+  Phrase = Zen::Phrase
   before do
-    class Klass
-      include Zen::Interfaces::StateAndEvent
-    end
     @koan = mock('Koan')
   end
 
-  describe "calling Klass.new" do
-    it "should create a new Klass given valid args" do
-      klass = Klass.new(@koan, :flux, { :meta => :doodle })
-      klass.should be_kind_of( Klass )
+  describe "calling Phrase.new" do
+    it "should create a new Phrase given valid args" do
+      klass = Phrase.new(@koan, :flux, { :meta => :doodle })
+      klass.should be_kind_of( Phrase )
       klass.name.should == :flux
       klass.options[:meta].should == :doodle
       klass.koan.should == @koan
@@ -27,7 +24,7 @@ describe "Common functionality shared between Zen::State & Zen::Event" do
 
   describe "instance methods" do
     before do
-      @klass = Klass.new(@koan, :flux, {:meta => "wibble"})
+      @klass = Phrase.new(@koan, :flux, {:meta => "wibble"})
     end
 
     describe ".apply!" do

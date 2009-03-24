@@ -3,14 +3,15 @@ module Zen
     class ActiveRecord < Zen::Persistence::Base
       private
 
+      # We already checked that they exist, or we'd be using the
+      # Attribute version, so just do the simplest thing we can.
+
       def read_attribute
         object.send( :read_attribute, field_name )
-        # raise "Abstract method! override me"
       end
 
       def write_attribute( string_value )
         object.send( :write_attribute, field_name, string_value )
-        # raise "Abstract method! override me"
       end
 
     end

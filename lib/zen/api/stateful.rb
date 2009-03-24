@@ -1,8 +1,8 @@
 module Zen
   module API
-
     module Stateful
       module ClassMethods
+
         # Well what have we here, a stickler for ironed shirts and
         # folded socks?  Don't worry, we've got you covered.
         #
@@ -15,21 +15,20 @@ module Zen
 
       module InstanceMethods
         public
-        # As above.
-        # ...
-        #
+        # This is your new swiss army knife.
+        # The object with all the references and conveniences you'll need.
         def stateful( *a )
           om *a
         end
 
-        # instantiate all meditations (or those named)
-        # it's useful to call this before_create w/
+        # initialize all meditations ... er .. statefuls? (or those named)
+        # it's useful to call this w/ before_create when using
         # ActiveRecord classes.
         def initialize_state!( *a )
           meditate!( *a )
         end
-
       end
+
     end
   end
 end

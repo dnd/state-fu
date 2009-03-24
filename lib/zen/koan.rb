@@ -31,8 +31,8 @@ module Zen
     attr_reader :states, :events, :options
 
     def initialize( name, options={}, &block )
-      @states  = [].extend( ArraySmartIndex )
-      @events  = [].extend( ArraySmartIndex )
+      @states  = [].extend( StateArray )
+      @events  = [].extend( EventArray )
       @options = options
     end
 
@@ -76,7 +76,7 @@ module Zen
       if existing_event = self.events[name]
         existing_event.apply!( options, &block)
       else
-        new_event = Zen::Event.new( self, name, options, &block )
+        new_event = Zen::Event.new( self, name, options )
         self.events << new_event
         new_event.apply!(&block)
         new_event
@@ -89,7 +89,7 @@ module Zen
       if existing_state = self.states[name]
         existing_state.apply!(options, &block)
       else
-        new_state = Zen::State.new( self, name, options, &block )
+        new_state = Zen::State.new( self, name, options )
         self.states << new_state
         new_state.apply!(&block)
         new_state

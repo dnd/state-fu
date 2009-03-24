@@ -3,10 +3,8 @@ module Zen
     class Attribute < Zen::Persistence::Base
       private
 
-      # TODO
-      #  - exception handling
-      #  - performance tuning
-      #  - bling
+      # Read / write our strings to a plain old instance variable
+      # Define it if it doesn't exist the first time we go to read it
 
       def read_attribute
         unless object.respond_to?( field_name )

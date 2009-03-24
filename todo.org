@@ -11,18 +11,26 @@
    To make them inheritable we'd be back to needing a Binding
    or some other substantial complexity.
    I don't think it's worth it.
+** About 800 - 1000 LOC
 
 * Features / Todo
+** auto transitions and default arguments
+*** find permissable events and try firing them; repeat until deadlock
+** storing meta-information in options for integration with eg Rails controllers, views
 ** event hooks
 ** conditionals / halting
 *** halt!
 *** halt_if | halt_unless
 *** needs
-
+** Persistence w/ Marshall.dump / reload
 ** Documentation
 *** high-level overviews
 **** of the API / syntax
 **** of the behind-the-scenes action and how classes relate
+
+* requirements, etc should be orderable
+** auto-order-by :position option
+** array mixins to help move stuff around
 
 ** Koans should be
 *** duplicable
@@ -38,14 +46,6 @@
 ** Contexts
 *** should be extensible by the user to create a custom DSL
 **** how to work this into the DSL? Scope?
-
-** Definition syntax
-*** use e.g. state(:foo) { |s| ... } or state(:foo) { ... } ?
-**** consider the merits carefully
-     discussion here
-**** support both?
-***** 'pretty version' as default
-***** 'nasty version' for advanced stuff / use as a full DSL
 
 * Specs pending
 

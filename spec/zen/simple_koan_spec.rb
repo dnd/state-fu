@@ -27,13 +27,13 @@ describe "A simple Koan definition" do
       #
       # maybe. or maybe that's just sick.
 
-      @koan_spec = lambda do
-        Klass.koan(:account, :method_proxy => true ) do
+      # @koan_spec = lambda do
+        Klass.koan( :method_proxy => true ) do
 
-          states :new, :confirmed, :active, :expired, :deleted
+          states :new, :active, :limbo, :expired, :deleted
 
           event :confirm do
-            from :new, :to => :confirmed do
+            from :new, :to => :confirmed, :auto => true do
               needs :email_confirmation
             end
           end
@@ -62,17 +62,17 @@ describe "A simple Koan definition" do
             end
           end
 
-          all_states do
+          states :ALL do
             after(:save!)
           end
 
         end
       end # koan
-    end # before
+    # end # before
 
     it "parsing it should not throw an error" do
-      @koan_spec.should_not raise_error()
-      @koan_spec.call()
+      # @koan_spec.should_not raise_error()
+      # @koan_spec.call()
     end
 
     describe ".." do
