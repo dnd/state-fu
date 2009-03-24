@@ -1,7 +1,6 @@
 module Zen
   class Phrase # Abstract Superclass of State & Event
-
-
+    include Zen::Helper # define apply!
 
     attr_reader :koan, :name, :options, :hooks
 
@@ -11,19 +10,6 @@ module Zen
       @options = options.symbolize_keys!
       @hooks   = Zen::Hooks.for( self )
     end
-
-    def apply!( options={}, &block )
-      @options.merge!( options.symbolize_keys! )
-      return self unless block_given?
-      case block.arity
-      when 1     # lambda{ |state| ... }.arity
-        yield self
-      when -1, 0 # lambda{ }.arity ( -1 in ruby 1.8.x but 0 in 1.9.x )
-        instance_eval &block
-      end
-      self
-    end
-    alias_method :update!, :apply!
 
     # sneaky way to make some comparisons / duck punching a bit cleaner
     alias_method :to_sym,  :name

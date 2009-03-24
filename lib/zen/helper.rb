@@ -1,5 +1,30 @@
 module Zen
+  module Helper
 
+    module InstanceMethods
+      def apply!( options={}, &block )
+        @options.merge!( options.symbolize_keys! )
+        return self unless block_given?
+        case block.arity
+        when 1     # lambda{ |state| ... }.arity
+          yield self
+        when -1, 0 # lambda{ }.arity ( -1 in ruby 1.8.x but 0 in 1.9.x )
+          instance_eval &block
+        end
+        self
+      end
+      alias_method :update!, :apply!
+    end
+
+    module ClassMethods
+    end
+
+    def self.included( mod )
+      mod.send( :include, InstanceMethods )
+      mod.extend( ClassMethods )
+    end
+
+  end
   # TODO clean up structure
 
   # retrieve by name
