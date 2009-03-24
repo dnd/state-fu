@@ -74,6 +74,16 @@ module Zen
 
     public
 
+    # helpers are mixed into all meditation / transition contexts
+    # use them to bend the language to your will
+    def helper( *names )
+      names.each do |name|
+        const_name = name.to_s.camelize
+        # if we can't find it now, try later in the disciple object's context
+        koan.helpers << (const_name.constantize rescue const_name )
+      end
+    end
+
     #
     # event definition
     #

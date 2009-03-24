@@ -7,8 +7,8 @@
 
 require 'zen/core_ext'
 require 'zen/logger'
-require 'zen/exceptions'
 require 'zen/helper'
+require 'zen/exceptions'
 require 'zen/space'
 require 'zen/koan'
 require 'zen/reader'

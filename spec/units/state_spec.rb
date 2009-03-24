@@ -32,7 +32,7 @@ describe Zen::State do
       it "should act as a proxy for reader.event without a block" do
         reader = mock("Zen::Reader")
         @state.stub!( :reader ).and_return( reader )
-        args = [:evt_name, :from => :old, :to => :new]
+        args = [:evt_name, {:from => :old, :to => :new}]
         reader.should_receive(:event).with( *args )
         @state.event( *args )
       end
@@ -41,7 +41,7 @@ describe Zen::State do
         reader = mock("Zen::Reader")
         block  = lambda{}
         @state.stub!( :reader ).and_return( reader )
-        args = [:evt_name, :from => :old, :to => :new]
+        args = [:evt_name, {:from => :old, :to => :new}]
         reader.should_receive(:event).with( *args )
         @state.event( *args ){ puts "TODO: can't find a way to test the block is passed" }
       end

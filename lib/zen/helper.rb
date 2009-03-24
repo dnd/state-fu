@@ -81,6 +81,13 @@ module Zen
     end
   end
 
+  # Array extender. Used by Koan to keep a list of helpers to mix into
+  # context objects.
+  module HelperArray
+
+  end
+
+
   # Extend an Array with this. It's a fairly compact implementation,
   # though it won't be super fast with lots of elements.
   # items. Internally objects are stored as a list of

@@ -28,11 +28,12 @@ module Zen
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options
+    attr_reader :states, :events, :options, :helpers
 
     def initialize( name, options={}, &block )
-      @states  = [].extend( StateArray )
-      @events  = [].extend( EventArray )
+      @states  = [].extend( StateArray  )
+      @events  = [].extend( EventArray  )
+      @helpers = [].extend( HelperArray )
       @options = options
     end
 

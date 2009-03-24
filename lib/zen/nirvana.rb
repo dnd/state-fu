@@ -8,7 +8,7 @@ module Zen
   # templating
   #
 
-  module StringLoader
+  module KoanText
     attr_accessor :format
 
     def to_ruby
@@ -29,12 +29,12 @@ module Zen
 
     def initialize( data )
       if Zen::Koan === data
-        @koan        = data.extend      KoanToRuby
+        @koan        = data.extend        KoanToRuby
         return
       elsif String === data
-        @string      = data.extend      StringLoader
+        @string      = data.extend      StringToRuby
       elsif IO     === data
-        @string      = data.read.extend StringLoader
+        @string      = data.read.extend StringToRuby
       end
     end
 
@@ -42,7 +42,6 @@ module Zen
       [koan, hash, string].compact
     end
 
-    # a simple ruby data structure which will dump happily to yaml / json
     def to_ruby()
       hash || ( datasources.unshift ).to_ruby
     end
@@ -52,7 +51,7 @@ module Zen
     end
 
     def to_code()
-      # Zen::Writer.new( to_koan )
+      Zen::Writer.new( to_koan )
     end
 
     def to_yaml
