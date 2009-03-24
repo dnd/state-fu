@@ -16,8 +16,8 @@ module Zen
     def self.for( me )
       x = if    me.is_a?( Zen::State ); STATE_HOOKS
           elsif me.is_a?( Zen::Event ); EVENT_HOOKS
-          else {}
-          end.map { |_,name| [name, [].extend( Zen::OrderedHash )] }
+          end.
+        map { |_,name| [name, [].extend( Zen::OrderedHash )] }
       Hash[x].extend( Zen::OrderedHash ).freeze
     end
 
