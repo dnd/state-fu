@@ -4,7 +4,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe "Common functionality shared between Zen::State & Zen::Event" do
+describe "Common features / functionality for Zen::State & Zen::Event" do
 
   include MySpecHelper
   Phrase = Zen::Phrase
@@ -14,56 +14,56 @@ describe "Common functionality shared between Zen::State & Zen::Event" do
 
   describe "calling Phrase.new" do
     it "should create a new Phrase given valid args" do
-      klass = Phrase.new(@koan, :flux, { :meta => :doodle })
-      klass.should be_kind_of( Phrase )
-      klass.name.should == :flux
-      klass.options[:meta].should == :doodle
-      klass.koan.should == @koan
+      phrase = Phrase.new(@koan, :flux, { :meta => :doodle })
+      phrase.should be_kind_of( Phrase )
+      phrase.name.should == :flux
+      phrase.options[:meta].should == :doodle
+      phrase.koan.should == @koan
     end
   end
 
   describe "instance methods" do
     before do
-      @klass = Phrase.new(@koan, :flux, {:meta => "wibble"})
+      @phrase = Phrase.new(@koan, :flux, {:meta => "wibble"})
     end
 
     describe ".apply!" do
 
       it "should yield itself if the block's arity is 1" do
         yielded = false
-        @klass.apply!{ |s| yielded = s  }
-        yielded.should == @klass
+        @phrase.apply!{ |s| yielded = s  }
+        yielded.should == @phrase
       end
 
       it "should instance_eval the block if its arity is 0/-1" do
         yielded = false
-        @klass.apply!{ yielded = self }
-        yielded.should == @klass
+        @phrase.apply!{ yielded = self }
+        yielded.should == @phrase
       end
     end
 
     describe "update!" do
       it "should merge any options passed into .options" do
-        opts    = @klass.options
+        opts    = @phrase.options
         newopts =  { :size => "huge", :colour => "orange" }
-        @klass.update!( newopts )
-        @klass.options.should == opts.merge(newopts)
+        @phrase.update!( newopts )
+        @phrase.options.should == opts.merge(newopts)
       end
 
       it "should instance_eval the block if one is passed" do
         ref = nil
-        @klass.update!(){ ref = self }
-        ref.should == @klass
+        @phrase.update!(){ ref = self }
+        ref.should == @phrase
       end
 
       it "should return itself" do
-        @klass.update!.should == @klass
+        @phrase.update!.should == @phrase
       end
     end
 
     describe "to_sym" do
       it "should return its name" do
-        @klass.to_sym.should == @klass.name
+        @phrase.to_sym.should == @phrase.name
       end
     end
 

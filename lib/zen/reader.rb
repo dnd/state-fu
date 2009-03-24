@@ -81,7 +81,7 @@ module Zen
     def event( name, options={}, &block )
       require_phrase( Zen::State, NilClass )
       if phrase? && phrase.is_a?( Zen::State ) # in state block
-        target  = options.delete(:to)
+        target  = options.symbolize_keys!.delete(:to)
         evt     = define_event( name, options, &block )
         evt.from phrase
         evt.to( target ) if target

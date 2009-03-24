@@ -1,9 +1,16 @@
 module Zen
+
+  # Utilities and snippets
   module Helper
 
+    # Instance methods mixed in on inclusion of Zen::Helper
     module InstanceMethods
 
+      # if given a hash of options (or a splatted arglist containing
+      # one), merge them into @options. If given a block, eval it
+      # (yielding self if the block expects it)
       def apply!( options={}, &block )
+        options.respond_to?(:keys) || options = options.extract_options!
         @options.merge!( options.symbolize_keys! )
         return self unless block_given?
         case block.arity
@@ -15,8 +22,10 @@ module Zen
         self
       end
       alias_method :update!, :apply!
+
     end
 
+    # Class methods mixed in on inclusion of Zen::Helper
     module ClassMethods
     end
 
@@ -27,8 +36,7 @@ module Zen
 
   end
 
-  # Use modules to extend Hash / Array instances.
-  # This allows us to add custom accessors to collections of objects
+  # Stuff shared between StateArray and EventArray
   module StateOrEventArray
     # Pass a symbol to the array and get the object with that .name
     # [<Foo @name=:bob>][:bob]
@@ -45,61 +53,66 @@ module Zen
       end
     end
 
+    # so we can go Koan.states.names
+    # mildly helpful with irb + readline
     def names
       map(&:name)
     end
 
   end
 
+  # Array extender. Used by Koan to keep a list of states.
   module StateArray
     include StateOrEventArray
-
   end
 
+  # Array extender. Used by Koan to keep a list of events.
   module EventArray
     include StateOrEventArray
 
+    # return all events transitioning from the given state
     def from( origin )
       select { |e| e.respond_to?(:from?) && e.from?( origin ) }
     end
 
+    # return all events transitioning to the given state
     def to( target )
       select { |e| e.respond_to?(:to?) && e.to?( target ) }
     end
   end
 
-
-  module Helper
-    # Unlike most implementations, this extends Array. It's small,
-    # though won't be very fast on lookup with many items. Internally
-    # objects are stored as a list of [:key, 'value'] pairs.
-    module OrderedHash
-      # if given a symbol / string, return the
-      def []( index )
-        begin
-          super( index )
-        rescue TypeError
-          ( x = self.detect { |i| i.first == index }) && x[1]
-        end
+  # Extend an Array with this. It's a fairly compact implementation,
+  # though it won't be super fast with lots of elements.
+  # items. Internally objects are stored as a list of
+  # [:key, 'value'] pairs.
+  module OrderedHash
+    # if given a symbol / string, treat it as a key
+    def []( index )
+      begin
+        super( index )
+      rescue TypeError
+        ( x = self.detect { |i| i.first == index }) && x[1]
       end
+    end
 
-      def []=( index, value )
-        begin
-          super( index, value )
-        rescue TypeError
-          ( x = self.detect { |i| i.first == index }) ?
-          x[1] = value : self << [ index, value ].extend( OrderedHash )
-        end
+    # hash-style setter
+    def []=( index, value )
+      begin
+        super( index, value )
+      rescue TypeError
+        ( x = self.detect { |i| i.first == index }) ?
+        x[1] = value : self << [ index, value ].extend( OrderedHash )
       end
+    end
 
-      def keys
-        map(&:first)
-      end
+    # poor man's Hash.keys
+    def keys
+      map(&:first)
+    end
 
-      def values
-        map(&:last)
-      end
-
-    end  # OrderedHash
-  end    # Helper
-end      # Zen
+    # poor man's Hash.values
+    def values
+      map(&:last)
+    end
+  end  # OrderedHash
+end

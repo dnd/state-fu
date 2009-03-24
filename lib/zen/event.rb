@@ -8,11 +8,13 @@ module Zen
     #
 
     def origin_names
-      @origin_names ||= origin.map(&:to_sym) rescue nil
+      # @origin_names ||=
+      origin.map(&:to_sym) rescue nil
     end
 
     def target_names
-      @target_names ||= target.map(&:to_sym) rescue nil
+      # @target_names ||=
+      target.map(&:to_sym) rescue nil
     end
 
     def to?( state )

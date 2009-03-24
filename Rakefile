@@ -87,10 +87,9 @@ namespace :spec do
 
   desc "Run autotest"
   task :auto do |t|
-    #ENV["RSPEC"] = 'true'
-    #exec 'autotest'
     exec 'autospec'
   end
+
 end
 
 desc "Keep things tidy"

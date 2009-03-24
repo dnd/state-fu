@@ -20,8 +20,8 @@ module Zen
             EVENT_HOOKS
           else
             {}
-          end.map {|k,v| [v, [].extend(Zen::Helper::OrderedHash) ] }
-      Hash[x].extend(Zen::Helper::OrderedHash).freeze
+          end.map {|k,v| [v, [].extend(Zen::OrderedHash) ] }
+      Hash[x].extend(Zen::OrderedHash).freeze
     end
 
   end

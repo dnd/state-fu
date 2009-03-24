@@ -5,7 +5,21 @@
 # writing it.
 
 # i.e., don't expect it to be up to date.
+==================================================
+* TODOs
+** event fire method on disciple.
+**
 
+
+
+
+
+
+
+
+
+
+====================================================
 * Bugs
 ** Koans are not inherited. Is this a bug?
    To make them inheritable we'd be back to needing a Binding
@@ -13,16 +27,19 @@
    I don't think it's worth it.
 ** About 800 - 1000 LOC
 
-* Features / Todo
+* Wishlist
 ** auto transitions and default arguments
 *** find permissable events and try firing them; repeat until deadlock
-** storing meta-information in options for integration with eg Rails controllers, views
+** DONE storing meta-information in options for integration with eg Rails controllers, views
+** Rails helpers for views etc? Tie-in to controller stuff?
 ** event hooks
 ** conditionals / halting
 *** halt!
 *** halt_if | halt_unless
 *** needs
-** Persistence w/ Marshall.dump / reload
+** TESTED Persistence w/ Marshall.dump / reload
+   works a treat as long as you got no procs
+
 ** Documentation
 *** high-level overviews
 **** of the API / syntax
@@ -56,6 +73,3 @@
 ** decide where to use Cucumber & where Rspec
 ** benchmark / tune for performance
 *** Cuc. for user-facing API; Rspec for internals?
-
-## FLEXIBLE INSTANCE EVAL API:
-https://gist.github.com/da794635f7f223350e13

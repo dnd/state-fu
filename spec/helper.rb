@@ -1,15 +1,22 @@
 #!/usr/bin/env ruby
 thisdir = File.expand_path(File.dirname(__FILE__))
 $: << thisdir << "#{thisdir}/../lib"
+# $: << thisdir << "#{thisdir}/vendor"
 
 require 'rubygems'
+# require 'rr'
 require 'spec'
 require 'zen-koan'
 
-module ZenMatchers
-  class HaveStatesMatcher
-  end
-end
+# module ZenMatchers
+#   class HaveStatesMatcher
+#   end
+# end
+
+# Spec::Runner.configure do |config|
+#   config.mock_with :rr
+#   # config.mock_with RR::Adapters::Rspec
+# end
 
 module MySpecHelper
 
