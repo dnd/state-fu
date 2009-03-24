@@ -25,7 +25,7 @@ module Zen
     end
 
     ##
-    ##
+    ## Instance Methods
     ##
 
     attr_reader :states, :events, :options
@@ -53,9 +53,11 @@ module Zen
       states.empty?
     end
 
-    def initial_state=( zen_state )
-      raise(ArgumentError,zen_state.inspect ) unless zen_state.is_a?(Zen::State)
-      @initial_state = zen_state
+    def initial_state=( state )
+      unless zen_state.is_a?( Zen::State )
+        state = states[ state.to_sym ] || raise( ArgumentError, state.inspect )
+      end
+      @initial_state = state
     end
 
     def initial_state()
