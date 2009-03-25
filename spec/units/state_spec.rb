@@ -29,20 +29,20 @@ describe StateFu::State do
 
     describe ".event" do
 
-      it "should act as a proxy for reader.event without a block" do
-        reader = mock("StateFu::Reader")
-        @state.stub!( :reader ).and_return( reader )
+      it "should act as a proxy for lathe.event without a block" do
+        lathe = mock("StateFu::Lathe")
+        @state.stub!( :lathe ).and_return( lathe )
         args = [:evt_name, {:from => :old, :to => :new}]
-        reader.should_receive(:event).with( *args )
+        lathe.should_receive(:event).with( *args )
         @state.event( *args )
       end
 
-      it "should act as a proxy for reader.event with a block" do
-        reader = mock("StateFu::Reader")
+      it "should act as a proxy for lathe.event with a block" do
+        lathe = mock("StateFu::Lathe")
         block  = lambda{}
-        @state.stub!( :reader ).and_return( reader )
+        @state.stub!( :lathe ).and_return( lathe )
         args = [:evt_name, {:from => :old, :to => :new}]
-        reader.should_receive(:event).with( *args )
+        lathe.should_receive(:event).with( *args )
         @state.event( *args ){ puts "TODO: can't find a way to test the block is passed" }
       end
 

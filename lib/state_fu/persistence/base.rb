@@ -37,7 +37,7 @@ module StateFu
       end
 
       def object
-        meditation.disciple
+        meditation.machinist
       end
 
       def klass

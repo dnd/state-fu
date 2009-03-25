@@ -23,7 +23,7 @@ describe "A simple Machine definition" do
       #
       # when executing methods from the helper,
       # use method(mname) to convert them into something
-      # we can instance_eval in the context of our disciple instance :)
+      # we can instance_eval in the context of our machinist instance :)
       #
       # maybe. or maybe that's just sick.
 

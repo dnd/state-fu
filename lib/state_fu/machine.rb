@@ -15,7 +15,7 @@ module StateFu
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      unless machine = StateFu::Space.class_machines[ klass ][ name ]
+      unless machine = StateFu::FuSpace.class_machines[ klass ][ name ]
         machine = new( name, options, &block )
         machine.teach!( klass, name, options[:field_name] )
       end
@@ -40,14 +40,14 @@ module StateFu
 
     # merge the commands in &block with the existing machine
     def apply!( &block )
-      StateFu::Reader.new( self, &block )
+      StateFu::Lathe.new( self, &block )
     end
 
     # the Machine teaches a class how to meditate on it:
     def teach!( klass, name=StateFu::DEFAULT_KOAN, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
-      StateFu::Space.insert!( klass, self, name, field_name )
+      StateFu::FuSpace.insert!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
 

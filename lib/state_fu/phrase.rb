@@ -18,8 +18,8 @@ module StateFu
       @hooks[slot.to_sym] << [name.to_sym, value]
     end
 
-    def reader(options={}, &block)
-      StateFu::Reader.new( machine, self, options, &block )
+    def lathe(options={}, &block)
+      StateFu::Lathe.new( machine, self, options, &block )
     end
 
   end

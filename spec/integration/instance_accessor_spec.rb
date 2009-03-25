@@ -1,6 +1,6 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-StateFu::Space.reset!
+StateFu::FuSpace.reset!
 
 ##
 ##

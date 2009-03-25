@@ -1,5 +1,5 @@
 module StateFu
-  class Reader
+  class Lathe
 
     attr_reader :machine, :phrase, :options
 
@@ -30,7 +30,7 @@ module StateFu
     alias_method :child?, :phrase?
 
     def apply_to( phrase, options, &block )
-      StateFu::Reader.new( machine, phrase, options, &block )
+      StateFu::Lathe.new( machine, phrase, options, &block )
       phrase
     end
 
@@ -79,7 +79,7 @@ module StateFu
     def helper( *names )
       names.each do |name|
         const_name = name.to_s.camelize
-        # if we can't find it now, try later in the disciple object's context
+        # if we can't find it now, try later in the machinist object's context
         machine.helpers << (const_name.constantize rescue const_name )
       end
     end
@@ -165,7 +165,7 @@ module StateFu
     end
 
     # def all_states *a, &b
-    #   Logger.info "<StateFu::Reader.all_states not implemented>"
+    #   Logger.info "<StateFu::Lathe.all_states not implemented>"
     # end
 
     # Bunch of silly little methods for defining events

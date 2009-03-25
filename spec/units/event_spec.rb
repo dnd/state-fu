@@ -36,8 +36,8 @@ describe StateFu::Event do
           it "should ..."
         end
 
-        describe "reader" do
-          it "should return a StateFu::Reader"
+        describe "lathe" do
+          it "should return a StateFu::Lathe"
           it "should have the event's machine"
           it "should have the event as the phrase"
           it "should eval ..."

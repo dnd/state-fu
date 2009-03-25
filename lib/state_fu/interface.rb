@@ -39,7 +39,7 @@ module StateFu
       # return a hash of :name => StateFu::Machine for your class.
       def machines( *args, &block )
         if args.empty? && !block_given?
-          StateFu::Space.class_machines[self]
+          StateFu::FuSpace.class_machines[self]
         else
           machine( *args, &block)
         end
@@ -50,7 +50,7 @@ module StateFu
 
       # return the list of machines names for this class
       def machine_names()
-        StateFu::Space.class_machines[self].keys
+        StateFu::FuSpace.class_machines[self].keys
       end
       alias_method :machine_names,    :machine_names
       alias_method :workflow_names,   :machine_names
@@ -82,7 +82,7 @@ module StateFu
       public
       def om( machine_name=StateFu::DEFAULT_KOAN )
         name = machine_name.to_sym
-        if machine = StateFu::Space.class_machines[self.class][name]
+        if machine = StateFu::FuSpace.class_machines[self.class][name]
           _om[name] ||= StateFu::Meditation.new( machine, self, name )
         end
       end

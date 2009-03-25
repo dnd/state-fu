@@ -1,6 +1,6 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-StateFu::Space.reset!
+StateFu::FuSpace.reset!
 
 ##
 ##
@@ -78,7 +78,7 @@ describe "A pristine class Klass with StateFu included:" do
         Klass.machine(:three).should be_kind_of( StateFu::Machine )
         three = Klass.machine(:three)
         Klass.machine(:three).should == three
-        # StateFu::Space.class_machines[Klass][:three].should == :three
+        # StateFu::FuSpace.class_machines[Klass][:three].should == :three
       end
 
       it "should return { :om => <StateFu::Machine>, :two => <StateFu::Machine> } given Klass.machines()" do

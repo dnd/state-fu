@@ -6,11 +6,11 @@ module StateFu
     end
 
     #
-    # Proxy methods to StateFu::Reader
+    # Proxy methods to StateFu::Lathe
     #
     # TODO - build something meta to build these proxy events
     def event( name, options={}, &block )
-      reader.event( name, options, &block )
+      lathe.event( name, options, &block )
     end
 
   end

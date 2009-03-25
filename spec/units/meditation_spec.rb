@@ -19,7 +19,7 @@ describe StateFu::Meditation do
       mdn = @obj.om()
       mdn.should be_kind_of( StateFu::Meditation )
       mdn.machine.should == Klass.machine
-      mdn.disciple.should == @obj
+      mdn.machinist.should == @obj
       mdn.method_name.should == :om
       mdn.field_name.should  == :om_state
     end

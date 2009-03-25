@@ -2,7 +2,7 @@ module StateFu
   # Provides a place to stash references.
   # In most cases you won't need to access it directly, though
   # calling reset! before each of your tests/specs can be helpful.
-  class Space
+  class FuSpace
     cattr_reader :named_machines, :class_machines, :field_names
 
     # class_machines[ Class ][ method_name ] # => a StateFu::Machine
@@ -18,7 +18,7 @@ module StateFu
       end
     end
 
-    # Add a machine to StateFu::Space and register it with a given class, by a given name.
+    # Add a machine to StateFu::FuSpace and register it with a given class, by a given name.
     def self.insert!( klass, machine, name, field_name )
       name                       = name.to_sym
       field_name                 = field_name.to_sym

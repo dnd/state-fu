@@ -42,14 +42,14 @@ module StateFu
     end
 
     #
-    # Proxy methods to StateFu::Reader
+    # Proxy methods to StateFu::Lathe
     #
     def from *a, &b
-      reader.from( *a, &b )
+      lathe.from( *a, &b )
     end
 
     def to *a, &b
-      reader.to( *a, &b )
+      lathe.to( *a, &b )
     end
 
     private

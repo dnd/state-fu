@@ -78,31 +78,31 @@ describe "Adding states to a Machine" do
     describe "calling machine() { state(:bird) {|s| .. } }" do
 
       it "should yield the state to the block as |s|" do
-        reader = nil
+        lathe = nil
         Klass.machine() do
           state(:bird) do |s|
-            reader = s
+            lathe = s
           end
         end
-        reader.should be_kind_of( StateFu::Reader )
-        reader.phrase.should be_kind_of( StateFu::State )
-        reader.phrase.name.should == :bird
+        lathe.should be_kind_of( StateFu::Lathe )
+        lathe.phrase.should be_kind_of( StateFu::State )
+        lathe.phrase.name.should == :bird
       end
 
     end
 
     describe "calling machine() { state(:bird) {  .. } }" do
 
-      it "should instance_eval the block as a StateFu::Reader" do
-        reader = nil
+      it "should instance_eval the block as a StateFu::Lathe" do
+        lathe = nil
         Klass.machine() do
           state(:bird) do
-            reader = self
+            lathe = self
           end
         end
-        reader.should be_kind_of(StateFu::Reader)
-        reader.phrase.should be_kind_of(StateFu::State)
-        reader.phrase.name.should == :bird
+        lathe.should be_kind_of(StateFu::Lathe)
+        lathe.phrase.should be_kind_of(StateFu::State)
+        lathe.phrase.name.should == :bird
       end
 
     end
@@ -135,7 +135,7 @@ describe "Adding states to a Machine" do
 
       describe "merging options" do
         it "should merge options when states are mentioned more than once" do
-          StateFu::Space.reset!
+          StateFu::FuSpace.reset!
           Klass.machine() { states(:egg, :chick, :bird, :poultry => true) }
           machine = Klass.machine
           machine.states.length.should == 3
