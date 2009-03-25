@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# StateFu Koan:
+# StateFu Machine:
 #
 # Teach your ruby objects the path
 # to a stateful enlightenment
@@ -10,7 +10,7 @@ require 'state_fu/logger'
 require 'state_fu/helper'
 require 'state_fu/exceptions'
 require 'state_fu/space'
-require 'state_fu/koan'
+require 'state_fu/machine'
 require 'state_fu/reader'
 require 'state_fu/meditation'
 require 'state_fu/persistence'
@@ -34,6 +34,6 @@ end
 
 if __FILE__ == $0
   # run rake stuff (specs / doc )
-  # load example_koan.rb
+  # load example_machine.rb
   # drop into irb
 end

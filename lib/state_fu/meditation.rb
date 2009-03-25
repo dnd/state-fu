@@ -1,10 +1,10 @@
 module StateFu
   class Meditation
 
-    attr_reader :object, :koan, :method_name, :persister
+    attr_reader :object, :machine, :method_name, :persister
 
-    def initialize( koan, object, method_name )
-      @koan          = koan
+    def initialize( machine, object, method_name )
+      @machine          = machine
       @object        = object
       @method_name   = method_name
 

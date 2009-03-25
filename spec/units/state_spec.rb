@@ -8,20 +8,20 @@ describe StateFu::State do
   include MySpecHelper
 
   before do
-    @koan = mock('StateFu::Koan')
+    @machine = mock('StateFu::Machine')
   end
 
   describe "instance methods" do
     before do
-      @state = StateFu::State.new(@koan, :flux, {:meta => "wibble"})
+      @state = StateFu::State.new(@machine, :flux, {:meta => "wibble"})
     end
 
     describe ".events" do
 
-      it "should call koan.events.from(self)" do
+      it "should call machine.events.from(self)" do
         events = mock('Array')
         events.should_receive(:from).with(@state)
-        @koan.should_receive(:events).and_return(events)
+        @machine.should_receive(:events).and_return(events)
         @state.events
       end
 

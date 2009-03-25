@@ -6,7 +6,7 @@ module StateFu
 
       def initialize( transition, name, options={}, &block )
         @transition = transition
-        super( transition.koan, name, options, block )
+        super( transition.machine, name, options, block )
       end
 
       def valid?

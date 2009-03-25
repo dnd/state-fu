@@ -15,7 +15,7 @@ module StateFu
 
         if current_state.nil?
           Logger.info("Object has an undefined state: #{object}")
-          Logger.info("Koan has no states: #{koan}") if koan.states.empty?
+          Logger.info("Machine has no states: #{machine}") if machine.states.empty?
         else
           persist!
           Logger.debug("Object resumes at #{current_state.name}: #{object}")
@@ -25,15 +25,15 @@ module StateFu
       def find_current_state
         string = read_attribute()
         if string.blank?
-          koan.initial_state
+          machine.initial_state
         else
           state_name = string.to_sym
-          state      = koan.states[ state_name ] || raise( StateFu::InvalidStateName, string )
+          state      = machine.states[ state_name ] || raise( StateFu::InvalidStateName, string )
         end
       end
 
-      def koan
-        meditation.koan
+      def machine
+        meditation.machine
       end
 
       def object

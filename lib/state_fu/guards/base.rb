@@ -2,11 +2,11 @@ module StateFu
   module Guards
     class Base
       include StateFu::Helper # define apply!
-      attr_reader :koan, :name, :message, :method_name, :options
+      attr_reader :machine, :name, :message, :method_name, :options
 
-      def initialize( koan, name, options={}, &block )
+      def initialize( machine, name, options={}, &block )
         @options     = options.symbolize_keys!
-        @koan        = koan
+        @machine        = machine
         @name        = name.to_sym
         @message     = @options.delete(:message)     || "#{name} was not satisfied."
         @method_name = @options.delete(:method_name) || @name

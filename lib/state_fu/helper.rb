@@ -53,7 +53,7 @@ module StateFu
       end
     end
 
-    # so we can go Koan.states.names
+    # so we can go Machine.states.names
     # mildly helpful with irb + readline
     def names
       map(&:name)
@@ -61,12 +61,12 @@ module StateFu
 
   end
 
-  # Array extender. Used by Koan to keep a list of states.
+  # Array extender. Used by Machine to keep a list of states.
   module StateArray
     include StateOrEventArray
   end
 
-  # Array extender. Used by Koan to keep a list of events.
+  # Array extender. Used by Machine to keep a list of events.
   module EventArray
     include StateOrEventArray
 
@@ -81,7 +81,7 @@ module StateFu
     end
   end
 
-  # Array extender. Used by Koan to keep a list of helpers to mix into
+  # Array extender. Used by Machine to keep a list of helpers to mix into
   # context objects.
   module HelperArray
 

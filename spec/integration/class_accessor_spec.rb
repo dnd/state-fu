@@ -12,92 +12,92 @@ describe "A pristine class Klass with StateFu included:" do
     make_pristine_class 'Klass'
   end
 
-  it "should return a new Koan bound to the class given Klass.koan()" do
-    Klass.should respond_to(:koan)
-    Klass.koan.should be_kind_of(StateFu::Koan)
-    koan = Klass.koan
-    Klass.koan.should == koan
+  it "should return a new Machine bound to the class given Klass.machine()" do
+    Klass.should respond_to(:machine)
+    Klass.machine.should be_kind_of(StateFu::Machine)
+    machine = Klass.machine
+    Klass.machine.should == machine
   end
 
-  it "should return {} given Klass.koans()" do
-    Klass.should respond_to(:koans)
-    Klass.koans.should == {}
+  it "should return {} given Klass.machines()" do
+    Klass.should respond_to(:machines)
+    Klass.machines.should == {}
   end
 
-  it "should return [] given Klass.koan_names()" do
-    Klass.should respond_to(:koan_names)
-    Klass.koan_names.should == []
+  it "should return [] given Klass.machine_names()" do
+    Klass.should respond_to(:machine_names)
+    Klass.machine_names.should == []
   end
 
   ##
   ##
   ##
 
-  describe "Having called Klass.koan() with an empty block:" do
+  describe "Having called Klass.machine() with an empty block:" do
     before(:each) do
-      Klass.koan do
+      Klass.machine do
       end
       StateFu::DEFAULT_KOAN.should == :om
     end
 
-    it "should return a StateFu::Koan given Klass.koan()" do
-      Klass.should respond_to(:koan)
-      Klass.koan.should_not be_nil
-      Klass.koan.should be_kind_of( StateFu::Koan )
+    it "should return a StateFu::Machine given Klass.machine()" do
+      Klass.should respond_to(:machine)
+      Klass.machine.should_not be_nil
+      Klass.machine.should be_kind_of( StateFu::Machine )
     end
 
-    it "should return { :om => <StateFu::Koan> } given Klass.koans()" do
-      Klass.should respond_to(:koans)
-      koans = Klass.koans()
-      koans.should be_kind_of(Hash)
-      koans.should_not be_empty
-      koans.length.should == 1
-      koans.keys.should == [:om]
-      koans.values.first.should be_kind_of( StateFu::Koan )
+    it "should return { :om => <StateFu::Machine> } given Klass.machines()" do
+      Klass.should respond_to(:machines)
+      machines = Klass.machines()
+      machines.should be_kind_of(Hash)
+      machines.should_not be_empty
+      machines.length.should == 1
+      machines.keys.should == [:om]
+      machines.values.first.should be_kind_of( StateFu::Machine )
     end
 
-    it "should returns [:om] given Klass.koan_names()" do
-      Klass.should respond_to(:koan_names)
-      Klass.koan_names.should == [:om]
+    it "should returns [:om] given Klass.machine_names()" do
+      Klass.should respond_to(:machine_names)
+      Klass.machine_names.should == [:om]
     end
 
-    describe "Having called Klass.koan(:two) with an empty block:" do
+    describe "Having called Klass.machine(:two) with an empty block:" do
       before(:each) do
-        Klass.koan(:two) do
+        Klass.machine(:two) do
         end
       end
 
-      it "should return a StateFu::Koan given Klass.koan(:two)" do
-        Klass.should respond_to(:koan)
-        Klass.koan(:two).should_not be_nil
-        Klass.koan(:two).should be_kind_of( StateFu::Koan )
+      it "should return a StateFu::Machine given Klass.machine(:two)" do
+        Klass.should respond_to(:machine)
+        Klass.machine(:two).should_not be_nil
+        Klass.machine(:two).should be_kind_of( StateFu::Machine )
       end
 
-      it "should return a new Koan given Klass.koan(:three)" do
-        Klass.should respond_to(:koan)
-        Klass.koan(:three).should be_kind_of( StateFu::Koan )
-        three = Klass.koan(:three)
-        Klass.koan(:three).should == three
-        # StateFu::Space.class_koans[Klass][:three].should == :three
+      it "should return a new Machine given Klass.machine(:three)" do
+        Klass.should respond_to(:machine)
+        Klass.machine(:three).should be_kind_of( StateFu::Machine )
+        three = Klass.machine(:three)
+        Klass.machine(:three).should == three
+        # StateFu::Space.class_machines[Klass][:three].should == :three
       end
 
-      it "should return { :om => <StateFu::Koan>, :two => <StateFu::Koan> } given Klass.koans()" do
-        Klass.should respond_to(:koans)
-        koans = Klass.koans()
-        koans.should be_kind_of(Hash)
-        koans.should_not be_empty
-        koans.length.should == 2
-        koans.keys.should include :om
-        koans.keys.should include :two
-        koans.values.length.should == 2
-        koans.values.each { |v| v.should be_kind_of( StateFu::Koan ) }
+      it "should return { :om => <StateFu::Machine>, :two => <StateFu::Machine> } given Klass.machines()" do
+        Klass.should respond_to(:machines)
+        machines = Klass.machines()
+        machines.should be_kind_of(Hash)
+        machines.should_not be_empty
+        machines.length.should == 2
+        machines.keys.should include :om
+        machines.keys.should include :two
+        machines.values.length.should == 2
+        machines.values.each { |v| v.should be_kind_of( StateFu::Machine ) }
       end
 
-      it "should return [:om, :two] give Klass.koan_names (unordered)" do
-        Klass.should respond_to(:koan_names)
-        Klass.koan_names.length.should == 2
-        Klass.koan_names.should include :om
-        Klass.koan_names.should include :two
+      it "should return [:om, :two] give Klass.machine_names (unordered)" do
+        Klass.should respond_to(:machine_names)
+        Klass.machine_names.length.should == 2
+        Klass.machine_names.should include :om
+        Klass.machine_names.should include :two
       end
     end
 
@@ -109,14 +109,14 @@ describe "A pristine class Klass with StateFu included:" do
       end
 
       # sorry, Darwinism, not Lamarckism.
-      it "does NOT inherit it's parent class' Koans !!" do
-        Child.koan.should_not == Klass.koan
+      it "does NOT inherit it's parent class' Machines !!" do
+        Child.machine.should_not == Klass.machine
       end
 
-      it "should know the Koan after calling Klass.koan.teach!( Child )" do
-        Child.koan.should_not == Klass.koan
-        Klass.koan.teach!( Child )
-        Child.koan.should == Klass.koan
+      it "should know the Machine after calling Klass.machine.teach!( Child )" do
+        Child.machine.should_not == Klass.machine
+        Klass.machine.teach!( Child )
+        Child.machine.should == Klass.machine
       end
 
     end

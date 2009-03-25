@@ -25,9 +25,9 @@ describe "An instance of Klass with StateFu included:" do
     @k.meditate!.should == []
   end
 
-  describe "Having called Klass.koan() with an empty block:" do
+  describe "Having called Klass.machine() with an empty block:" do
     before(:each) do
-      Klass.koan do
+      Klass.machine do
       end
       StateFu::DEFAULT_KOAN.should == :om
     end
@@ -64,9 +64,9 @@ describe "An instance of Klass with StateFu included:" do
       @k.meditate!.length.should == 1
     end
 
-    describe "Having called Klass.koan(:two) with an empty block:" do
+    describe "Having called Klass.machine(:two) with an empty block:" do
       before(:each) do
-        Klass.koan(:two) do
+        Klass.machine(:two) do
         end
       end
 

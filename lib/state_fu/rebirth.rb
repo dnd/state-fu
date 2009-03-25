@@ -1,6 +1,6 @@
 module StateFu
 
-  # Handles dumping / loading a Koan to common interchange formats
+  # Handles dumping / loading a Machine to common interchange formats
   # (Simple ruby data structures, YAML, JSON, Marshal )
   #
   # Note this is not possible if any components have procs / lambdas
@@ -16,7 +16,7 @@ module StateFu
 
   end
 
-  module KoanToRuby
+  module MachineToRuby
 
     def to_ruby
     end
@@ -25,11 +25,11 @@ module StateFu
 
   class Nirvana
 
-    attr_reader :koan, :hash, :string
+    attr_reader :machine, :hash, :string
 
     def initialize( data )
-      if StateFu::Koan === data
-        @koan        = data.extend      KoanToRuby
+      if StateFu::Machine === data
+        @machine        = data.extend      MachineToRuby
         return
       elsif String === data
         @string      = data.extend      StringLoader
@@ -39,7 +39,7 @@ module StateFu
     end
 
     def datasources
-      [koan, hash, string].compact
+      [machine, hash, string].compact
     end
 
     # a simple ruby data structure which will dump happily to yaml / json
@@ -47,12 +47,12 @@ module StateFu
       hash || ( datasources.unshift ).to_ruby
     end
 
-    def to_koan()
-      koan || ( datasources.unshift ).to_koan
+    def to_machine()
+      machine || ( datasources.unshift ).to_machine
     end
 
     def to_code()
-      # StateFu::Writer.new( to_koan )
+      # StateFu::Writer.new( to_machine )
     end
 
     def to_yaml
@@ -65,7 +65,7 @@ module StateFu
 
     def to_dump
       begin
-        Marshal.dump( to_koan )
+        Marshal.dump( to_machine )
       rescue TypeError
         # ...
       end

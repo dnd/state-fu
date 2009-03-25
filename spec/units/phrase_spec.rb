@@ -9,22 +9,22 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
   include MySpecHelper
   Phrase = StateFu::Phrase
   before do
-    @koan = mock('Koan')
+    @machine = mock('Machine')
   end
 
   describe "calling Phrase.new" do
     it "should create a new Phrase given valid args" do
-      phrase = Phrase.new(@koan, :flux, { :meta => :doodle })
+      phrase = Phrase.new(@machine, :flux, { :meta => :doodle })
       phrase.should be_kind_of( Phrase )
       phrase.name.should == :flux
       phrase.options[:meta].should == :doodle
-      phrase.koan.should == @koan
+      phrase.machine.should == @machine
     end
   end
 
   describe "instance methods" do
     before do
-      @phrase = Phrase.new(@koan, :flux, {:meta => "wibble"})
+      @phrase = Phrase.new(@machine, :flux, {:meta => "wibble"})
     end
 
     describe ".apply!" do

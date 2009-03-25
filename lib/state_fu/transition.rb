@@ -116,16 +116,16 @@ module StateFu
     alias_method :om,             :meditation
     alias_method :stateful,       :meditation
     alias_method :zen,            :meditation
-    alias_method :koan,           :meditation
-    alias_method :zen_koan,       :meditation
+    alias_method :machine,           :meditation
+    alias_method :zen_machine,       :meditation
     alias_method :meditation,     :meditation
     alias_method :machine,        :meditation
     alias_method :present,        :meditation
 
-    alias_method :statefully,     :koan
-    alias_method :machine,        :koan
-    alias_method :workflow,       :koan
-    alias_method :zen_koan,       :koan
+    alias_method :statefully,     :machine
+    alias_method :machine,        :machine
+    alias_method :workflow,       :machine
+    alias_method :zen_machine,       :machine
 
     alias_method :write? ,        :live?
     alias_method :destructive?,   :live?

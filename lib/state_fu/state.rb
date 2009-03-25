@@ -2,7 +2,7 @@ module StateFu
   class State < StateFu::Phrase
 
     def events
-      koan.events.from(self)
+      machine.events.from(self)
     end
 
     #

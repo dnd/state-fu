@@ -1,14 +1,14 @@
 module StateFu
   class Reader
 
-    attr_reader :koan, :phrase, :options
+    attr_reader :machine, :phrase, :options
 
-    def self.parse( koan, phrase = nil, options={}, &block )
-      new( koan, phrase = nil, options={}, &block )
+    def self.parse( machine, phrase = nil, options={}, &block )
+      new( machine, phrase = nil, options={}, &block )
     end
 
-    def initialize( koan, phrase = nil, options={}, &block )
-      @koan   = koan
+    def initialize( machine, phrase = nil, options={}, &block )
+      @machine   = machine
       @phrase = phrase
       if phrase
         phrase.apply!( options )
@@ -30,7 +30,7 @@ module StateFu
     alias_method :child?, :phrase?
 
     def apply_to( phrase, options, &block )
-      StateFu::Reader.new( koan, phrase, options, &block )
+      StateFu::Reader.new( machine, phrase, options, &block )
       phrase
     end
 
@@ -45,12 +45,12 @@ module StateFu
     def define_phrase( type, name, options={}, &block )
       name       = name.to_sym
       klass      = StateFu.const_get((a=type.to_s.split('',2);[a.first.upcase, a.last].join))
-      collection = koan.send("#{type}s")
+      collection = machine.send("#{type}s")
       options.symbolize_keys!
       if phrase = collection[name]
         apply_to( phrase, options, &block )
       else
-        phrase = klass.new( koan, name, options )
+        phrase = klass.new( machine, name, options )
         collection << phrase
         apply_to( phrase, options, &block )
         phrase
@@ -80,7 +80,7 @@ module StateFu
       names.each do |name|
         const_name = name.to_s.camelize
         # if we can't find it now, try later in the disciple object's context
-        koan.helpers << (const_name.constantize rescue const_name )
+        machine.helpers << (const_name.constantize rescue const_name )
       end
     end
 
@@ -117,7 +117,7 @@ module StateFu
 
     def initial_state( *args, &block )
       require_no_phrase()
-      koan.initial_state= state( *args, &block)
+      machine.initial_state= state( *args, &block)
     end
 
     def state( name, options={}, &block )

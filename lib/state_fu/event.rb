@@ -54,7 +54,7 @@ module StateFu
 
     private
     def get_states_list_by_name( list )
-      koan.find_or_create_states_by_name( [list].flatten.map(&:to_sym) )
+      machine.find_or_create_states_by_name( [list].flatten.map(&:to_sym) )
     end
 
   end

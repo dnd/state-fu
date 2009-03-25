@@ -14,35 +14,35 @@ describe StateFu::Space do
     @k = Klass.new()
   end
 
-  describe "Before any Koan is defined" do
-    it "should return {} given StateFu::Space.class_koans()" do
-      StateFu::Space.should respond_to(:class_koans)
-      StateFu::Space.class_koans.should == {}
+  describe "Before any Machine is defined" do
+    it "should return {} given StateFu::Space.class_machines()" do
+      StateFu::Space.should respond_to(:class_machines)
+      StateFu::Space.class_machines.should == {}
     end
   end
 
-  describe "Having called Klass.koan() with an empty block:" do
+  describe "Having called Klass.machine() with an empty block:" do
     before(:each) do
-      Klass.koan do
+      Klass.machine do
       end
       StateFu::DEFAULT_KOAN.should == :om
     end
 
-    it "should return { Klass => { ... } } given StateFu::Space.class_koans()" do
-      StateFu::Space.should respond_to(:class_koans)
-      koans = StateFu::Space.class_koans()
-      koans.keys.should == [Klass]
-      koans.values.first.should be_kind_of( Hash )
+    it "should return { Klass => { ... } } given StateFu::Space.class_machines()" do
+      StateFu::Space.should respond_to(:class_machines)
+      machines = StateFu::Space.class_machines()
+      machines.keys.should == [Klass]
+      machines.values.first.should be_kind_of( Hash )
     end
 
-    it "should return { :om => <StateFu::Koan> } given StateFu::Space.class_koans[Klass]" do
-      StateFu::Space.should respond_to(:class_koans)
-      koans = StateFu::Space.class_koans[Klass]
-      koans.should be_kind_of(Hash)
-      koans.should_not be_empty
-      koans.length.should == 1
-      koans.keys.should == [:om]
-      koans.values.first.should be_kind_of( StateFu::Koan )
+    it "should return { :om => <StateFu::Machine> } given StateFu::Space.class_machines[Klass]" do
+      StateFu::Space.should respond_to(:class_machines)
+      machines = StateFu::Space.class_machines[Klass]
+      machines.should be_kind_of(Hash)
+      machines.should_not be_empty
+      machines.length.should == 1
+      machines.keys.should == [:om]
+      machines.values.first.should be_kind_of( StateFu::Machine )
     end
 
     it "should return { Klass => { ... } } given StateFu::Space.field_names()" do
@@ -62,30 +62,30 @@ describe StateFu::Space do
       fields.values.should == [:om_state]
     end
 
-    describe "Having called Klass.koan(:two) with an empty block:" do
+    describe "Having called Klass.machine(:two) with an empty block:" do
       before(:each) do
-        # Klass.koan.should_not be_nil
-        Klass.koan(:two) do
+        # Klass.machine.should_not be_nil
+        Klass.machine(:two) do
         end
       end
 
-      it "should return { :om => <StateFu::Koan>, :two => <StateFu::Koan> } given StateFu::Space.class_koans()" do
-        StateFu::Space.should respond_to(:class_koans)
-        koans = StateFu::Space.class_koans[Klass]
-        koans.should be_kind_of(Hash)
-        koans.should_not be_empty
-        koans.length.should == 2
-        koans.keys.sort.should == [:om, :two]
-        koans.values.each { |v| v.should be_kind_of( StateFu::Koan ) }
+      it "should return { :om => <StateFu::Machine>, :two => <StateFu::Machine> } given StateFu::Space.class_machines()" do
+        StateFu::Space.should respond_to(:class_machines)
+        machines = StateFu::Space.class_machines[Klass]
+        machines.should be_kind_of(Hash)
+        machines.should_not be_empty
+        machines.length.should == 2
+        machines.keys.sort.should == [:om, :two]
+        machines.values.each { |v| v.should be_kind_of( StateFu::Machine ) }
       end
 
       describe "Having called StateFu::Space.reset!" do
         before(:each) do
           StateFu::Space.reset!
         end
-        it "should return {} given StateFu::Space.class_koans()" do
-          StateFu::Space.should respond_to(:class_koans)
-          StateFu::Space.class_koans.should == {}
+        it "should return {} given StateFu::Space.class_machines()" do
+          StateFu::Space.should respond_to(:class_machines)
+          StateFu::Space.class_machines.should == {}
         end
       end
 

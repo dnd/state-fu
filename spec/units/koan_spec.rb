@@ -4,7 +4,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ## StateFu::State and StateFu::Event
 ##
 
-describe StateFu::Koan do
+describe StateFu::Machine do
   include MySpecHelper
 
   before do
@@ -15,11 +15,11 @@ describe StateFu::Koan do
     before do
     end
 
-    describe "Koan.for_class" do
+    describe "Machine.for_class" do
       it "..."
     end
 
-    describe "Koan[]" do
+    describe "Machine[]" do
       it "..."
     end
 

@@ -2,10 +2,10 @@ module StateFu
   class Phrase # Abstract Superclass of State & Event
     include StateFu::Helper # define apply!
 
-    attr_reader :koan, :name, :options, :hooks
+    attr_reader :machine, :name, :options, :hooks
 
-    def initialize(koan, name, options={})
-      @koan    = koan
+    def initialize(machine, name, options={})
+      @machine    = machine
       @name    = name.to_sym
       @options = options.symbolize_keys!
       @hooks   = StateFu::Hooks.for( self )
@@ -19,7 +19,7 @@ module StateFu
     end
 
     def reader(options={}, &block)
-      StateFu::Reader.new( koan, self, options, &block )
+      StateFu::Reader.new( machine, self, options, &block )
     end
 
   end

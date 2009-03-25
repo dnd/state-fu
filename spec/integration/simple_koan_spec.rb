@@ -4,11 +4,11 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe "A simple Koan definition" do
+describe "A simple Machine definition" do
 
   include MySpecHelper
 
-  describe "When there is a koan describing user logins" do
+  describe "When there is a machine describing user logins" do
     before(:all) do
       reset!
       make_pristine_class 'Klass'
@@ -27,8 +27,8 @@ describe "A simple Koan definition" do
       #
       # maybe. or maybe that's just sick.
 
-      # @koan_spec = lambda do
-        Klass.koan( :method_proxy => true ) do
+      # @machine_spec = lambda do
+        Klass.machine( :method_proxy => true ) do
 
           states :new, :active, :limbo, :expired, :deleted
 
@@ -67,12 +67,12 @@ describe "A simple Koan definition" do
           end
 
         end
-      end # koan
+      end # machine
     # end # before
 
     it "parsing it should not throw an error" do
-      # @koan_spec.should_not raise_error()
-      # @koan_spec.call()
+      # @machine_spec.should_not raise_error()
+      # @machine_spec.call()
     end
 
     describe ".." do

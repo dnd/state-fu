@@ -1,27 +1,28 @@
 module StateFu
   #
+  # TODO - rename to ... Machine ?
   #
-  class Koan
+  class Machine
     include Helper
 
-    # analogous to self.for_class, but keeps koans in
+    # analogous to self.for_class, but keeps machines in
     # global space, not tied to a specific class.
     def self.[] name, options, &block
       # ...
     end
 
-    # meta-constructor; expects to be called via Klass.koan()
+    # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      unless koan = StateFu::Space.class_koans[ klass ][ name ]
-        koan = new( name, options, &block )
-        koan.teach!( klass, name, options[:field_name] )
+      unless machine = StateFu::Space.class_machines[ klass ][ name ]
+        machine = new( name, options, &block )
+        machine.teach!( klass, name, options[:field_name] )
       end
       if block_given?
-        koan.apply!( &block )
+        machine.apply!( &block )
       end
-      koan
+      machine
     end
 
     ##
@@ -37,12 +38,12 @@ module StateFu
       @options = options
     end
 
-    # merge the commands in &block with the existing koan
+    # merge the commands in &block with the existing machine
     def apply!( &block )
       StateFu::Reader.new( self, &block )
     end
 
-    # the Koan teaches a class how to meditate on it:
+    # the Machine teaches a class how to meditate on it:
     def teach!( klass, name=StateFu::DEFAULT_KOAN, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
