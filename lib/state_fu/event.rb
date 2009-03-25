@@ -1,5 +1,5 @@
 module StateFu
-  class Event < StateFu::Phrase
+  class Event < StateFu::Sprocket
 
     attr_reader :origin, :target
 

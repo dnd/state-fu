@@ -85,8 +85,8 @@ describe "Adding states to a Machine" do
           end
         end
         lathe.should be_kind_of( StateFu::Lathe )
-        lathe.phrase.should be_kind_of( StateFu::State )
-        lathe.phrase.name.should == :bird
+        lathe.sprocket.should be_kind_of( StateFu::State )
+        lathe.sprocket.name.should == :bird
       end
 
     end
@@ -101,8 +101,8 @@ describe "Adding states to a Machine" do
           end
         end
         lathe.should be_kind_of(StateFu::Lathe)
-        lathe.phrase.should be_kind_of(StateFu::State)
-        lathe.phrase.name.should == :bird
+        lathe.sprocket.should be_kind_of(StateFu::State)
+        lathe.sprocket.name.should == :bird
       end
 
     end

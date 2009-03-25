@@ -7,63 +7,63 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 describe "Common features / functionality for StateFu::State & StateFu::Event" do
 
   include MySpecHelper
-  Phrase = StateFu::Phrase
+  Sprocket = StateFu::Sprocket
   before do
     @machine = mock('Machine')
   end
 
-  describe "calling Phrase.new" do
-    it "should create a new Phrase given valid args" do
-      phrase = Phrase.new(@machine, :flux, { :meta => :doodle })
-      phrase.should be_kind_of( Phrase )
-      phrase.name.should == :flux
-      phrase.options[:meta].should == :doodle
-      phrase.machine.should == @machine
+  describe "calling Sprocket.new" do
+    it "should create a new Sprocket given valid args" do
+      sprocket = Sprocket.new(@machine, :flux, { :meta => :doodle })
+      sprocket.should be_kind_of( Sprocket )
+      sprocket.name.should == :flux
+      sprocket.options[:meta].should == :doodle
+      sprocket.machine.should == @machine
     end
   end
 
   describe "instance methods" do
     before do
-      @phrase = Phrase.new(@machine, :flux, {:meta => "wibble"})
+      @sprocket = Sprocket.new(@machine, :flux, {:meta => "wibble"})
     end
 
     describe ".apply!" do
 
       it "should yield itself if the block's arity is 1" do
         yielded = false
-        @phrase.apply!{ |s| yielded = s  }
-        yielded.should == @phrase
+        @sprocket.apply!{ |s| yielded = s  }
+        yielded.should == @sprocket
       end
 
       it "should instance_eval the block if its arity is 0/-1" do
         yielded = false
-        @phrase.apply!{ yielded = self }
-        yielded.should == @phrase
+        @sprocket.apply!{ yielded = self }
+        yielded.should == @sprocket
       end
     end
 
     describe "update!" do
       it "should merge any options passed into .options" do
-        opts    = @phrase.options
+        opts    = @sprocket.options
         newopts =  { :size => "huge", :colour => "orange" }
-        @phrase.update!( newopts )
-        @phrase.options.should == opts.merge(newopts)
+        @sprocket.update!( newopts )
+        @sprocket.options.should == opts.merge(newopts)
       end
 
       it "should instance_eval the block if one is passed" do
         ref = nil
-        @phrase.update!(){ ref = self }
-        ref.should == @phrase
+        @sprocket.update!(){ ref = self }
+        ref.should == @sprocket
       end
 
       it "should return itself" do
-        @phrase.update!.should == @phrase
+        @sprocket.update!.should == @sprocket
       end
     end
 
     describe "to_sym" do
       it "should return its name" do
-        @phrase.to_sym.should == @phrase.name
+        @sprocket.to_sym.should == @sprocket.name
       end
     end
 

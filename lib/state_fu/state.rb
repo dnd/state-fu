@@ -1,5 +1,5 @@
 module StateFu
-  class State < StateFu::Phrase
+  class State < StateFu::Sprocket
 
     def events
       machine.events.from(self)

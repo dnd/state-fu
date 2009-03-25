@@ -39,7 +39,7 @@ describe StateFu::Event do
         describe "lathe" do
           it "should return a StateFu::Lathe"
           it "should have the event's machine"
-          it "should have the event as the phrase"
+          it "should have the event as the sprocket"
           it "should eval ..."
         end
 

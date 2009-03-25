@@ -1,5 +1,5 @@
 module StateFu
-  class Phrase # Abstract Superclass of State & Event
+  class Sprocket # Abstract Superclass of State & Event
     include StateFu::Helper # define apply!
 
     attr_reader :machine, :name, :options, :hooks
