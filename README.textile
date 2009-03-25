@@ -2,7 +2,11 @@
 require 'redcloth'; puts RedCloth.new( DATA.read ).to_html
 __END__
 
-h1. Zen / Koan
+h1. StateFu (formerly Zen Koan)
+
+Note: I'm halfway through a project rename, so mentally:
+  * gsub(/koan/, 'machine')
+  * gsub(/meditation/, 'context')
 
 h3. Why pile your classes full of business logic, when you can teach
 them to meditate until they find enlightenment?
