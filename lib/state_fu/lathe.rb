@@ -74,7 +74,7 @@ module StateFu
 
     public
 
-    # helpers are mixed into all meditation / transition contexts
+    # helpers are mixed into all binding / transition contexts
     # use them to bend the language to your will
     def helper( *names )
       names.each do |name|

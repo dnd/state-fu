@@ -8,7 +8,7 @@ module StateFu
 
   class Transition
     include StateFu::Helper
-    attr_reader(  :meditation,
+    attr_reader(  :binding,
                   :origin,
                   :target,
                   :event,
@@ -20,10 +20,10 @@ module StateFu
 
     attr_accessor :only_pretend
 
-    def initialize( meditation, origin, target, event, *args, &block )
+    def initialize( binding, origin, target, event, *args, &block )
       apply!( args ) # handle options
-      @meditation = meditation
-      @object     = meditation.object
+      @binding = binding
+      @object     = binding.object
       @origin     = origin
       @target     = target
       @event      = event
@@ -113,14 +113,14 @@ module StateFu
     alias_method :initial_state,  :origin
     alias_method :from,           :origin
 
-    alias_method :om,             :meditation
-    alias_method :stateful,       :meditation
-    alias_method :zen,            :meditation
-    alias_method :machine,           :meditation
-    alias_method :zen_machine,       :meditation
-    alias_method :meditation,     :meditation
-    alias_method :machine,        :meditation
-    alias_method :present,        :meditation
+    alias_method :om,             :binding
+    alias_method :stateful,       :binding
+    alias_method :zen,            :binding
+    alias_method :machine,           :binding
+    alias_method :zen_machine,       :binding
+    alias_method :binding,     :binding
+    alias_method :machine,        :binding
+    alias_method :present,        :binding
 
     alias_method :statefully,     :machine
     alias_method :machine,        :machine

@@ -1,5 +1,5 @@
 module StateFu
-  class Meditation
+  class Binding
 
     attr_reader :object, :machine, :method_name, :persister
 

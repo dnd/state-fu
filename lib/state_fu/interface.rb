@@ -58,7 +58,7 @@ module StateFu
     end
 
     # Give the gift of self-awareness to your objects. These methods
-    # grant access to StateFu::Meditation objects, which are bundles of
+    # grant access to StateFu::Binding objects, which are bundles of
     # context linking a StateFu::Machine to an object / instance.
     # Again, plenty of aliases are provided so you can use whatever
     # makes sense to you.
@@ -70,7 +70,7 @@ module StateFu
 
       # .om() is the instance method your objects use to meditate.
       #
-      # A StateFu::Meditation comes into being, linking your object and
+      # A StateFu::Binding comes into being, linking your object and
       # a machine, when you first call om() for that machine.
       #
       # Like the class method .machine(), calling it without any arguments
@@ -83,29 +83,29 @@ module StateFu
       def om( machine_name=StateFu::DEFAULT_KOAN )
         name = machine_name.to_sym
         if machine = StateFu::FuSpace.class_machines[self.class][name]
-          _om[name] ||= StateFu::Meditation.new( machine, self, name )
+          _om[name] ||= StateFu::Binding.new( machine, self, name )
         end
       end
       alias_method :stateful,   :om
       alias_method :zen,        :om
       alias_method :machine,       :om
       alias_method :zen_machine,   :om
-      alias_method :meditation, :om
+      alias_method :binding, :om
       alias_method :machine,    :om
       alias_method :present,    :om
 
-      # Gain awareness of all meditations (state contexts) this object
+      # Gain awareness of all bindings (state contexts) this object
       # has contemplated into being.
-      # Returns a Hash of { :name => <StateFu::Meditation>, ... }
-      def meditations()
+      # Returns a Hash of { :name => <StateFu::Binding>, ... }
+      def bindings()
         _om
       end
-      alias_method :oms,       :meditations
-      alias_method :machines,     :meditations
-      alias_method :zen_machines, :meditations
-      alias_method :machines,  :meditations
+      alias_method :oms,       :bindings
+      alias_method :machines,     :bindings
+      alias_method :zen_machines, :bindings
+      alias_method :machines,  :bindings
 
-      # Instant enlightenment. Instantiate all meditations.
+      # Instant enlightenment. Instantiate all bindings.
       # It's useful to call this before_create w/
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.

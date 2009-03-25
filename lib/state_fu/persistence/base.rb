@@ -6,10 +6,10 @@ module StateFu
   module Persistence
     class Base
 
-      attr_reader :meditation, :field_name, :current_state
+      attr_reader :binding, :field_name, :current_state
 
-      def initialize( meditation, field_name )
-        @meditation    = meditation
+      def initialize( binding, field_name )
+        @binding    = binding
         @field_name    = field_name
         @current_state = find_current_state()
 
@@ -33,11 +33,11 @@ module StateFu
       end
 
       def machine
-        meditation.machine
+        binding.machine
       end
 
       def object
-        meditation.machinist
+        binding.machinist
       end
 
       def klass
@@ -45,7 +45,7 @@ module StateFu
       end
 
 #      def method_name
-#        meditation.method_name
+#        binding.method_name
 #      end
 
       def current_state=( state )

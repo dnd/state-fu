@@ -9,11 +9,11 @@ module StateFu
         klass.columns.map(&:name).include?( field_name.to_s )
     end
 
-    def self.for( meditation, field_name )
-      if active_record_column?( meditation.machinist, field_name )
-        self::ActiveRecord.new( meditation, field_name )
+    def self.for( binding, field_name )
+      if active_record_column?( binding.machinist, field_name )
+        self::ActiveRecord.new( binding, field_name )
       else
-        self::Attribute.new( meditation, field_name )
+        self::Attribute.new( binding, field_name )
       end
     end
 

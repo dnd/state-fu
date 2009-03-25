@@ -4,7 +4,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe StateFu::Meditation do
+describe StateFu::Binding do
   include MySpecHelper
 
   before do
@@ -15,9 +15,9 @@ describe StateFu::Meditation do
   end
 
   describe "initialization via @obj.om()" do
-    it "should create a new StateFu::Meditation" do
+    it "should create a new StateFu::Binding" do
       mdn = @obj.om()
-      mdn.should be_kind_of( StateFu::Meditation )
+      mdn.should be_kind_of( StateFu::Binding )
       mdn.machine.should == Klass.machine
       mdn.machinist.should == @obj
       mdn.method_name.should == :om
@@ -26,7 +26,7 @@ describe StateFu::Meditation do
   end
 
   describe "constructor" do
-    it "should create a new Meditation given valid arguments" do
+    it "should create a new Binding given valid arguments" do
       pending
     end
   end
