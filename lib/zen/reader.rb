@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   class Reader
 
     attr_reader :koan, :phrase, :options
@@ -30,7 +30,7 @@ module Zen
     alias_method :child?, :phrase?
 
     def apply_to( phrase, options, &block )
-      Zen::Reader.new( koan, phrase, options, &block )
+      StateFu::Reader.new( koan, phrase, options, &block )
       phrase
     end
 
@@ -44,7 +44,7 @@ module Zen
 
     def define_phrase( type, name, options={}, &block )
       name       = name.to_sym
-      klass      = Zen.const_get((a=type.to_s.split('',2);[a.first.upcase, a.last].join))
+      klass      = StateFu.const_get((a=type.to_s.split('',2);[a.first.upcase, a.last].join))
       collection = koan.send("#{type}s")
       options.symbolize_keys!
       if phrase = collection[name]
@@ -89,8 +89,8 @@ module Zen
     #
 
     def event( name, options={}, &block )
-      require_phrase( Zen::State, NilClass )
-      if phrase? && phrase.is_a?( Zen::State ) # in state block
+      require_phrase( StateFu::State, NilClass )
+      if phrase? && phrase.is_a?( StateFu::State ) # in state block
         target  = options.symbolize_keys!.delete(:to)
         evt     = define_event( name, options, &block )
         evt.from phrase
@@ -107,7 +107,7 @@ module Zen
     end
 
     def needs *a, &b
-      require_phrase( Zen::Event )
+      require_phrase( StateFu::Event )
       # ...
     end
 
@@ -137,7 +137,7 @@ module Zen
     # both can be supplied as a symbol, array of symbols.
     # any states referenced here will be created if they do not exist.
     def from *args, &block
-      require_phrase( Zen::Event )
+      require_phrase( StateFu::Event )
       options           = args.extract_options!.symbolize_keys!
       phrase.origin     = args
       to                = options.delete(:to)
@@ -165,16 +165,16 @@ module Zen
     end
 
     # def all_states *a, &b
-    #   Logger.info "<Zen::Reader.all_states not implemented>"
+    #   Logger.info "<StateFu::Reader.all_states not implemented>"
     # end
 
     # Bunch of silly little methods for defining events
-    def before   *a, &b; require_phrase( Zen::Event ); define_hook :before,   *a, &b; end
-    def on_exit  *a, &b; require_phrase( Zen::State ); define_hook :exit,     *a, &b; end
-    def execute  *a, &b; require_phrase( Zen::Event ); define_hook :execute,  *a, &b; end
-    def on_entry *a, &b; require_phrase( Zen::State ); define_hook :entry,    *a, &b; end
-    def after    *a, &b; require_phrase( Zen::Event ); define_hook :after,    *a, &b; end
-    def accepted *a, &b; require_phrase( Zen::State ); define_hook :accepted, *a, &b; end
+    def before   *a, &b; require_phrase( StateFu::Event ); define_hook :before,   *a, &b; end
+    def on_exit  *a, &b; require_phrase( StateFu::State ); define_hook :exit,     *a, &b; end
+    def execute  *a, &b; require_phrase( StateFu::Event ); define_hook :execute,  *a, &b; end
+    def on_entry *a, &b; require_phrase( StateFu::State ); define_hook :entry,    *a, &b; end
+    def after    *a, &b; require_phrase( StateFu::Event ); define_hook :after,    *a, &b; end
+    def accepted *a, &b; require_phrase( StateFu::State ); define_hook :accepted, *a, &b; end
 
   end
 end

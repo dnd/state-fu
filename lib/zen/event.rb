@@ -1,5 +1,5 @@
-module Zen
-  class Event < Zen::Phrase
+module StateFu
+  class Event < StateFu::Phrase
 
     attr_reader :origin, :target
 
@@ -42,7 +42,7 @@ module Zen
     end
 
     #
-    # Proxy methods to Zen::Reader
+    # Proxy methods to StateFu::Reader
     #
     def from *a, &b
       reader.from( *a, &b )

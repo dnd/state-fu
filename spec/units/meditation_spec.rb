@@ -4,7 +4,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe Zen::Meditation do
+describe StateFu::Meditation do
   include MySpecHelper
 
   before do
@@ -15,9 +15,9 @@ describe Zen::Meditation do
   end
 
   describe "initialization via @obj.om()" do
-    it "should create a new Zen::Meditation" do
+    it "should create a new StateFu::Meditation" do
       mdn = @obj.om()
-      mdn.should be_kind_of( Zen::Meditation )
+      mdn.should be_kind_of( StateFu::Meditation )
       mdn.koan.should == Klass.koan
       mdn.disciple.should == @obj
       mdn.method_name.should == :om
@@ -60,7 +60,7 @@ describe Zen::Meditation do
     describe ".state()" do
       it "should default to koan.initial_state when no initial_state is explicitly defined" do
         @om.respond_to?(:current_state).should == true
-        @om.current_state.should be_kind_of( Zen::State )
+        @om.current_state.should be_kind_of( StateFu::State )
         @om.current_state.name.should == :new
         @om.koan.initial_state.name.should == :new
       end

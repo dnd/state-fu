@@ -1,4 +1,4 @@
-module Zen
+module StateFu
 
   # A 'context' class, created when an event is fired, or needs to be
   # validated.
@@ -7,7 +7,7 @@ module Zen
   # to any TransitionHalted exceptions raised.
 
   class Transition
-    include Zen::Helper
+    include StateFu::Helper
     attr_reader(  :meditation,
                   :origin,
                   :target,

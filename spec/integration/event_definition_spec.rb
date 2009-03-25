@@ -37,15 +37,15 @@ describe "Adding events to a Koan outside a state block" do
       it "should add 2 states to the koan called: [:dead, :alive] " do
         Klass.koan.state_names.should == [:dead, :alive]
         Klass.koan.states.length.should == 2
-        Klass.koan.states.each { |s| s.should be_kind_of(Zen::State) }
+        Klass.koan.states.each { |s| s.should be_kind_of(StateFu::State) }
         Klass.koan.states.map(&:name).sort.should == [:alive, :dead]
       end
 
-      describe "the <Zen::Event> created" do
+      describe "the <StateFu::Event> created" do
         it "should be accessible through Klass.koan.events" do
           Klass.koan.events.should be_kind_of(Array)
           Klass.koan.events.length.should == 1
-          Klass.koan.events.first.should be_kind_of( Zen::Event )
+          Klass.koan.events.first.should be_kind_of( StateFu::Event )
           Klass.koan.events.first.name.should == :die
         end
 
@@ -95,7 +95,7 @@ describe "Adding events to a Koan outside a state block" do
       it "should add 2 states to the koan called [:dead, :alive] " do
         Klass.koan.state_names.should == [:dead, :alive]
         Klass.koan.states.length.should == 2
-        Klass.koan.states.each { |s| s.should be_kind_of( Zen::State ) }
+        Klass.koan.states.each { |s| s.should be_kind_of( StateFu::State ) }
       end
     end
 

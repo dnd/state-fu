@@ -1,6 +1,6 @@
-module Zen
+module StateFu
   module Interface
-    # Provides access to Zen to your classes.  Plenty of aliases are
+    # Provides access to StateFu to your classes.  Plenty of aliases are
     # provided so you can use whatever makes sense to you.
     module ClassMethods
 
@@ -28,17 +28,17 @@ module Zen
       # koan( name=:om, options[:field_name], &block )
       def koan( *args, &block )
         options = args.extract_options!.symbolize_keys!
-        name    = args[0] || Zen::DEFAULT_KOAN
-        Zen::Koan.for_class( self, name, options, &block )
+        name    = args[0] || StateFu::DEFAULT_KOAN
+        StateFu::Koan.for_class( self, name, options, &block )
       end
       alias_method :statefully, :koan
       alias_method :machine,    :koan
       alias_method :workflow,   :koan
       alias_method :zen_koan,   :koan
 
-      # return a hash of :name => Zen::Koan for your class.
+      # return a hash of :name => StateFu::Koan for your class.
       def koans()
-        Zen::Space.class_koans[self]
+        StateFu::Space.class_koans[self]
       end
       alias_method :machines,    :koans
       alias_method :workflows,   :koans
@@ -46,7 +46,7 @@ module Zen
 
       # return the list of koans names for this class
       def koan_names()
-        Zen::Space.class_koans[self].keys
+        StateFu::Space.class_koans[self].keys
       end
       alias_method :machine_names,    :koan_names
       alias_method :workflow_names,   :koan_names
@@ -54,8 +54,8 @@ module Zen
     end
 
     # Give the gift of self-awareness to your objects. These methods
-    # grant access to Zen::Meditation objects, which are bundles of
-    # context linking a Zen::Koan to an object / instance.
+    # grant access to StateFu::Meditation objects, which are bundles of
+    # context linking a StateFu::Koan to an object / instance.
     # Again, plenty of aliases are provided so you can use whatever
     # makes sense to you.
     module InstanceMethods
@@ -66,7 +66,7 @@ module Zen
 
       # .om() is the instance method your objects use to meditate.
       #
-      # A Zen::Meditation comes into being, linking your object and
+      # A StateFu::Meditation comes into being, linking your object and
       # a koan, when you first call om() for that koan.
       #
       # Like the class method .koan(), calling it without any arguments
@@ -76,10 +76,10 @@ module Zen
       # can see and change its state, interact with events, etc.
       #
       public
-      def om( koan_name=Zen::DEFAULT_KOAN )
+      def om( koan_name=StateFu::DEFAULT_KOAN )
         name = koan_name.to_sym
-        if koan = Zen::Space.class_koans[self.class][name]
-          _om[name] ||= Zen::Meditation.new( koan, self, name )
+        if koan = StateFu::Space.class_koans[self.class][name]
+          _om[name] ||= StateFu::Meditation.new( koan, self, name )
         end
       end
       alias_method :stateful,   :om
@@ -92,7 +92,7 @@ module Zen
 
       # Gain awareness of all meditations (state contexts) this object
       # has contemplated into being.
-      # Returns a Hash of { :name => <Zen::Meditation>, ... }
+      # Returns a Hash of { :name => <StateFu::Meditation>, ... }
       def meditations()
         _om
       end

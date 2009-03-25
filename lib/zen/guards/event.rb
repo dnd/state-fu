@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   module Guards
     class Event
 

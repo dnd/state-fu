@@ -1,10 +1,10 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
 ## See state_and_event_common_spec.rb for behaviour shared between
-## Zen::State and Zen::Event
+## StateFu::State and StateFu::Event
 ##
 
-describe Zen::Koan do
+describe StateFu::Koan do
   include MySpecHelper
 
   before do

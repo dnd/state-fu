@@ -1,12 +1,12 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-Zen::Space.reset!
+StateFu::Space.reset!
 
 ##
 ##
 ##
 
-describe "A pristine class Klass with Zen included:" do
+describe "A pristine class Klass with StateFu included:" do
   include MySpecHelper
   before(:each) do
     make_pristine_class 'Klass'
@@ -14,7 +14,7 @@ describe "A pristine class Klass with Zen included:" do
 
   it "should return a new Koan bound to the class given Klass.koan()" do
     Klass.should respond_to(:koan)
-    Klass.koan.should be_kind_of(Zen::Koan)
+    Klass.koan.should be_kind_of(StateFu::Koan)
     koan = Klass.koan
     Klass.koan.should == koan
   end
@@ -37,23 +37,23 @@ describe "A pristine class Klass with Zen included:" do
     before(:each) do
       Klass.koan do
       end
-      Zen::DEFAULT_KOAN.should == :om
+      StateFu::DEFAULT_KOAN.should == :om
     end
 
-    it "should return a Zen::Koan given Klass.koan()" do
+    it "should return a StateFu::Koan given Klass.koan()" do
       Klass.should respond_to(:koan)
       Klass.koan.should_not be_nil
-      Klass.koan.should be_kind_of( Zen::Koan )
+      Klass.koan.should be_kind_of( StateFu::Koan )
     end
 
-    it "should return { :om => <Zen::Koan> } given Klass.koans()" do
+    it "should return { :om => <StateFu::Koan> } given Klass.koans()" do
       Klass.should respond_to(:koans)
       koans = Klass.koans()
       koans.should be_kind_of(Hash)
       koans.should_not be_empty
       koans.length.should == 1
       koans.keys.should == [:om]
-      koans.values.first.should be_kind_of( Zen::Koan )
+      koans.values.first.should be_kind_of( StateFu::Koan )
     end
 
     it "should returns [:om] given Klass.koan_names()" do
@@ -67,21 +67,21 @@ describe "A pristine class Klass with Zen included:" do
         end
       end
 
-      it "should return a Zen::Koan given Klass.koan(:two)" do
+      it "should return a StateFu::Koan given Klass.koan(:two)" do
         Klass.should respond_to(:koan)
         Klass.koan(:two).should_not be_nil
-        Klass.koan(:two).should be_kind_of( Zen::Koan )
+        Klass.koan(:two).should be_kind_of( StateFu::Koan )
       end
 
       it "should return a new Koan given Klass.koan(:three)" do
         Klass.should respond_to(:koan)
-        Klass.koan(:three).should be_kind_of( Zen::Koan )
+        Klass.koan(:three).should be_kind_of( StateFu::Koan )
         three = Klass.koan(:three)
         Klass.koan(:three).should == three
-        # Zen::Space.class_koans[Klass][:three].should == :three
+        # StateFu::Space.class_koans[Klass][:three].should == :three
       end
 
-      it "should return { :om => <Zen::Koan>, :two => <Zen::Koan> } given Klass.koans()" do
+      it "should return { :om => <StateFu::Koan>, :two => <StateFu::Koan> } given Klass.koans()" do
         Klass.should respond_to(:koans)
         koans = Klass.koans()
         koans.should be_kind_of(Hash)
@@ -90,7 +90,7 @@ describe "A pristine class Klass with Zen included:" do
         koans.keys.should include :om
         koans.keys.should include :two
         koans.values.length.should == 2
-        koans.values.each { |v| v.should be_kind_of( Zen::Koan ) }
+        koans.values.each { |v| v.should be_kind_of( StateFu::Koan ) }
       end
 
       it "should return [:om, :two] give Klass.koan_names (unordered)" do

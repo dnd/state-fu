@@ -1,4 +1,4 @@
-module Zen
+module StateFu
 
   # Handles dumping / loading a Koan to common interchange formats
   # (Simple ruby data structures, YAML, JSON, Marshal )
@@ -28,7 +28,7 @@ module Zen
     attr_reader :koan, :hash, :string
 
     def initialize( data )
-      if Zen::Koan === data
+      if StateFu::Koan === data
         @koan        = data.extend        KoanToRuby
         return
       elsif String === data
@@ -51,7 +51,7 @@ module Zen
     end
 
     def to_code()
-      Zen::Writer.new( to_koan )
+      StateFu::Writer.new( to_koan )
     end
 
     def to_yaml

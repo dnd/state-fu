@@ -1,7 +1,7 @@
-module Zen
+module StateFu
   module Guards
     class Base
-      include Zen::Helper # define apply!
+      include StateFu::Helper # define apply!
       attr_reader :koan, :name, :message, :method_name, :options
 
       def initialize( koan, name, options={}, &block )

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Zen Koan:
+# StateFu Koan:
 #
 # Teach your ruby objects the path
 # to a stateful enlightenment
@@ -23,7 +23,7 @@ require 'zen/event'
 require 'zen/hooks'
 require 'zen/interface'
 
-module Zen
+module StateFu
   DEFAULT_KOAN    = :om
 
   def self.included( klass )

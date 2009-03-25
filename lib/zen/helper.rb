@@ -1,9 +1,9 @@
-module Zen
+module StateFu
 
   # Utilities and snippets
   module Helper
 
-    # Instance methods mixed in on inclusion of Zen::Helper
+    # Instance methods mixed in on inclusion of StateFu::Helper
     module InstanceMethods
 
       # if given a hash of options (or a splatted arglist containing
@@ -25,7 +25,7 @@ module Zen
 
     end
 
-    # Class methods mixed in on inclusion of Zen::Helper
+    # Class methods mixed in on inclusion of StateFu::Helper
     module ClassMethods
     end
 

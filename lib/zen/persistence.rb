@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   module Persistence
 
     def self.active_record_column?( obj, field_name )

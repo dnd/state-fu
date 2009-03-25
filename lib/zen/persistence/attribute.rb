@@ -1,6 +1,6 @@
-module Zen
+module StateFu
   module Persistence
-    class Attribute < Zen::Persistence::Base
+    class Attribute < StateFu::Persistence::Base
       private
 
       # Read / write our strings to a plain old instance variable

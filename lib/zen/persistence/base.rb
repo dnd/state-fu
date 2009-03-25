@@ -1,4 +1,4 @@
-module Zen
+module StateFu
 
   class InvalidStateName < Exception
   end
@@ -28,7 +28,7 @@ module Zen
           koan.initial_state
         else
           state_name = string.to_sym
-          state      = koan.states[ state_name ] || raise( Zen::InvalidStateName, string )
+          state      = koan.states[ state_name ] || raise( StateFu::InvalidStateName, string )
         end
       end
 
@@ -49,7 +49,7 @@ module Zen
 #      end
 
       def current_state=( state )
-        raise(ArgumentError, state.inspect) unless state.is_a?(Zen::State)
+        raise(ArgumentError, state.inspect) unless state.is_a?(StateFu::State)
         @current_state = state
         persist!
       end

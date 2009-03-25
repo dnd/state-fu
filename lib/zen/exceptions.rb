@@ -1,4 +1,4 @@
-module Zen
+module StateFu
 
   class TransitionHalted < Exception
     attr_reader :foo

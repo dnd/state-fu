@@ -1,12 +1,12 @@
-module Zen
-  class State < Zen::Phrase
+module StateFu
+  class State < StateFu::Phrase
 
     def events
       koan.events.from(self)
     end
 
     #
-    # Proxy methods to Zen::Reader
+    # Proxy methods to StateFu::Reader
     #
     # TODO - build something meta to build these proxy events
     def event( name, options={}, &block )

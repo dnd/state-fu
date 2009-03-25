@@ -4,7 +4,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe Zen::Event do
+describe StateFu::Event do
   include MySpecHelper
   before do
     @koan = mock('Koan')
@@ -14,9 +14,9 @@ describe Zen::Event do
     before do
       @name         = :germinate
       @options      = {:speed => :slow}
-      @event        = Zen::Event.new( @koan, @name, @options )
-      @state_a      = Zen::State.new( @koan,:a )
-      @state_b      = Zen::State.new( @koan,:b )
+      @event        = StateFu::Event.new( @koan, @name, @options )
+      @state_a      = StateFu::State.new( @koan,:a )
+      @state_b      = StateFu::State.new( @koan,:b )
       @initial      = mock('State:Initial')
       @final        = mock('State:Final')
       @start        = mock('State:Start')
@@ -37,7 +37,7 @@ describe Zen::Event do
         end
 
         describe "reader" do
-          it "should return a Zen::Reader"
+          it "should return a StateFu::Reader"
           it "should have the event's koan"
           it "should have the event as the phrase"
           it "should eval ..."
@@ -145,14 +145,14 @@ describe Zen::Event do
         it "should return true given a symbol which is the name of a state in @target" do
           @event.should_receive( :target ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@koan,:a)] )
           @event.to?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @target" do
           @event.should_receive( :target ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@koan,:a)] )
           @event.to?( :b ).should == false
         end
 
@@ -168,14 +168,14 @@ describe Zen::Event do
         it "should return true given a symbol which is the name of a state in @origin" do
           @event.should_receive( :origin ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@koan,:a)] )
           @event.from?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @origin" do
           @event.should_receive( :origin ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@koan,:a)] )
           @event.from?( :b ).should == false
         end
 
@@ -207,5 +207,5 @@ describe Zen::Event do
       end
 
     end # describe instance methods
-  end   # describe Zen::Event
+  end   # describe StateFu::Event
 end

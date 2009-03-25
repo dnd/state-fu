@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   module Persistence
     class Session
       # Rails / etc session key

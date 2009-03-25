@@ -4,10 +4,10 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe "Common features / functionality for Zen::State & Zen::Event" do
+describe "Common features / functionality for StateFu::State & StateFu::Event" do
 
   include MySpecHelper
-  Phrase = Zen::Phrase
+  Phrase = StateFu::Phrase
   before do
     @koan = mock('Koan')
   end

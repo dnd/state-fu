@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   #
   #
   class Koan
@@ -14,7 +14,7 @@ module Zen
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      unless koan = Zen::Space.class_koans[ klass ][ name ]
+      unless koan = StateFu::Space.class_koans[ klass ][ name ]
         koan = new( name, options, &block )
         koan.teach!( klass, name, options[:field_name] )
       end
@@ -39,14 +39,14 @@ module Zen
 
     # merge the commands in &block with the existing koan
     def apply!( &block )
-      Zen::Reader.new( self, &block )
+      StateFu::Reader.new( self, &block )
     end
 
     # the Koan teaches a class how to meditate on it:
-    def teach!( klass, name=Zen::DEFAULT_KOAN, field_name = nil )
+    def teach!( klass, name=StateFu::DEFAULT_KOAN, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
-      Zen::Space.insert!( klass, self, name, field_name )
+      StateFu::Space.insert!( klass, self, name, field_name )
     end
     alias_method :bind!, :teach!
 
@@ -55,7 +55,7 @@ module Zen
     end
 
     def initial_state=( state )
-      unless state.is_a?( Zen::State )
+      unless state.is_a?( StateFu::State )
         state = states[ state.to_sym ] || raise( ArgumentError, state.inspect )
       end
       @initial_state = state
@@ -77,10 +77,10 @@ module Zen
     # matching States.
     def find_or_create_states_by_name( *names )
       names.flatten.select do |s|
-        s.is_a?( Symbol ) || s.is_a?( Zen::State )
+        s.is_a?( Symbol ) || s.is_a?( StateFu::State )
       end.map do |name|
         unless state = states[name.to_sym]
-          state = Zen::State.new( self, name )
+          state = StateFu::State.new( self, name )
           self.states << state
         end
         state

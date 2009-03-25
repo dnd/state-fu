@@ -1,6 +1,6 @@
-module Zen
+module StateFu
   module Persistence
-    class ActiveRecord < Zen::Persistence::Base
+    class ActiveRecord < StateFu::Persistence::Base
       private
 
       # We already checked that they exist, or we'd be using the

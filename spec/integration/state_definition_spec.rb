@@ -28,10 +28,10 @@ describe "Adding states to a Koan" do
       Klass.koan.state_names.should == [:egg]
     end
 
-    it "should return [<Zen::State @name=:egg>] given koan.states" do
+    it "should return [<StateFu::State @name=:egg>] given koan.states" do
       Klass.koan.should respond_to(:states)
       Klass.koan.states.length.should == 1
-      Klass.koan.states.first.should be_kind_of( Zen::State )
+      Klass.koan.states.first.should be_kind_of( StateFu::State )
       Klass.koan.states.first.name.should == :egg
     end
 
@@ -42,11 +42,11 @@ describe "Adding states to a Koan" do
       Klass.koan.states.first.name.should == :egg
     end
 
-    it "should return a <Zen::State @name=:egg> given koan.states[:egg]" do
+    it "should return a <StateFu::State @name=:egg> given koan.states[:egg]" do
       Klass.koan.should respond_to(:states)
       result = Klass.koan.states[:egg]
       result.should_not be_nil
-      result.should be_kind_of( Zen::State )
+      result.should be_kind_of( StateFu::State )
       result.name.should == :egg
     end
 
@@ -65,11 +65,11 @@ describe "Adding states to a Koan" do
         Klass.koan.state_names.should == [:egg, :chick]
       end
 
-      it "should return a <Zen::State @name=:chick> given koan.states[:egg]" do
+      it "should return a <StateFu::State @name=:chick> given koan.states[:egg]" do
         Klass.koan.should respond_to(:states)
         result = Klass.koan.states[:chick]
         result.should_not be_nil
-        result.should be_kind_of( Zen::State )
+        result.should be_kind_of( StateFu::State )
         result.name.should == :chick
       end
 
@@ -84,8 +84,8 @@ describe "Adding states to a Koan" do
             reader = s
           end
         end
-        reader.should be_kind_of( Zen::Reader )
-        reader.phrase.should be_kind_of( Zen::State )
+        reader.should be_kind_of( StateFu::Reader )
+        reader.phrase.should be_kind_of( StateFu::State )
         reader.phrase.name.should == :bird
       end
 
@@ -93,15 +93,15 @@ describe "Adding states to a Koan" do
 
     describe "calling koan() { state(:bird) {  .. } }" do
 
-      it "should instance_eval the block as a Zen::Reader" do
+      it "should instance_eval the block as a StateFu::Reader" do
         reader = nil
         Klass.koan() do
           state(:bird) do
             reader = self
           end
         end
-        reader.should be_kind_of(Zen::Reader)
-        reader.phrase.should be_kind_of(Zen::State)
+        reader.should be_kind_of(StateFu::Reader)
+        reader.phrase.should be_kind_of(StateFu::State)
         reader.phrase.name.should == :bird
       end
 
@@ -130,12 +130,12 @@ describe "Adding states to a Koan" do
       Klass.koan().states.map(&:name).should == [:egg, :chick, :bird]
       Klass.koan().states().each do |s|
         s.options[:poultry].should be_true
-        s.should be_kind_of(Zen::State)
+        s.should be_kind_of(StateFu::State)
       end
 
       describe "merging options" do
         it "should merge options when states are mentioned more than once" do
-          Zen::Space.reset!
+          StateFu::Space.reset!
           Klass.koan() { states(:egg, :chick, :bird, :poultry => true) }
           koan = Klass.koan
           koan.states.length.should == 3
@@ -149,7 +149,7 @@ describe "Adding states to a Koan" do
           koan.states().each do |s|
             s.options[:poultry].should be_true
             s.options[:covering].should == 'feathers'
-            s.should be_kind_of(Zen::State)
+            s.should be_kind_of(StateFu::State)
           end
         end
       end

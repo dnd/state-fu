@@ -1,4 +1,4 @@
-module Zen
+module StateFu
   class Guard
     class State
 
@@ -6,7 +6,7 @@ module Zen
         super( koan, name, options, block )
       end
 
-      # passed a collection of Zen::States, return those which are
+      # passed a collection of StateFu::States, return those which are
       # valid targets.
       def select( *states, object )
         states.flatten.select do |state|

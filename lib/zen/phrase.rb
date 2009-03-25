@@ -1,6 +1,6 @@
-module Zen
+module StateFu
   class Phrase # Abstract Superclass of State & Event
-    include Zen::Helper # define apply!
+    include StateFu::Helper # define apply!
 
     attr_reader :koan, :name, :options, :hooks
 
@@ -8,7 +8,7 @@ module Zen
       @koan    = koan
       @name    = name.to_sym
       @options = options.symbolize_keys!
-      @hooks   = Zen::Hooks.for( self )
+      @hooks   = StateFu::Hooks.for( self )
     end
 
     # sneaky way to make some comparisons / duck typing a bit cleaner
@@ -19,7 +19,7 @@ module Zen
     end
 
     def reader(options={}, &block)
-      Zen::Reader.new( koan, self, options, &block )
+      StateFu::Reader.new( koan, self, options, &block )
     end
 
   end
