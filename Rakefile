@@ -6,7 +6,7 @@ require "fileutils"
 require "rubygems"
 # require "rake/gempackagetask"
 
-require "./lib/zen/version.rb"
+require "./lib/state_fu/version.rb"
 
 Cucumber::Rake::Task.new(:features) do |t|
   t.cucumber_opts = "--format pretty" # Any valid command line option can go here.
@@ -19,9 +19,9 @@ module Rakefile
 end
 
 # stateful_gemspec = Gem::Specification.new do |s|
-#   s.name              = "zen-koan"
-#   s.rubyforge_project = "zen-koan"
-#   s.version           = :noversion # Zen::VERSION
+#   s.name              = "state_fu-koan"
+#   s.rubyforge_project = "state_fu-koan"
+#   s.version           = :noversion # state_fu::VERSION
 #   s.platform          = Gem::Platform::RUBY
 #   s.has_rdoc          = true
 #   s.extra_rdoc_files  = ["README.rdoc"]
@@ -29,7 +29,7 @@ end
 #   s.description       = s.summary
 #   s.author            = "David Lee"
 #   s.email             = "david@rubyist.net.au"
-#   s.homepage          = "http://github.com/davidlee/zen-koan"
+#   s.homepage          = "http://github.com/davidlee/state_fu-koan"
 #   s.require_path      = "lib"
 #   s.files             = %w(README.rdoc Rakefile) + Dir.glob("{lib,spec}/**/*")
 # end
@@ -41,13 +41,13 @@ end
 # namespace :gem do
 #   desc "Build and install as a RubyGem"
 #   task :install => :package do
-#     sh %{#{'sudo' unless Rakefile.windows?} gem install --local pkg/stateful-#{Zen::VERSION}*}
+#     sh %{#{'sudo' unless Rakefile.windows?} gem install --local pkg/stateful-#{state_fu::VERSION}*}
 #   end
 #
 #   desc "Generate stateful.gemspec"
 #   task :spec do
 #     unless ENV["RELEASE"] == "true"
-#       stateful_gemspec.version = "#{Zen::VERSION}.#{Time.now.strftime("%Y%m%d%H%M")}"
+#       stateful_gemspec.version = "#{state_fu::VERSION}.#{Time.now.strftime("%Y%m%d%H%M")}"
 #     end
 #
 #     File.open("stateful.gemspec", "w") do |f|
@@ -97,7 +97,7 @@ task :clean => :clobber_package
 
 desc 'Runs irb in this project\'s context'
 task :irb do |t|
-  exec 'irb -I lib -r zen-koan'
+  exec 'irb -I lib -r state_fu-koan'
 end
 
 desc 'Runs rdoc on the project lib directory'

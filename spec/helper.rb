@@ -6,7 +6,7 @@ $: << thisdir << "#{thisdir}/../lib"
 require 'rubygems'
 # require 'rr'
 require 'spec'
-require 'zen-koan'
+require 'state-fu'
 
 # module StateFuMatchers
 #   class HaveStatesMatcher
