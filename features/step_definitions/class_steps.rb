@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec/expectations'
 $:.unshift(File.dirname(__FILE__) + '/../../lib')
-require 'zen-koan'
+require 'state-fu'
 
 Before do
   @result = :false

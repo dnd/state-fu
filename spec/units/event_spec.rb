@@ -4,19 +4,19 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-describe Zen::Event do
+describe StateFu::Event do
   include MySpecHelper
   before do
-    @koan = mock('Koan')
+    @machine = mock('Machine')
   end
 
   describe "Instance methods" do
     before do
       @name         = :germinate
       @options      = {:speed => :slow}
-      @event        = Zen::Event.new( @koan, @name, @options )
-      @state_a      = Zen::State.new( @koan,:a )
-      @state_b      = Zen::State.new( @koan,:b )
+      @event        = StateFu::Event.new( @machine, @name, @options )
+      @state_a      = StateFu::State.new( @machine,:a )
+      @state_b      = StateFu::State.new( @machine,:b )
       @initial      = mock('State:Initial')
       @final        = mock('State:Final')
       @start        = mock('State:Start')
@@ -36,10 +36,10 @@ describe Zen::Event do
           it "should ..."
         end
 
-        describe "reader" do
-          it "should return a Zen::Reader"
-          it "should have the event's koan"
-          it "should have the event as the phrase"
+        describe "lathe" do
+          it "should return a StateFu::Lathe"
+          it "should have the event's machine"
+          it "should have the event as the sprocket"
           it "should eval ..."
         end
 
@@ -47,17 +47,17 @@ describe Zen::Event do
           describe "given @event.from :initial, :to => :final" do
             describe "setting attributes" do
               before do
-                @koan.should_receive(:find_or_create_states_by_name).
+                @machine.should_receive(:find_or_create_states_by_name).
                   with([:initial]).
                   once.
                   and_return([@initial])
-                @koan.should_receive(:find_or_create_states_by_name).
+                @machine.should_receive(:find_or_create_states_by_name).
                   with([:final]).
                   once.
                   and_return([@final])
               end
 
-              it "should call @koan.find_or_create_states_by_name() with [:initial] and [:final]" do
+              it "should call @machine.find_or_create_states_by_name() with [:initial] and [:final]" do
                 @event.from :initial, :to => :final
               end
 
@@ -73,7 +73,7 @@ describe Zen::Event do
             end
 
             it "should merge any options passed into event.options" do
-              @koan.stub!(:find_or_create_states_by_name).and_return([])
+              @machine.stub!(:find_or_create_states_by_name).and_return([])
               @event.from :initial, :to => :final, :colour => :green
               @event.options[:speed].should  == :slow
               @event.options[:colour].should == :green
@@ -81,12 +81,12 @@ describe Zen::Event do
           end
 
           describe "given @event.from <Array>, :to => <Array>" do
-            it "should call @koan.find_or_create_states_by_name() with both arrays" do
-              @koan.should_receive(:find_or_create_states_by_name).
+            it "should call @machine.find_or_create_states_by_name() with both arrays" do
+              @machine.should_receive(:find_or_create_states_by_name).
                 with([:initial, :start]).
                 once.
                 and_return([@initial, @start])
-              @koan.should_receive(:find_or_create_states_by_name).
+              @machine.should_receive(:find_or_create_states_by_name).
                 with([:final, :end]).
                 once.
                 and_return([@final, @end])
@@ -98,7 +98,7 @@ describe Zen::Event do
         describe '.to()' do
           describe "given :final" do
             it "should set @event.target to [:final]" do
-              @koan.should_receive(:find_or_create_states_by_name).
+              @machine.should_receive(:find_or_create_states_by_name).
                 with([:final]).
                 once.
                 and_return([@final])
@@ -109,7 +109,7 @@ describe Zen::Event do
 
           describe "given [:final, :end]" do
             it "should set @event.target to [:final, :end]" do
-              @koan.should_receive(:find_or_create_states_by_name).
+              @machine.should_receive(:find_or_create_states_by_name).
                 with([:final, :end]).
                 once.
                 and_return([@final, @end])
@@ -120,7 +120,7 @@ describe Zen::Event do
 
           describe "given [:final], :end" do
             it "should set @event.target to [:final, :end]" do
-              @koan.should_receive(:find_or_create_states_by_name).
+              @machine.should_receive(:find_or_create_states_by_name).
                 with([:final, :end]).
                 once.
                 and_return([@final, @end])
@@ -145,14 +145,14 @@ describe Zen::Event do
         it "should return true given a symbol which is the name of a state in @target" do
           @event.should_receive( :target ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@machine,:a)] )
           @event.to?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @target" do
           @event.should_receive( :target ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@machine,:a)] )
           @event.to?( :b ).should == false
         end
 
@@ -168,14 +168,14 @@ describe Zen::Event do
         it "should return true given a symbol which is the name of a state in @origin" do
           @event.should_receive( :origin ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@machine,:a)] )
           @event.from?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @origin" do
           @event.should_receive( :origin ).
             at_least(:once).
-            and_return( [Zen::State.new(@koan,:a)] )
+            and_return( [StateFu::State.new(@machine,:a)] )
           @event.from?( :b ).should == false
         end
 
@@ -207,5 +207,5 @@ describe Zen::Event do
       end
 
     end # describe instance methods
-  end   # describe Zen::Event
+  end   # describe StateFu::Event
 end

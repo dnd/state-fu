@@ -6,9 +6,9 @@ $: << thisdir << "#{thisdir}/../lib"
 require 'rubygems'
 # require 'rr'
 require 'spec'
-require 'zen-koan'
+require 'state-fu'
 
-# module ZenMatchers
+# module StateFuMatchers
 #   class HaveStatesMatcher
 #   end
 # end
@@ -25,7 +25,7 @@ module MySpecHelper
     @class_names ||= []
     @class_names << class_name
     klass = Class.new
-    klass.send( :include, Zen )
+    klass.send( :include, StateFu )
     Object.send(:remove_const, class_name ) if Object.const_defined?( class_name )
     Object.const_set(class_name, klass)
   end
@@ -36,7 +36,7 @@ module MySpecHelper
       Object.send(:remove_const, class_name ) if Object.const_defined?( class_name )
     end
     @class_names = []
-    Zen::Space.reset!
+    StateFu::FuSpace.reset!
   end
 
 end

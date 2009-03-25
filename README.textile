@@ -2,58 +2,15 @@
 require 'redcloth'; puts RedCloth.new( DATA.read ).to_html
 __END__
 
-h1. Zen / Koan
+h1. StateFu ( ALPHA / UNRELEASED )
 
-h3. Why pile your classes full of business logic, when you can teach
-them to meditate until they find enlightenment?
+State Fu is a rich framework for describing state machines,
+workflows and rules engines in ruby and/or Rails.
 
-This is a ground-up rewrite of davidlee/Stateful, drawing inspiration
-from a variety of acts_as_state_machine-style libraries (notably
-jbarnette/stateful ).
+It aims to be the most featureful, expressive and powerful such
+library available, without sacrificing ease of use, clarity, or
+performance.
 
-It should:
-
- * be a powerful DSL for building state machines, describing complex
-   workflows and domain logic, and managing much of the state in a
-   typical application.
-
- * make it easy to do simple things, and possible to do very complex
-   things
-
- * play nicely with, but not require, ActiveRecord and / or Rails.
-
-Interested parties should run the specs ( just `rake`, provided you
-have rspec installed ).
-
-Your feedback is valued.
-
-h2. Status: Pre-alpha
-
-Those seeking a production-ready alternative should see jbarnette-stateful or rubyist-aasm.
-
-Notes:
-
- * Spec coverage is pretty reasonable ( just `rake`, provided you have
-   rspec installed ) - I started with some cucumber features but
-   decided to use plain rspec for now and maybe do some features for
-   the user-facing stuff once I've finished testing the internals.
-
- * I've written most of the code which deals with inclusion / binding /
-   defining methods on your classes (except for those defined by
-   events), and I'm happy to report I've made the code for that far
-   less complex than it was in (my) Stateful.
-
- * I'm currently designing the DSL parser / syntax. I aim to support
-   both "cute" (i.e. state :name do ... end) and "explicit" (state
-   :name do |state| ... end ) syntax.
-
-
- * A koan is a story, dialogue, question, or statement in the history
-   and lore of Chan (Zen) Buddhism, generally containing aspects that
-   are inaccessible to rational understanding, yet may be accessible
-   to intuition. A famous koan is: "Two hands clap and there is a
-   sound; what is the sound of one hand?"
-
-bq. Spoiler: bend your wrist back at a 90 degree angle, let your
-    fingers go loose, and flap your hand rapidly up and down. It makes
-    a fleshy, 'fap fap fap' kind of sound.
+State-Fu is currently under active development (no releases
+yet). Those seeking a production-ready alternative should consider
+rubyist-aasm or jbarnette-stateful.
