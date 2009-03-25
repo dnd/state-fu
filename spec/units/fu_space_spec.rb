@@ -25,7 +25,7 @@ describe StateFu::FuSpace do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_KOAN.should == :om
+      StateFu::DEFAULT_MACHINE.should == :om
     end
 
     it "should return { Klass => { ... } } given StateFu::FuSpace.class_machines()" do

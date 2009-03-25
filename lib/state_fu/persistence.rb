@@ -10,7 +10,7 @@ module StateFu
     end
 
     def self.for( binding, field_name )
-      if active_record_column?( binding.machinist, field_name )
+      if active_record_column?( binding.object, field_name )
         self::ActiveRecord.new( binding, field_name )
       else
         self::Attribute.new( binding, field_name )

@@ -12,7 +12,7 @@ module StateFu
     # return the default machine, or an empty hash, given a missing index.
     LAZY_HASH = lambda do |h, k|
       if k.nil?
-        self[ StateFu::DEFAULT_KOAN ]
+        self[ StateFu::DEFAULT_MACHINE ]
       else
         h[k]= Hash.new()
       end

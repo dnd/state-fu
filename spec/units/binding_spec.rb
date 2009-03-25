@@ -16,10 +16,10 @@ describe StateFu::Binding do
 
   describe "initialization via @obj.om()" do
     it "should create a new StateFu::Binding" do
-      mdn = @obj.om()
+      mdn = @obj.binding()
       mdn.should be_kind_of( StateFu::Binding )
       mdn.machine.should == Klass.machine
-      mdn.machinist.should == @obj
+      mdn.object.should == @obj
       mdn.method_name.should == :om
       mdn.field_name.should  == :om_state
     end
@@ -43,12 +43,12 @@ describe StateFu::Binding do
         # initial_state :fetus
       end
       @machine   = Klass.machine()
-      @object = Klass.new()
-      @om     = @object.om()
+      @object    = Klass.new()
+      @binding   = @object.stfu()
     end
 
     it "should be sane (checking Machine for sanity)" do
-      machine = @om.machine
+      machine = @binding.machine
       machine.states.length.should == 2
       machine.state_names.should == [:new, :old]
       machine.events.length.should == 1
@@ -59,17 +59,17 @@ describe StateFu::Binding do
 
     describe ".state()" do
       it "should default to machine.initial_state when no initial_state is explicitly defined" do
-        @om.respond_to?(:current_state).should == true
-        @om.current_state.should be_kind_of( StateFu::State )
-        @om.current_state.name.should == :new
-        @om.machine.initial_state.name.should == :new
+        @binding.respond_to?(:current_state).should == true
+        @binding.current_state.should be_kind_of( StateFu::State )
+        @binding.current_state.name.should == :new
+        @binding.machine.initial_state.name.should == :new
       end
 
       it "should default to the machine's initial_state if one is set" do
         Klass.machine() { initial_state :fetus }
-        Klass.machine.states.first.name.should      == :new
-        Klass.machine.initial_state.name.should     == :fetus
-        Klass.new().om.current_state.name.should == :fetus
+        Klass.machine.states.first.name.should   == :new
+        Klass.machine.initial_state.name.should  == :fetus
+        Klass.new().binding.current_state.name.should == :fetus
       end
 
     end

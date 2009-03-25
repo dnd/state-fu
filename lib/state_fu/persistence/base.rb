@@ -37,7 +37,7 @@ module StateFu
       end
 
       def object
-        binding.machinist
+        binding.object
       end
 
       def klass

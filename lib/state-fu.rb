@@ -24,7 +24,7 @@ require 'state_fu/hooks'
 require 'state_fu/interface'
 
 module StateFu
-  DEFAULT_KOAN    = :om
+  DEFAULT_MACHINE    = :om
 
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )

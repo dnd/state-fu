@@ -8,7 +8,7 @@ module StateFu
     end
 
     def initialize( machine, sprocket = nil, options={}, &block )
-      @machine   = machine
+      @machine  = machine
       @sprocket = sprocket
       if sprocket
         sprocket.apply!( options )
@@ -76,12 +76,14 @@ module StateFu
 
     # helpers are mixed into all binding / transition contexts
     # use them to bend the language to your will
-    def helper( *names )
-      names.each do |name|
-        const_name = name.to_s.camelize
-        # if we can't find it now, try later in the machinist object's context
-        machine.helpers << (const_name.constantize rescue const_name )
-      end
+    def helper_( *modules )
+      machine.helpers += modules
+      machine.helpers.extend( HelperArray )
+      # names.each do |name|
+      #   const_name = name.to_s.camelize
+      #   # if we can't find it now, try later in the machinist object's context
+      #   machine.helpers << (const_name.constantize rescue const_name )
+      # end
     end
 
     #
@@ -109,6 +111,13 @@ module StateFu
     def needs *a, &b
       require_sprocket( StateFu::Event )
       # ...
+    end
+
+    # create an event from *and* to the current state.
+    # Creates a loop, useful (only) for hooking behaviours onto.
+    def cycle( name, options={}, &block )
+      require_sprocket( StateFu::State )
+      #
     end
 
     #

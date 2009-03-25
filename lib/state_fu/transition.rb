@@ -99,7 +99,6 @@ module StateFu
     # Try to give as many options (chances) as possible
     #
 
-    alias_method :machinist,       :object
     alias_method :obj,            :object
     alias_method :instance,       :object
     alias_method :model,          :object

@@ -3,38 +3,45 @@ module StateFu
     # Provides access to StateFu to your classes.  Plenty of aliases are
     # provided so you can use whatever makes sense to you.
     module ClassMethods
+      # TODO:
+      # take option :alias => false (disable aliases) or :alias
+      # => :foo (use foo as class & instance accessor)
 
+      #
       # Given no arguments, return the default machine (:om) for the
-      # class, if it exists (or nil).
+      # class, creating it if it did not exist.
       #
-      # Given a symbol, return the machine by that name if it exists
-      # (or nil).
+      # Why is it called :om? This library was originally called
+      # Zen::Koan, and this remains in tribute.
       #
-      # Given a block, create the machine (:om if no name is supplied)
-      # if it does not yet exist, and define it with the contents of
-      # the block.
+      # Given a symbol, return the machine by that name, creating it
+      # if it didn't exist.
+      #
+      # Given a block, also define it with the contents of the block.
       #
       # This can be done multiple times; changes are cumulative.
       #
-      # Calling Klass.machine with or without a block will create one if
-      # it does not exist, and bind it to your class.
-      #
-      # You can have as many as you like per class.
+      # You can have as many machines as you like per class.
       #
       # Klass.machine            # the default machine named :om
-      #                       # equivalent to Klass.machine(:om)
+      #                          # equivalent to Klass.machine(:om)
       # Klass.machine(:workflow) # another totally separate machine
-
+      #
       # machine( name=:om, options[:field_name], &block )
+
       def machine( *args, &block )
         options = args.extract_options!.symbolize_keys!
-        name    = args[0] || StateFu::DEFAULT_KOAN
+        name    = args[0] || StateFu::DEFAULT_MACHINE
         StateFu::Machine.for_class( self, name, options, &block )
       end
-      alias_method :statefully,    :machine
-      alias_method :machine,       :machine
+      alias_method :stfu,          :machine
+      alias_method :state_fu,      :machine
       alias_method :workflow,      :machine
+      alias_method :statefully,    :machine
       alias_method :state_machine, :machine
+      alias_method :stateful,      :machine
+      alias_method :workflow,      :machine
+      alias_method :engine,        :machine
 
       # return a hash of :name => StateFu::Machine for your class.
       def machines( *args, &block )
@@ -46,18 +53,18 @@ module StateFu
       end
       alias_method :machines,     :machines
       alias_method :workflows,    :machines
-      alias_method :zen_machines, :machines
+      alias_method :engines,      :machines
 
       # return the list of machines names for this class
       def machine_names()
         StateFu::FuSpace.class_machines[self].keys
       end
-      alias_method :machine_names,    :machine_names
-      alias_method :workflow_names,   :machine_names
-      alias_method :zen_machine_names,   :machine_names
+      alias_method :machine_names,       :machine_names
+      alias_method :workflow_names,      :machine_names
+      alias_method :engine_names,        :machine_names
     end
 
-    # Give the gift of self-awareness to your objects. These methods
+    # Give the gift of state to your objects. These methods
     # grant access to StateFu::Binding objects, which are bundles of
     # context linking a StateFu::Machine to an object / instance.
     # Again, plenty of aliases are provided so you can use whatever
@@ -68,10 +75,9 @@ module StateFu
         @_om ||= {}
       end
 
-      # .om() is the instance method your objects use to meditate.
-      #
-      # A StateFu::Binding comes into being, linking your object and
-      # a machine, when you first call om() for that machine.
+      # A StateFu::Binding comes into being, linking your object and a
+      # machine, when you first call yourobject.binding() for that
+      # machine.
       #
       # Like the class method .machine(), calling it without any arguments
       # is equivalent to passing :om.
@@ -80,46 +86,56 @@ module StateFu
       # can see and change its state, interact with events, etc.
       #
       public
-      def om( machine_name=StateFu::DEFAULT_KOAN )
-        name = machine_name.to_sym
-        if machine = StateFu::FuSpace.class_machines[self.class][name]
-          _om[name] ||= StateFu::Binding.new( machine, self, name )
+      def binding( name=StateFu::DEFAULT_MACHINE )
+        name = name.to_sym
+        if mach = StateFu::FuSpace.class_machines[self.class][name]
+          _om[name] ||= StateFu::Binding.new( mach, self, name )
         end
       end
-      alias_method :stateful,   :om
-      alias_method :zen,        :om
-      alias_method :machine,       :om
-      alias_method :zen_machine,   :om
-      alias_method :binding, :om
-      alias_method :machine,    :om
-      alias_method :present,    :om
 
+      alias_method :fu,          :binding
+      alias_method :stfu,        :binding
+      alias_method :state_fu,    :binding
+      alias_method :stateful,    :binding
+      alias_method :workflow,    :binding
+      alias_method :engine,      :binding
+      alias_method :machine,     :binding # not strictly accurate, but makes sense sometimes
+      alias_method :context,     :binding
+      alias_method :om,          :binding # historical
       # Gain awareness of all bindings (state contexts) this object
       # has contemplated into being.
       # Returns a Hash of { :name => <StateFu::Binding>, ... }
       def bindings()
         _om
       end
-      alias_method :oms,       :bindings
-      alias_method :machines,     :bindings
-      alias_method :zen_machines, :bindings
-      alias_method :machines,  :bindings
 
-      # Instant enlightenment. Instantiate all bindings.
+      alias_method :fus,          :bindings
+      alias_method :stfus,        :bindings
+      alias_method :state_fus,    :bindings
+      alias_method :state_foos,   :bindings
+      alias_method :workflows,    :bindings
+      alias_method :engines,      :bindings
+      alias_method :bindings,     :bindings
+      alias_method :machines,     :binding # not strictly accurate, but makes sense sometimes
+      alias_method :contexts,     :bindings
+
+      # Instantiate bindings for all machines defined for this class.
       # It's useful to call this before_create w/
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.
-      def meditate!( *names )
+      def assemble!( *names )
         if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
           names = self.class.machine_names()
         end
-        names.map { |n| om( n ) }
+        names.map { |n| binding( n ) }
       end
-      alias_method :initialize_state!, :meditate!
-      alias_method :zen!,              :meditate!
-      alias_method :machine_init!,        :meditate!
-      alias_method :awaken!,           :meditate!
-
+      alias_method :fu!,               :assemble!
+      alias_method :stfu!,             :assemble!
+      alias_method :state_fu!,         :assemble!
+      alias_method :init_machines!,    :assemble!
+      alias_method :initialize_state!, :assemble!
+      alias_method :build_workflow!,   :assemble!
+      alias_method :meditate!,         :assemble! # historical
     end
   end
 end

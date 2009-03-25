@@ -29,7 +29,7 @@ describe "An instance of Klass with StateFu included:" do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_KOAN.should == :om
+      StateFu::DEFAULT_MACHINE.should == :om
     end
 
     it "should return a StateFu::Binding given .om()" do
@@ -71,8 +71,8 @@ describe "An instance of Klass with StateFu included:" do
       end
 
       it "should return the same Binding given .om() and .om(:om)" do
-        @k.om().should be_kind_of( StateFu::Binding )
-        @k.om().should == @k.om(:om)
+        @k.binding().should be_kind_of( StateFu::Binding )
+        @k.binding().should == @k.om(:om)
       end
 
       it "should return a StateFu::Binding given .om(:two)" do

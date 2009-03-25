@@ -8,7 +8,8 @@ module StateFu
     # analogous to self.for_class, but keeps machines in
     # global space, not tied to a specific class.
     def self.[] name, options, &block
-      # ...
+      # ... use case?
+      raise "pending"
     end
 
     # meta-constructor; expects to be called via Klass.machine()
@@ -43,23 +44,37 @@ module StateFu
       StateFu::Lathe.new( self, &block )
     end
 
-    # the Machine teaches a class how to meditate on it:
-    def teach!( klass, name=StateFu::DEFAULT_KOAN, field_name = nil )
+    # the modules listed here will be mixed into Binding and
+    # Transition objects for this machine. use this to define methods,
+    # references or data useful to you during transitions, event
+    # hooks, or in general use of StateFu.
+    #
+    # To do this globally, just duck-punch StateFu::Machine /
+    # StateFu::Binding.
+    def helper *modules
+      raise "pending"
+    end
+
+    # make it so a class which has included StateFu has a binding to
+    # this machine
+    def bind!( klass, name=StateFu::DEFAULT_MACHINE, field_name = nil )
       field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
       field_name   = field_name.to_sym
       StateFu::FuSpace.insert!( klass, self, name, field_name )
     end
-    alias_method :bind!, :teach!
+    alias_method :teach!, :bind! # TODO remove
 
     def empty?
       states.empty?
     end
 
-    def initial_state=( state )
-      unless state.is_a?( StateFu::State )
-        state = states[ state.to_sym ] || raise( ArgumentError, state.inspect )
+    def initial_state=( s )
+      case s
+      when Symbol, String, StateFu::State
+        @initial_state =  states[ s.to_sym ] ||  StateFu::State.new( self, s.to_sym )
+      else
+        raise( ArgumentError, s.inspect )
       end
-      @initial_state = state
     end
 
     def initial_state()

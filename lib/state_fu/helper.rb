@@ -46,7 +46,7 @@ module StateFu
         super( idx )
       rescue TypeError => e
         if idx.respond_to?(:to_sym)
-          self.detect { |i| i.respond_to?(:name) && i.name == idx.to_sym }
+          self.detect { |i| i == idx || i.respond_to?(:name) && i.name == idx.to_sym }
         else
           raise e
         end
@@ -64,6 +64,16 @@ module StateFu
   # Array extender. Used by Machine to keep a list of states.
   module StateArray
     include StateOrEventArray
+
+    # is there exactly one possible event to fire, with a single
+    # target event?
+    def next?
+    end
+
+    # if next?, return the state
+    def next
+    end
+
   end
 
   # Array extender. Used by Machine to keep a list of events.
@@ -79,6 +89,16 @@ module StateFu
     def to( target )
       select { |e| e.respond_to?(:to?) && e.to?( target ) }
     end
+
+    # is there exactly one possible event to fire, with a single
+    # target event?
+    def next?
+    end
+
+    # if next?, return the event
+    def next
+    end
+
   end
 
   # Array extender. Used by Machine to keep a list of helpers to mix into

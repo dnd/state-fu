@@ -37,7 +37,7 @@ describe "A pristine class Klass with StateFu included:" do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_KOAN.should == :om
+      StateFu::DEFAULT_MACHINE.should == :om
     end
 
     it "should return a StateFu::Machine given Klass.machine()" do

@@ -47,6 +47,7 @@
 **** JSON
 **** nested hash as basic interchange format?
 *** avoid procs if possible, or provide alternatives, to keep these options open
+*** serialize / deserialize allows easy deep-object copies
 
 ** Documentation
 *** high-level overviews
