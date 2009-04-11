@@ -9,7 +9,7 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
   include MySpecHelper
   Sprocket = StateFu::Sprocket
   before do
-    @machine = mock('Machine')
+    @machine = Object.new
   end
 
   describe "calling Sprocket.new" do

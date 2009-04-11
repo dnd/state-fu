@@ -8,13 +8,11 @@ module StateFu
     #
 
     def origin_names
-      # @origin_names ||=
-      origin.map(&:to_sym) rescue nil
+      origin ? origin.map(&:to_sym) : nil
     end
 
     def target_names
-      # @target_names ||=
-      target.map(&:to_sym) rescue nil
+      target ? target.map(&:to_sym) : nil
     end
 
     def to?( state )

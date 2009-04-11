@@ -14,22 +14,32 @@ describe StateFu::Binding do
     @obj = Klass.new()
   end
 
-  describe "initialization via @obj.om()" do
-    it "should create a new StateFu::Binding" do
-      mdn = @obj.binding()
-      mdn.should be_kind_of( StateFu::Binding )
-      mdn.machine.should == Klass.machine
-      mdn.object.should == @obj
-      mdn.method_name.should == :om
-      mdn.field_name.should  == :om_state
+  describe "constructor" do
+    it "should create a new Binding given valid arguments" do
+      mock( StateFu::FuSpace ).field_names() do
+        {
+          Klass => { :example => :example_field }
+        }
+      end
+      b = StateFu::Binding.new( Klass.machine, @obj, :example )
+      b.should be_kind_of( StateFu::Binding )
+      b.object.should      == @obj
+      b.machine.should     == Klass.machine
+      b.method_name.should == :example
     end
   end
 
-  describe "constructor" do
-    it "should create a new Binding given valid arguments" do
-      pending
+  describe "initialization via @obj.binding()" do
+    it "should create a new StateFu::Binding with default method-name & field_name" do
+      b = @obj.binding()
+      b.should be_kind_of( StateFu::Binding )
+      b.machine.should == Klass.machine
+      b.object.should == @obj
+      b.method_name.should == :om
+      b.field_name.should  == :om_state
     end
   end
+
 
   describe "For Klass.machine() with two states and an event" do
     before do
@@ -71,10 +81,9 @@ describe StateFu::Binding do
         Klass.machine.initial_state.name.should  == :fetus
         Klass.new().binding.current_state.name.should == :fetus
       end
-
     end
-  end
 
+  end
 
   describe "Instance methods" do
     before do

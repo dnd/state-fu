@@ -7,10 +7,10 @@ module StateFu
 
     # analogous to self.for_class, but keeps machines in
     # global space, not tied to a specific class.
-    def self.[] name, options, &block
-      # ... use case?
-      raise "pending"
-    end
+    # def self.[] name, options, &block
+    #   # is there a use case for this or is it just unneccesary complexity?
+    #   raise "pending"
+    # end
 
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
@@ -18,7 +18,7 @@ module StateFu
       name = name.to_sym
       unless machine = StateFu::FuSpace.class_machines[ klass ][ name ]
         machine = new( name, options, &block )
-        machine.teach!( klass, name, options[:field_name] )
+        machine.bind!( klass, name, options[:field_name] )
       end
       if block_given?
         machine.apply!( &block )
@@ -51,8 +51,8 @@ module StateFu
     #
     # To do this globally, just duck-punch StateFu::Machine /
     # StateFu::Binding.
-    def helper *modules
-      raise "pending"
+    def helper *modules_to_add
+      modules_to_add.each { |mod| helpers << mod }
     end
 
     # make it so a class which has included StateFu has a binding to

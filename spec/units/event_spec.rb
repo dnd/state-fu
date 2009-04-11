@@ -7,7 +7,7 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 describe StateFu::Event do
   include MySpecHelper
   before do
-    @machine = mock('Machine')
+    @machine = Object.new
   end
 
   describe "Instance methods" do
@@ -17,10 +17,10 @@ describe StateFu::Event do
       @event        = StateFu::Event.new( @machine, @name, @options )
       @state_a      = StateFu::State.new( @machine,:a )
       @state_b      = StateFu::State.new( @machine,:b )
-      @initial      = mock('State:Initial')
-      @final        = mock('State:Final')
-      @start        = mock('State:Start')
-      @end          = mock('State:End')
+      @initial      = Object.new
+      @final        = Object.new
+      @start        = Object.new
+      @end          = Object.new
     end
 
 
@@ -28,33 +28,57 @@ describe StateFu::Event do
       describe "setting origin / target" do
 
         describe 'origin=' do
-          it "should call get_states_list_by_name with its argument"
-          it "should set @origin to the result"
+          it "should call get_states_list_by_name with its argument" do
+            mock( @machine ).find_or_create_states_by_name( [:initial] ) { }
+            @event.origin= :initial
+          end
+
+          it "should set @origin to the result" do
+            mock( @machine ).find_or_create_states_by_name( [:initial] ) { :result }
+            @event.origin= :initial
+            @event.origin.should == :result
+          end
+
         end
 
         describe 'target=' do
-          it "should ..."
+          it "should call get_states_list_by_name with its argument" do
+            mock( @machine ).find_or_create_states_by_name( [:initial] ) { }
+            @event.target= :initial
+          end
+
+          it "should set @target to the result" do
+            mock( @machine ).find_or_create_states_by_name( [:initial] ) { :result }
+            @event.target= :initial
+            @event.target.should == :result
+          end
         end
 
         describe "lathe" do
-          it "should return a StateFu::Lathe"
-          it "should have the event's machine"
-          it "should have the event as the sprocket"
-          it "should eval ..."
+          before do
+            @lathe = @event.lathe()
+          end
+
+          it "should return a StateFu::Lathe" do
+            @lathe.should be_kind_of( StateFu::Lathe )
+          end
+
+          it "should have the event's machine" do
+            @lathe.machine.should == @event.machine()
+          end
+
+          it "should have the event as the sprocket" do
+            @lathe.sprocket.should == @event
+          end
+
         end
 
         describe '.from()' do
           describe "given @event.from :initial, :to => :final" do
             describe "setting attributes" do
               before do
-                @machine.should_receive(:find_or_create_states_by_name).
-                  with([:initial]).
-                  once.
-                  and_return([@initial])
-                @machine.should_receive(:find_or_create_states_by_name).
-                  with([:final]).
-                  once.
-                  and_return([@final])
+                mock( @machine ).find_or_create_states_by_name( [:initial] ) { [@initial] }
+                mock( @machine ).find_or_create_states_by_name( [:final]   ) { [@final]   }
               end
 
               it "should call @machine.find_or_create_states_by_name() with [:initial] and [:final]" do
@@ -73,7 +97,8 @@ describe StateFu::Event do
             end
 
             it "should merge any options passed into event.options" do
-              @machine.stub!(:find_or_create_states_by_name).and_return([])
+              mock( @machine ).find_or_create_states_by_name([:initial]) { [@initial]}
+              mock( @machine ).find_or_create_states_by_name([:final  ]) { [@final]}
               @event.from :initial, :to => :final, :colour => :green
               @event.options[:speed].should  == :slow
               @event.options[:colour].should == :green
@@ -82,14 +107,12 @@ describe StateFu::Event do
 
           describe "given @event.from <Array>, :to => <Array>" do
             it "should call @machine.find_or_create_states_by_name() with both arrays" do
-              @machine.should_receive(:find_or_create_states_by_name).
-                with([:initial, :start]).
-                once.
-                and_return([@initial, @start])
-              @machine.should_receive(:find_or_create_states_by_name).
-                with([:final, :end]).
-                once.
-                and_return([@final, @end])
+              mock( @machine ).find_or_create_states_by_name([:initial, :start]) do
+                [@initial, @start]
+              end
+              mock( @machine ).find_or_create_states_by_name([:final, :end]) do
+                [@final, @end]
+              end
               @event.from( [:initial, :start], :to => [:final, :end] )
             end
           end
@@ -97,93 +120,67 @@ describe StateFu::Event do
 
         describe '.to()' do
           describe "given :final" do
-            it "should set @event.target to [:final]" do
-              @machine.should_receive(:find_or_create_states_by_name).
-                with([:final]).
-                once.
-                and_return([@final])
+            it "should set @event.target to machine.find_or_create_states_by_name( :final )" do
+              mock( @machine ).find_or_create_states_by_name([:final]) { [@final] }
               @event.to :final
               @event.target.should == [@final]
             end
           end
-
-          describe "given [:final, :end]" do
-            it "should set @event.target to [:final, :end]" do
-              @machine.should_receive(:find_or_create_states_by_name).
-                with([:final, :end]).
-                once.
-                and_return([@final, @end])
-              @event.to( [:final, :end] )
-              @event.target.should == [@final, @end]
-            end
-          end
-
-          describe "given [:final], :end" do
-            it "should set @event.target to [:final, :end]" do
-              @machine.should_receive(:find_or_create_states_by_name).
-                with([:final, :end]).
-                once.
-                and_return([@final, @end])
-              @event.to( [:final], :end )
-              @event.target.should == [@final, @end]
-            end
-          end
         end
+
       end
 
       describe 'origin_names' do
-        it "should return an array of state names in origin when origin is not nil"
-        it "should return nil when origin is nil"
+        it "should return an array of state names in origin when origin is not nil" do
+          mock( @machine ).find_or_create_states_by_name([:initial]) { [@initial] }
+          mock( @machine ).find_or_create_states_by_name([:final]) { [@final] }
+          @event.from :initial, :to => :final
+          @event.origin.should == [@initial]
+          mock( @initial ).to_sym().times(any_times) { :initial }
+          @event.origin_names.should == [:initial]
+        end
+
+        it "should return nil when origin is nil" do
+          mock( @event ).origin().times(any_times) { nil }
+          @event.origin_names.should == nil
+        end
+
       end
 
       describe 'target_names' do
-        it "should return an array of state names in target when target is not nil"
-        it "should return nil when target is nil"
+        it "should return an array of state names in target when target is not nil" do
+          mock( @event ).target.times( any_times ) { [@final] }
+          mock( @final ).to_sym { :final }
+          @event.target_names.should == [:final]
+        end
+
+        it "should return nil when target is nil" do
+          mock( @event ).target().times(any_times) { nil }
+          @event.target_names.should == nil
+        end
       end
 
       describe 'to?' do
         it "should return true given a symbol which is the name of a state in @target" do
-          @event.should_receive( :target ).
-            at_least(:once).
-            and_return( [StateFu::State.new(@machine,:a)] )
+          mock( @event ).target.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.to?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @target" do
-          @event.should_receive( :target ).
-            at_least(:once).
-            and_return( [StateFu::State.new(@machine,:a)] )
+          mock( @event ).target.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.to?( :b ).should == false
-        end
-
-        it "should raise an exception when @target is a Proc" do
-          @event.should_receive( :target ).
-            at_least(:once).
-            and_return( @proc_initial )
-          lambda{  @event.to?( :b ) }.should raise_error()
         end
       end
 
       describe 'from?' do
         it "should return true given a symbol which is the name of a state in @origin" do
-          @event.should_receive( :origin ).
-            at_least(:once).
-            and_return( [StateFu::State.new(@machine,:a)] )
+          mock( @event ).origin.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.from?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @origin" do
-          @event.should_receive( :origin ).
-            at_least(:once).
-            and_return( [StateFu::State.new(@machine,:a)] )
+          mock( @event ).origin().times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.from?( :b ).should == false
-        end
-
-        it "should raise an exception when @origin is a Proc" do
-          @event.should_receive( :origin ).
-            at_least(:once).
-            and_return( @proc_initial )
-          lambda{  @event.from?( :b ) }.should raise_error()
         end
       end
 
@@ -193,14 +190,14 @@ describe StateFu::Event do
         end
 
         it "should be true when origin / target are both not nil" do
-          @event.should_receive( :origin ).and_return( [:a])
-          @event.should_receive( :target ).and_return( [:b])
+          mock( @event ).origin { [:a] }
+          mock( @event ).target { [:b] }
           @event.complete?.should == true
         end
 
         it "should be false when either origin / target are nil" do
-          @event.should_receive( :origin ).and_return( [:a])
-          # @event.should_receive( :target ).and_return( [:b])
+          mock( @event ).origin { [:a] }
+          mock( @event ).target { nil  }
           @event.complete?.should == false
         end
 

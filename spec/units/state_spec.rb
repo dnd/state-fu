@@ -8,20 +8,20 @@ describe StateFu::State do
   include MySpecHelper
 
   before do
-    @machine = mock('StateFu::Machine')
+    @machine = Object.new
   end
 
   describe "instance methods" do
     before do
-      @state = StateFu::State.new(@machine, :flux, {:meta => "wibble"})
+      @state = StateFu::State.new( @machine, :flux, {:meta => "wibble"} )
     end
 
     describe ".events" do
 
       it "should call machine.events.from(self)" do
-        events = mock('Array')
-        events.should_receive(:from).with(@state)
-        @machine.should_receive(:events).and_return(events)
+        machine_events = Object.new
+        mock( @machine ).events { machine_events }
+        mock( machine_events ).from( @state ) { nil }
         @state.events
       end
 
@@ -30,19 +30,18 @@ describe StateFu::State do
     describe ".event" do
 
       it "should act as a proxy for lathe.event without a block" do
-        lathe = mock("StateFu::Lathe")
-        @state.stub!( :lathe ).and_return( lathe )
-        args = [:evt_name, {:from => :old, :to => :new}]
-        lathe.should_receive(:event).with( *args )
-        @state.event( *args )
+        lathe = Object.new
+        mock( @state ).lathe { lathe }
+        mock( lathe ).event( :evt_name, :from => :old, :to => :new ) { nil }
+        @state.event( :evt_name, :from => :old, :to => :new )
       end
 
       it "should act as a proxy for lathe.event with a block" do
-        lathe = mock("StateFu::Lathe")
+        lathe = Object.new
         block  = lambda{}
-        @state.stub!( :lathe ).and_return( lathe )
+        stub( @state ).lathe { lathe }
         args = [:evt_name, {:from => :old, :to => :new}]
-        lathe.should_receive(:event).with( *args )
+        mock( lathe ).event( *args ) {}
         @state.event( *args ){ puts "TODO: can't find a way to test the block is passed" }
       end
 

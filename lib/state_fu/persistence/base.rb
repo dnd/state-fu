@@ -9,7 +9,7 @@ module StateFu
       attr_reader :binding, :field_name, :current_state
 
       def initialize( binding, field_name )
-        @binding    = binding
+        @binding       = binding
         @field_name    = field_name
         @current_state = find_current_state()
 

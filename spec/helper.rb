@@ -4,7 +4,7 @@ $: << thisdir << "#{thisdir}/../lib"
 # $: << thisdir << "#{thisdir}/vendor"
 
 require 'rubygems'
-# require 'rr'
+require 'rr'
 require 'spec'
 require 'state-fu'
 
@@ -13,10 +13,10 @@ require 'state-fu'
 #   end
 # end
 
-# Spec::Runner.configure do |config|
-#   config.mock_with :rr
-#   # config.mock_with RR::Adapters::Rspec
-# end
+Spec::Runner.configure do |config|
+  config.mock_with :rr
+  # config.mock_with RR::Adapters::Rspec
+end
 
 module MySpecHelper
 
