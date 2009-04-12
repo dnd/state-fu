@@ -62,7 +62,6 @@ module StateFu
       field_name   = field_name.to_sym
       StateFu::FuSpace.insert!( klass, self, name, field_name )
     end
-    alias_method :teach!, :bind! # TODO remove
 
     def empty?
       states.empty?

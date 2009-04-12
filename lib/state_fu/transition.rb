@@ -78,29 +78,45 @@ module StateFu
       end
     end
 
+    def run_hook( hook )
+
+      # FIXME this should have the name of the hook,
+      # not the hook itself
+      @current_hook = hook
+      return if test_only?
+      case hook
+      when Symbol
+        object.send( hook, self )
+      when Proc
+        if hook.arity == 1
+          hook.call( self )
+        else
+          instance_eval( &hook )
+        end
+      end
+    end
+
+    def halt!( message )
+      raise TransitionHalted.new( self, message )
+    end
+
     def fire!
       return false if fired? # no infinite loops please
       @fired = true
       begin
         hooks.each do |hook|
-          @current_hook = hook
-          begin
-            if pretending?
-              current_hook.test( self )
-            else
-              current_hook.apply!( self )
-            end
-          rescue TransitionHalted => e
+          # begin
+            run_hook( hook )
+          # rescue TransitionHalted => e
             # ensure the error has all our lovely context
-            e.transition = self
-            raise e
-          end
+            # e.transition = self
+          #   raise e
+          # end
         end
         @binding.persister.current_state = @target
         @accepted                        = true
       rescue TransitionHalted => e
-        # do something
-        raise e
+        @errors << e
       end
       return !halted?
     end

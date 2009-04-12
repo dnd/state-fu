@@ -108,14 +108,14 @@ describe "A pristine class Klass with StateFu included:" do
         end
       end
 
-      # sorry, Darwinism, not Lamarckism.
+      # sorry, Lamarckism not supported
       it "does NOT inherit it's parent class' Machines !!" do
         Child.machine.should_not == Klass.machine
       end
 
-      it "should know the Machine after calling Klass.machine.teach!( Child )" do
+      it "should know the Machine after calling Klass.machine.bind!( Child )" do
         Child.machine.should_not == Klass.machine
-        Klass.machine.teach!( Child )
+        Klass.machine.bind!( Child )
         Child.machine.should == Klass.machine
       end
 

@@ -1,5 +1,6 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
+# TODO - this is really an integration spec and should be moved as appropriate
 describe StateFu::Transition do
   include MySpecHelper
   before do
@@ -416,7 +417,7 @@ describe StateFu::Transition do
     end    # state_fu instance methods
   end      # 1 state w/ cyclic event
 
-  describe "A simple machine w/ 2 states, 1 event and all hooks defined" do
+  describe "A simple machine w/ 2 states, 1 event and named hooks " do
     before do
       @machine = Klass.machine do
 
@@ -446,14 +447,186 @@ describe StateFu::Transition do
       @obj   = Klass.new
     end # before
 
+    describe "state :a" do
+      it "should have a hook for on_exit" do
+        @a.hooks[:exit].should == [ :exiting_a ]
+      end
+    end
+
+    describe "state :b" do
+      it "should have a hook for on_entry" do
+        @b.hooks[:entry].should == [ :entering_b ]
+      end
+    end
+
+    describe "event :go" do
+      it "should have a hook for before" do
+        @event.hooks[:before].should == [ :before_go ]
+      end
+
+      it "should have a hook for execute" do
+        @event.hooks[:execute].should == [ :execute_go ]
+      end
+
+      it "should have a hook for after" do
+        @event.hooks[:execute].should == [ :execute_go ]
+      end
+    end
+
+
     describe "a transition for the event" do
-      it "should have hooks" do
+
+      it "should have all defined hooks in correct order of execution" do
         t = @obj.state_fu.transition( :go )
         t.hooks.should be_kind_of( Array )
         t.hooks.should_not be_empty
+        t.hooks.should == [ :before_go,
+                            :exiting_a,
+                            :execute_go,
+                            :entering_b,
+                            :after_go,
+                            :accepted_b ]
       end
-    end
+    end # a transition ..
+
+    describe "when fired" do
+      before do
+        @t      = @obj.state_fu.transition( :go )
+        stub( @obj ).before_go(@t)  { @called << :before_go  }
+        stub( @obj ).exiting_a(@t)  { @called << :exiting_a  }
+        stub( @obj ).execute_go(@t) { @called << :execute_go }
+        stub( @obj ).entering_b(@t) { @called << :entering_b }
+        stub( @obj ).after_go(@t)   { @called << :after_go   }
+        stub( @obj ).accepted_b(@t) { @called << :accepted_b }
+        @called = []
+        [ :before_go,
+          :exiting_a,
+          :execute_go,
+          :entering_b,
+          :after_go,
+          :accepted_b ]
+
+      end
+
+      it "should call the method for each hook on @obj in order, with the transition" do
+        mock( @obj ).before_go(@t)  { @called << :before_go  }
+        mock( @obj ).exiting_a(@t)  { @called << :exiting_a  }
+        mock( @obj ).execute_go(@t) { @called << :execute_go }
+        mock( @obj ).entering_b(@t) { @called << :entering_b }
+        mock( @obj ).after_go(@t)   { @called << :after_go   }
+        mock( @obj ).accepted_b(@t) { @called << :accepted_b }
+        @t.fire!()
+        @called.should == [ :before_go,
+                            :exiting_a,
+                            :execute_go,
+                            :entering_b,
+                            :after_go,
+                            :accepted_b ]
+
+      end
+
+      describe "adding an anonymous hook for event.hooks[:execute]" do
+        before do
+          called = @called # get us a ref for the closure
+          Klass.machine do
+            event( :go ) do
+              execute do |ctx|
+                called << :execute_proc
+              end
+            end
+          end
+        end
+
+        it "should be called at the correct point" do
+          @event.hooks[:execute].length.should == 2
+          @event.hooks[:execute].first.class.should == Symbol
+          @event.hooks[:execute].last.class.should  == Proc
+          @t.fire!()
+          @called.should == [ :before_go,
+                              :exiting_a,
+                              :execute_go,
+                              :execute_proc,
+                              :entering_b,
+                              :after_go,
+                              :accepted_b ]
+        end
+
+        it "should be replace the previous proc for a slot if redefined" do
+          called = @called # get us a ref for the closure
+          Klass.machine do
+            event( :go ) do
+              execute do |ctx|
+                called << :execute_proc_2
+              end
+            end
+          end
+
+          @event.hooks[:execute].length.should == 2
+          @event.hooks[:execute].first.class.should == Symbol
+          @event.hooks[:execute].last.class.should == Proc
+
+          @t.fire!()
+          @called.should == [ :before_go,
+                              :exiting_a,
+                              :execute_go,
+                              :execute_proc_2,
+                              :entering_b,
+                              :after_go,
+                              :accepted_b ]
+        end
+
+        describe "halting the transition during the execute hook" do
+
+          before do
+            Klass.machine do
+              event( :go ) do
+                execute do |ctx|
+                  ctx.halt!("stop")
+                end
+              end
+            end
+          end # before
+
+          it "should prevent the transition from being accepted" do
+            @obj.state_fu.state.name.should == :a
+            @t.fire!()
+            @obj.state_fu.state.name.should == :a
+            @t.should be_kind_of( StateFu::Transition )
+            @t.should be_halted
+            @t.should_not be_accepted
+            @called.should == [ :before_go,
+                                :exiting_a,
+                                :execute_go ]
+          end
+        end # halting from execute
+      end   # anon hook
+    end     # when fired
+
   end # machine w/ hooks
 
+  describe "A simple machine w/ 2 states, 1 event, named & proc hooks" do
+    before do
+      @machine = Klass.machine do
+        state :a do
+          on_exit( :exiting_a )
+        end
 
+        state :b do
+          on_entry( :entering_b )
+          accepted( :accepted_b )
+        end
+
+        event( :go ) do
+          from :a, :to => :b
+
+          before  :before_go
+          execute :execute_go
+          after   :after_go
+        end
+
+        initial_state :a
+      end
+    end
+
+  end # machine w/ named & proc hooks
 end

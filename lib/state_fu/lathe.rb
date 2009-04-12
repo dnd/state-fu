@@ -65,11 +65,32 @@ module StateFu
       define_sprocket( :event, name, options, &block )
     end
 
-    def define_hook *args, &block # type, names, options={}, &block
+    def __define_hook *args, &block # type, names, options={}, &block
       options      = args.extract_options!.symbolize_keys!
       type         = args.shift
       method_names = args
       Logger.info "define_hook: not implemented"
+    end
+
+    def define_hook slot, method_name=nil, &block
+      hook = block_given? ? block : method_name
+      unless sprocket.hooks.has_key?( slot )
+        raise ArgumentError, "invalid hook type #{slot.inspect} for #{sprocket.class}"
+      end
+      case hook
+      when Proc
+        unless (-1..1).include?( hook.arity )
+          raise ArgumentError, "unexpected block arity: #{hook.arity}"
+        end
+        # SPECME: a proc should clobber any existing proc for this slot
+        sprocket.hooks[slot].delete_if { |h| Proc === h }
+      when Symbol
+        # prevent duplicates
+        sprocket.hooks[slot].delete_if { |h| hook == h }
+      else
+        raise ArgumentError, hook.class.to_s
+      end
+      sprocket.hooks[slot] << hook
     end
 
     public

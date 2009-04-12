@@ -63,7 +63,7 @@ describe "A simple Machine definition" do
           end
 
           states :ALL do
-            after(:save!)
+            accepted(:save!)
           end
 
         end

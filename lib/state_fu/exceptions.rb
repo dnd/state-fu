@@ -7,7 +7,9 @@ module StateFu
   class TransitionHalted < Exception
     attr_reader :transition
     DEFAULT_MESSAGE = "The transition was halted"
-    def initialize( transition, message=DEFAULT_MESSAGE, options={} )
+    def initialize( transition, message=DEFAULT_MESSAGE )
+      @transition = transition
+      @message    = message
     end
   end
 
