@@ -134,16 +134,16 @@ module StateFu
     alias_method :om,             :binding
     alias_method :stateful,       :binding
     alias_method :zen,            :binding
-    alias_method :machine,           :binding
-    alias_method :zen_machine,       :binding
-    alias_method :binding,     :binding
+    alias_method :machine,        :binding
+    alias_method :zen_machine,    :binding
+    alias_method :binding,        :binding
     alias_method :machine,        :binding
     alias_method :present,        :binding
 
     alias_method :statefully,     :machine
     alias_method :machine,        :machine
     alias_method :workflow,       :machine
-    alias_method :zen_machine,       :machine
+    alias_method :zen_machine,    :machine
 
     alias_method :write? ,        :live?
     alias_method :destructive?,   :live?
