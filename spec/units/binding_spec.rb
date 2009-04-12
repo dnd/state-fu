@@ -66,6 +66,11 @@ describe StateFu::Binding do
       machine.events.first.target.should_not be_nil
     end
 
+    describe "firing events" do
+      describe "fire! method" do
+
+      end
+    end
 
     describe ".state()" do
       it "should default to machine.initial_state when no initial_state is explicitly defined" do

@@ -22,6 +22,7 @@ require 'state_fu/state'
 require 'state_fu/event'
 require 'state_fu/hooks'
 require 'state_fu/interface'
+require 'state_fu/transition'
 
 module StateFu
   DEFAULT_MACHINE    = :om

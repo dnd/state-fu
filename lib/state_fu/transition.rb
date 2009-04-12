@@ -20,11 +20,28 @@ module StateFu
 
     attr_accessor :only_pretend
 
-    def initialize( binding, origin, target, event, *args, &block )
-      apply!( args ) # handle options
-      @binding = binding
+    def initialize( binding, event, target=nil, options={}, *args, &block )
+      # ensure event is a StateFu::Event
+      if event.is_a?( Symbol )
+        event = binding.machine.events[ event ]
+      end
+      if !event.is_a?( StateFu::Event )
+        raise ArgumentError, event.inspect
+      end
+
+      # ensure target is a StateFu::State
+      if target.nil?
+        if event.target.is_a?( Array ) && event.target.length == 1
+          target = event.target.first
+        else
+          raise( ArgumentError, "target cannot be determined" )
+        end
+      end
+
+      @options    = options.symbolize_keys!
+      @binding    = binding
       @object     = binding.object
-      @origin     = origin
+      @origin     = binding.current_state
       @target     = target
       @event      = event
       @args       = args
@@ -37,9 +54,9 @@ module StateFu
     end
 
     def hooks()
-      [ origin.hooks,
-        event.hooks,
-        target.hooks ].sort
+      StateFu::Hooks::ALL_HOOKS.map do |arr|
+        send(arr[0]).hooks[arr[1]]
+      end.flatten
     end
 
     def current_state
@@ -68,9 +85,11 @@ module StateFu
             raise e
           end
         end
-        @accepted = true
+        @binding.persister.current_state = @target
+        @accepted                        = true
       rescue TransitionHalted => e
-        #
+        # do something
+        raise e
       end
       return !halted?
     end

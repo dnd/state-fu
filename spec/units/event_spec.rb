@@ -27,6 +27,10 @@ describe StateFu::Event do
     describe "Instance methods" do
       describe "setting origin / target" do
 
+        describe "single_target?" do
+          it "should be true if the target is set and there is only one"
+        end
+
         describe 'origin=' do
           it "should call get_states_list_by_name with its argument" do
             mock( @machine ).find_or_create_states_by_name( [:initial] ) { }

@@ -10,6 +10,7 @@ module StateFu
 
     EVENT_HOOKS = ALL_HOOKS.select { |type, name| type == :event }
     STATE_HOOKS = ALL_HOOKS - EVENT_HOOKS
+    HOOK_NAMES  = ALL_HOOKS.map {|a| a[1] }
 
     # just turn the above into what each class needs
     # and make it into a nice hash: { :name =>[ hook, ... ], ... }

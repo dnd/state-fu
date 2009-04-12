@@ -7,7 +7,7 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * TODOs
-** event fire method on disciple.
+** event fire method on object / binding
 ** koan units
 ** other units
 ** integration specs

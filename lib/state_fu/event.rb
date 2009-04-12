@@ -39,6 +39,10 @@ module StateFu
         all?{ |f| !(f.nil? || f.empty?) }
     end
 
+    def single_target?
+      target && target.is_a?( Array ) && target.length == 1
+    end
+
     #
     # Proxy methods to StateFu::Lathe
     #

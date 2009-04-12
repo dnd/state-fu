@@ -97,7 +97,7 @@ task :clean => :clobber_package
 
 desc 'Runs irb in this project\'s context'
 task :irb do |t|
-  exec 'irb -I lib -r state_fu-koan'
+  exec 'irb -I lib -r state-fu'
 end
 
 desc 'Runs rdoc on the project lib directory'

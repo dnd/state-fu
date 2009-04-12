@@ -74,48 +74,50 @@ describe StateFu::Machine do
       end
     end
 
+    it "should have specs for Machine instance methods"
+
     describe ".apply!" do
-      it "..."
+
     end
 
     describe ".bind!" do
-      it "..."
+
     end
 
     describe ".initial_state=" do
-      it "..."
+
     end
 
     describe ".initial_state" do
-      it "..."
+
     end
 
     describe ".states" do
-      it "..."
+
     end
 
     describe ".state_names" do
-      it "..."
+
     end
 
     describe ".events" do
-      it "..."
+
     end
 
     describe ".event_names" do
-      it "..."
+
     end
 
     describe ".define_state" do
-      it "..."
+
     end
 
     describe ".define_event" do
-      it "..."
+
     end
 
     describe ".find_or_create_states_by_name" do
-      it "..."
+
     end
 
   end

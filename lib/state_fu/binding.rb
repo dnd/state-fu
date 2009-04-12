@@ -1,14 +1,15 @@
 module StateFu
   class Binding
 
-    attr_reader :object, :machine, :method_name, :persister
+    attr_reader :object, :machine, :method_name, :persister, :transitions
 
     def initialize( machine, object, method_name )
       @machine       = machine
       @object        = object
       @method_name   = method_name
-
+      @transitions   = []
       field_name     = StateFu::FuSpace.field_names[object.class][@method_name]
+      raise( ArgumentError, "No field_name" ) unless field_name
       @persister     = StateFu::Persistence.for( self, field_name )
       Logger.info( "Persister added: #@persister ")
     end
@@ -31,9 +32,15 @@ module StateFu
     alias_method :at,    :current_state
     alias_method :state, :current_state
 
+    def transition( event, target=nil, options={}, &block )
+      StateFu::Transition.new( self, event, target, options, &block )
+    end
+
     # fire event
-    def fire!( event, target_state=nil, *args, &block)
-      raise "!"
+    def fire!( event, target=nil, options={}, &block)
+      t = transition( event, target, options, &block )
+      t.fire!
+      t
     end
     alias_method :call!,       :fire!
     alias_method :trigger!,    :fire!
@@ -46,10 +53,10 @@ module StateFu
     end
     alias_method :next_state!, :next!
 
-    # fire event
-    def fire!( event_or_event_name, *args, &block)
+    def cycle!( *args, &block )
       raise "!"
     end
+
     alias_method :call!,       :fire!
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!

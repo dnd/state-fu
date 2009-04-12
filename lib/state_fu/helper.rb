@@ -14,10 +14,12 @@ module StateFu
         @options.merge!( options.symbolize_keys! )
         return self unless block_given?
         case block.arity
-        when 1     # lambda{ |state| ... }.arity
+        when 1     # lambda{ |state| ... }
           yield self
-        when -1, 0 # lambda{ }.arity ( -1 in ruby 1.8.x but 0 in 1.9.x )
+        when -1, 0 # lambda{ } ( -1 in ruby 1.8.x but 0 in 1.9.x )
           instance_eval &block
+        else
+          raise ArgumentError, "unexpected block arity: #{block.arity}"
         end
         self
       end
