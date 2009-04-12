@@ -178,6 +178,7 @@ module StateFu
     # end
 
     # Bunch of silly little methods for defining events
+
     def before   *a, &b; require_sprocket( StateFu::Event ); define_hook :before,   *a, &b; end
     def on_exit  *a, &b; require_sprocket( StateFu::State ); define_hook :exit,     *a, &b; end
     def execute  *a, &b; require_sprocket( StateFu::Event ); define_hook :execute,  *a, &b; end

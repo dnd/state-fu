@@ -20,7 +20,7 @@ module StateFu
 
     attr_accessor :only_pretend
 
-    def initialize( binding, event, target=nil, options={}, *args, &block )
+    def initialize( binding, event, target=nil, *args, &block )
       # ensure event is a StateFu::Event
       if event.is_a?( Symbol )
         event = binding.machine.events[ event ]
@@ -29,7 +29,7 @@ module StateFu
         raise ArgumentError, event.inspect
       end
 
-      # ensure target is a StateFu::State
+      # ensure target is a valid StateFu::State
       if target.nil?
         if event.target.is_a?( Array ) && event.target.length == 1
           target = event.target.first
@@ -37,8 +37,19 @@ module StateFu
           raise( ArgumentError, "target cannot be determined" )
         end
       end
+      if target.is_a?( Symbol )
+        target = binding.machine.states[ target ]
+      end
+      unless event.target.include?( target )
+        err_msg = "Illegal target #{target}"
+        raise( StateFu::InvalidTransition.new( binding,
+                                               event,
+                                               binding.current_state,
+                                               target,
+                                               err_msg ))
+      end
 
-      @options    = options.symbolize_keys!
+      @options    = args.extract_options!.symbolize_keys!
       @binding    = binding
       @object     = binding.object
       @origin     = binding.current_state
@@ -147,6 +158,7 @@ module StateFu
 
     alias_method :write? ,        :live?
     alias_method :destructive?,   :live?
+    alias_method :real?,          :live?
     alias_method :really?,        :live?
     alias_method :seriously?,     :live?
 

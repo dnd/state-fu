@@ -37,13 +37,13 @@ module StateFu
     end
     alias_method :events_from_current_state,  :events
 
-    def transition( event, target=nil, options={}, &block )
-      StateFu::Transition.new( self, event, target, options, &block )
+    def transition( event, target=nil, *args, &block )
+      StateFu::Transition.new( self, event, target, *args, &block )
     end
 
     # fire event
-    def fire!( event, target=nil, options={}, &block)
-      t = transition( event, target, options, &block )
+    def fire!( event, target=nil, *args, &block)
+      t = transition( event, target, *args, &block )
       t.fire!
       t
     end
@@ -53,7 +53,7 @@ module StateFu
 
     # fire event to move to the next state, if there is only one possible state.
     # otherwise raise an error ( NoNextStateError)
-    def next!( options={}, &block )
+    def next!( *args, &block )
       next_events = events.select {|e| e.target.length == 1 }
       case next_events.length
       when 0
@@ -63,7 +63,8 @@ module StateFu
                                               nil,
                                               err_msg )
       when 1
-        fire!( next_events.first, nil, options, &block )
+        event = next_events.first
+        fire!( event, nil, *args, &block )
       else
         err_msg = "There is more than one candidate event for next!"
         raise StateFu::InvalidTransition.new( self,
@@ -74,11 +75,11 @@ module StateFu
     end
     alias_method :next_state!, :next!
 
-    def cycle!( options={}, &block )
+    def cycle!( *args, &block )
       cycle_events = events.select {|e| e.target == [current_state] }
       if cycle_events.length == 1
         event = cycle_events.first
-        fire!( event )
+        fire!( event, nil, *args, &block )
       else
         err_msg = "Cannot cycle! unless there is exactly one event leading from the current state to itself"
         raise StateFu::InvalidTransition.new( self,
