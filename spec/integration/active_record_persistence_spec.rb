@@ -77,7 +77,7 @@ describe "an ActiveRecord model with StateFu " do
     ex = ExampleRecord.new( :name => "exemplar" )
     ex.state_fu
     ex.state_fu.should be_kind_of( StateFu::Binding )
-    ex.state_fu.persister.field_name.should == :om_state
+    ex.state_fu.persister.field_name.should == :state_fu_state
     ex.state_fu.persister.should be_kind_of( StateFu::Persistence::ActiveRecord )
 
   end

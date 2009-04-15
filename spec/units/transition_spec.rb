@@ -89,10 +89,10 @@ describe StateFu::Transition do
 
         it "should change the field when persistence is via an attribute" do
           @obj.state_fu.persister.should be_kind_of( StateFu::Persistence::Attribute )
-          @obj.state_fu.persister.field_name.should == :om_state
-          @obj.send( :om_state ).should == "src"
+          @obj.state_fu.persister.field_name.should == :state_fu_state
+          @obj.send( :state_fu_state ).should == "src"
           @t.fire!
-          @obj.send( :om_state ).should == "dest"
+          @obj.send( :state_fu_state ).should == "dest"
         end
       end # transition.fire!
 
@@ -291,11 +291,11 @@ describe StateFu::Transition do
 
     before do
       @machine = Klass.machine do
-        state :omega do
-          event :transfer, :to => :omega
+        state :state_fuega do
+          event :transfer, :to => :state_fuega
         end
       end
-      @state = @machine.states[:omega]
+      @state = @machine.states[:state_fuega]
       @event = @machine.events.first
       @obj   = Klass.new
     end

@@ -29,7 +29,7 @@ describe "An instance of Klass with StateFu included:" do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_MACHINE.should == :om
+      StateFu::DEFAULT_MACHINE.should == :state_fu
     end
 
     it "should return a StateFu::Binding given .om()" do
@@ -43,19 +43,19 @@ describe "An instance of Klass with StateFu included:" do
     end
 
     describe "after .om()" do
-      it "should return { :om => <StateFu::Binding>} given .bindings()" do
+      it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
         @k.om()
         @k.bindings().length.should == 1
-        @k.bindings().keys.should == [:om]
+        @k.bindings().keys.should == [:state_fu]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
 
     describe "after .meditate!()" do
-      it "should return { :om => <StateFu::Binding>} given .bindings()" do
+      it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
         @k.meditate!()
         @k.bindings().length.should == 1
-        @k.bindings().keys.should == [:om]
+        @k.bindings().keys.should == [:state_fu]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
@@ -70,14 +70,14 @@ describe "An instance of Klass with StateFu included:" do
         end
       end
 
-      it "should return the same Binding given .om() and .om(:om)" do
+      it "should return the same Binding given .om() and .om(:state_fu)" do
         @k.binding().should be_kind_of( StateFu::Binding )
-        @k.binding().should == @k.om(:om)
+        @k.binding().should == @k.om(:state_fu)
       end
 
       it "should return a StateFu::Binding given .om(:two)" do
         @k.om(:two).should be_kind_of( StateFu::Binding )
-        @k.om(:two).should_not == @k.om(:om)
+        @k.om(:two).should_not == @k.om(:state_fu)
       end
 
       it "should return nil given .om(:hibiscus)" do
