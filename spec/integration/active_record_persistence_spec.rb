@@ -9,7 +9,7 @@ require 'active_record'
 class CreateTables < ActiveRecord::Migration
   def self.up
     create_table :example_records do |t|
-      t.string :name,                  :null => false
+      t.string :name,           :null => false
       t.string :state_fu_state, :null => false
       t.timestamps
     end
@@ -28,6 +28,8 @@ describe "an ActiveRecord model with StateFu " do
   before(:each) do
 
     reset!
+
+    # class ExampleRecord < ActiveRecord::Base
     make_pristine_class( 'ExampleRecord', ActiveRecord::Base )
     ExampleRecord.class_eval do
       validates_presence_of :name
@@ -38,8 +40,13 @@ describe "an ActiveRecord model with StateFu " do
         end
       end
 
+      # this ensures state_fu initializes the field before create to
+      # satisfy the not null constraint
       before_create :state_fu!
     end
+    # end class ExampleRecord
+
+
     @db_config = {
       :adapter  => 'sqlite3',
       :database => ':memory:'
