@@ -71,8 +71,8 @@ module StateFu
     # makes sense to you.
     module InstanceMethods
       private
-      def _om
-        @_om ||= {}
+      def _state_fu
+        @_state_fu ||= {}
       end
 
       # A StateFu::Binding comes into being, linking your object and a
@@ -89,7 +89,7 @@ module StateFu
       def binding( name=StateFu::DEFAULT_MACHINE )
         name = name.to_sym
         if mach = StateFu::FuSpace.class_machines[self.class][name]
-          _om[name] ||= StateFu::Binding.new( mach, self, name )
+          _state_fu[name] ||= StateFu::Binding.new( mach, self, name )
         end
       end
 
@@ -106,7 +106,7 @@ module StateFu
       # has contemplated into being.
       # Returns a Hash of { :name => <StateFu::Binding>, ... }
       def bindings()
-        _om
+        _state_fu
       end
 
       alias_method :fus,          :bindings
