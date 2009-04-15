@@ -5,6 +5,8 @@ module StateFu
   class Machine
     include Helper
 
+    DEFAULT_FIELD_NAME_SUFFIX = '_state'
+
     # analogous to self.for_class, but keeps machines in
     # global space, not tied to a specific class.
     # def self.[] name, options, &block
@@ -58,7 +60,7 @@ module StateFu
     # make it so a class which has included StateFu has a binding to
     # this machine
     def bind!( klass, name=StateFu::DEFAULT_MACHINE, field_name = nil )
-      field_name ||= name.to_s.downcase.tr(' ', '_') + "_state"
+      field_name ||= name.to_s.underscore.tr(' ', '_') + DEFAULT_FIELD_NAME_SUFFIX
       field_name   = field_name.to_sym
       StateFu::FuSpace.insert!( klass, self, name, field_name )
     end
@@ -70,7 +72,11 @@ module StateFu
     def initial_state=( s )
       case s
       when Symbol, String, StateFu::State
-        @initial_state =  states[ s.to_sym ] ||  StateFu::State.new( self, s.to_sym )
+        unless init_state = states[ s.to_sym ]
+          init_state = StateFu::State.new( self, s.to_sym )
+          states << init_state
+        end
+        @initial_state = init_state
       else
         raise( ArgumentError, s.inspect )
       end
@@ -93,9 +99,9 @@ module StateFu
     def find_or_create_states_by_name( *names )
       names.flatten.select do |s|
         s.is_a?( Symbol ) || s.is_a?( StateFu::State )
-      end.map do |name|
-        unless state = states[name.to_sym]
-          state = StateFu::State.new( self, name )
+      end.map do |s|
+        unless state = states[s.to_sym]
+          state = s.is_a?( StateFu::State ) ? s : StateFu::State.new( self, s )
           self.states << state
         end
         state

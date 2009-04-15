@@ -31,12 +31,11 @@ describe StateFu::Machine do
         end
 
         it "should apply the block if one is given"
+        # dont know how to spec this
       end
 
       describe "when there's a matching machine in FuSpace" do
         before do
-          reset!
-          make_pristine_class 'Klass'
           @machine = Object.new
           mock( StateFu::FuSpace ).class_machines() { { Klass => { :moose => @machine } } }
         end
@@ -46,6 +45,7 @@ describe StateFu::Machine do
         end
 
         it "should apply the block if one is given"
+        # dont know how to spec this
       end
 
     end
@@ -53,6 +53,8 @@ describe StateFu::Machine do
 
   describe "instance methods" do
     before do
+      reset!
+      make_pristine_class 'Klass'
       @mchn = StateFu::Machine.new( :spec_machine, options={} )
     end
 
@@ -74,52 +76,136 @@ describe StateFu::Machine do
       end
     end
 
-    it "should have specs for Machine instance methods"
-
     describe ".apply!" do
 
     end
 
     describe ".bind!" do
+      it "should call StateFu::FuSpace.insert! with itself and its arguments" do
+        field_name = :my_field_name
+        mock( StateFu::FuSpace ).insert!( Klass, @mchn, :newname, field_name ) {}
+        @mchn.bind!( Klass, :newname, field_name )
+      end
 
+      it "should generate a field name if none is given" do
+        klass      = Klass
+        name       = :StinkJuice
+        field_name = 'stink_juice_state'
+        mock( StateFu::FuSpace ).insert!( Klass, @mchn, name, field_name.to_sym ) {}
+        @mchn.bind!( Klass, name )
+      end
     end
 
     describe ".initial_state=" do
 
+      it "should set @initial_state given a String, Symbol or State for an existing state" do
+        state = StateFu::State.new( @mchn, :wizzle )
+        @mchn.states << state
+        @mchn.initial_state = state
+        @mchn.initial_state.should == state
+      end
+
+      it "should create the state if it doesnt exist" do
+        @mchn.initial_state = :snoo
+        @mchn.initial_state.should be_kind_of( StateFu::State )
+        @mchn.initial_state.name.should == :snoo
+        @mchn.states.should include( @mchn.initial_state )
+      end
+
+      it "should raise an ArgumentError given a number or an Array" do
+        lambda do @mchn.initial_state = 6
+        end.should raise_error( ArgumentError )
+
+        lambda do @mchn.initial_state = [:ping]
+        end.should raise_error( ArgumentError )
+      end
+
     end
 
     describe ".initial_state" do
+      it "should return nil if there are no states and initial_state= has not been called" do
+        @mchn.states.should == []
+        @mchn.initial_state.should == nil
+      end
+
+      it "should return the first state if one exists" do
+        stub( @mchn ).states() {  [:a, :b, :c] }
+        @mchn.initial_state.should == :a
+      end
 
     end
 
     describe ".states" do
-
+      it "should return an array extended with StateFu::StateArray" do
+        @mchn.states.should be_kind_of( Array )
+        @mchn.states.extended_by.should include( StateFu::StateArray )
+      end
     end
 
     describe ".state_names" do
-
+      it "should return a list of symbols of state names" do
+        @mchn.states << StateFu::State.new( @mchn, :a )
+        @mchn.states << StateFu::State.new( @mchn, :b )
+        @mchn.state_names.should == [:a, :b ]
+      end
     end
 
     describe ".events" do
-
+      it "should return an array extended with StateFu::EventArray" do
+        @mchn.events.should be_kind_of( Array )
+        @mchn.events.extended_by.should include( StateFu::EventArray )
+      end
     end
 
     describe ".event_names" do
-
-    end
-
-    describe ".define_state" do
-
-    end
-
-    describe ".define_event" do
-
+      it "should return a list of symbols of event names" do
+        @mchn.events << StateFu::Event.new( @mchn, :a )
+        @mchn.events << StateFu::Event.new( @mchn, :b )
+        @mchn.event_names.should == [:a, :b ]
+      end
     end
 
     describe ".find_or_create_states_by_name" do
+      describe "given an array of symbols" do
+        it "should return the states named by the symbols if they exist" do
+          a = StateFu::State.new( @mchn, :a )
+          b = StateFu::State.new( @mchn, :b )
+          @mchn.states << a
+          @mchn.states << b
+          @mchn.find_or_create_states_by_name( :a, :b ).should == [a, b]
+          @mchn.find_or_create_states_by_name( [:a, :b] ).should == [a, b]
+        end
 
+        it "should return the states named by the symbols and create them if they don't exist" do
+          @mchn.states.should == []
+          res = @mchn.find_or_create_states_by_name( :a, :b )
+          res.should be_kind_of( Array )
+          res.length.should == 2
+          res.all? { |e| e.class == StateFu::State  }.should be_true
+          res.map(&:name).should == [ :a, :b ]
+          @mchn.find_or_create_states_by_name( :a, :b ).should == res
+        end
+      end
+
+      describe "given an array of states" do
+        it "should return the states if they're in the machine's states array" do
+          a = StateFu::State.new( @mchn, :a )
+          b = StateFu::State.new( @mchn, :b )
+          @mchn.states << a
+          @mchn.states << b
+          @mchn.find_or_create_states_by_name( a, b ).should == [a, b]
+          @mchn.find_or_create_states_by_name( [a, b] ).should == [a, b]
+          @mchn.find_or_create_states_by_name( [[a, b]] ).should == [a, b]
+        end
+
+        it "should add the states to the machine's states array if they're absent" do
+          a = StateFu::State.new( @mchn, :a )
+          b = StateFu::State.new( @mchn, :b )
+          @mchn.find_or_create_states_by_name( a, b ).should == [a, b]
+          @mchn.find_or_create_states_by_name( [a, b] ).should == [a, b]
+          @mchn.find_or_create_states_by_name( [[a, b]] ).should == [a, b]
+        end
+      end
     end
-
   end
-
 end
