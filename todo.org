@@ -7,7 +7,6 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * TODOs
-** activerecord persistence spec
 ** simple event firing methods on object / binding
 ** refactor transition unit spec to integration & unit specs
 ** update account example integration spec

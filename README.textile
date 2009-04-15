@@ -17,6 +17,12 @@ State-Fu is currently under active development. I'm not yet using it
 in production, but it has a fairly stable API, reasonable spec
 coverage and should have features sufficient for most use cases.
 
+It plays nicely with both ActiveRecord models and standard ruby
+classes; it requires ActiveSupport but not ActiveRecord, and will use
+an ActiveRecord column for persistence if an appropriate column
+exists. You can even mix machines using ActiveRecord- &
+attribute-based persistence on the same model.
+
 Until I've written an introductory example specifically for this
 README, you can take a look at the specs (especially the integration
 specs) for example usage.
