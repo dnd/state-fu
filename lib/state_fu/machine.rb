@@ -1,18 +1,8 @@
 module StateFu
-  #
-  # TODO - rename to ... Machine ?
-  #
   class Machine
     include Helper
 
     DEFAULT_FIELD_NAME_SUFFIX = '_state'
-
-    # analogous to self.for_class, but keeps machines in
-    # global space, not tied to a specific class.
-    # def self.[] name, options, &block
-    #   # is there a use case for this or is it just unneccesary complexity?
-    #   raise "pending"
-    # end
 
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
