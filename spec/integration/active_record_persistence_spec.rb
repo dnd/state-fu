@@ -26,7 +26,7 @@ class CreateTables < ActiveRecord::Migration
   def self.up
     create_table :example_records do |t|
       t.string :name,                  :null => false
-      t.string :example_machine_state, :null => false
+      t.string :state_fu_state, :null => false
       t.timestamps
     end
   end
