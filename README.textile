@@ -2,7 +2,7 @@
 require 'redcloth'; puts RedCloth.new( DATA.read ).to_html
 __END__
 
-h1. StateFu ( ALPHA / UNRELEASED )
+h1. StateFu
 
 State Fu is a rich framework for describing state machines,
 workflows and rules engines in ruby and/or Rails.
@@ -11,6 +11,15 @@ It aims to be the most featureful, expressive and powerful such
 library available, without sacrificing ease of use, clarity, or
 performance.
 
-State-Fu is currently under active development (no releases
-yet). Those seeking a production-ready alternative should consider
-rubyist-aasm or jbarnette-stateful.
+h2. Status
+
+State-Fu is currently under active development. I'm not yet using it
+in production, but it has a fairly stable API, reasonable spec
+coverage and should have features sufficient for most use cases.
+
+Until I've written an introductory example specifically for this
+README, you can take a look at the specs (especially the integration
+specs) for example usage.
+
+Note that the 'rspec' and 'rr' gems are required to run the specs.
+
