@@ -25,7 +25,7 @@ require 'state_fu/interface'
 require 'state_fu/transition'
 
 module StateFu
-  DEFAULT_MACHINE    = :om
+  DEFAULT_MACHINE    = :state_fu
 
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )
