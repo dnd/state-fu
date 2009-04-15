@@ -4,22 +4,6 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 ##
 ##
 
-
-# class ExampleRecord < ActiveRecord::Base
-#
-#   include StateFu
-#
-#   validates_presence_of :name
-#
-#   machine do
-#     state :initial do
-#       event :change, :to => :final
-#     end
-#   end
-#
-#   before_create :state_fu!
-# end
-#
 require 'active_record'
 
 class CreateTables < ActiveRecord::Migration
@@ -39,6 +23,8 @@ end
 describe "an ActiveRecord model with StateFu " do
 
   include MySpecHelper
+  include NoStdout
+
   before(:each) do
 
     reset!
@@ -59,7 +45,9 @@ describe "an ActiveRecord model with StateFu " do
       :database => ':memory:'
     }
     ActiveRecord::Base.establish_connection( @db_config )
-    CreateTables.migrate( :up )
+    no_stdout do
+      CreateTables.migrate( :up )
+    end
   end
 
   it "should be a subclass of ActiveRecord::Base" do
@@ -77,18 +65,29 @@ describe "an ActiveRecord model with StateFu " do
     ex = ExampleRecord.new( :name => "exemplar" )
     ex.state_fu
     ex.state_fu.should be_kind_of( StateFu::Binding )
-    ex.state_fu.persister.field_name.should == :state_fu_state
     ex.state_fu.persister.should be_kind_of( StateFu::Persistence::ActiveRecord )
-
+    ex.state_fu.persister.field_name.should == :state_fu_state
   end
 
-  it "should create a record given only a name" do
-    pending()
+  it "should create a record given only a name, with the field set to the initial state" do
     ex = ExampleRecord.new( :name => "exemplar" )
     ex.should be_valid
+    ex.state_fu_state.should == nil
     ex.save!
     ex.should_not be_new_record
+    ex.state_fu_state.should == 'initial'
+    ex.state_fu.state.name.should == :initial
   end
+
+  it "should update the field after a successful transition" do
+    ex = ExampleRecord.create!( :name => "exemplar" )
+    ex.state_fu.state.name.should == :initial
+    ex.state_fu_state.should == 'initial'
+    ex.state_fu.fire!( :change )
+    ex.state_fu.state.name == :final
+    ex.state_fu_state.should == 'final'
+  end
+
 
 
 end

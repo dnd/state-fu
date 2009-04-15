@@ -7,6 +7,7 @@ require 'rubygems'
 require 'rr'
 require 'spec'
 require 'state-fu'
+require File.join( thisdir, '..' , 'lib', 'no_stdout' )
 
 # module StateFuMatchers
 #   class HaveStatesMatcher
