@@ -6,18 +6,27 @@ module StateFu
 
   class TransitionHalted < Exception
     attr_reader :transition
+
     DEFAULT_MESSAGE = "The transition was halted"
+
     def initialize( transition, message=DEFAULT_MESSAGE )
       @transition = transition
+      @binding    = transition.binding
       @message    = message
     end
   end
 
   class InvalidTransition < Exception
     attr_reader :binding, :origin, :target, :args
+
     DEFAULT_MESSAGE = "An invalid transition was attempted"
 
-    def initialize( binding, event, origin, target, message=DEFAULT_MESSAGE, options={})
+    def initialize( binding,
+                    event,
+                    origin,
+                    target,
+                    message=DEFAULT_MESSAGE,
+                    options={})
       @binding = binding
       @origin  = origin
       @target  = target

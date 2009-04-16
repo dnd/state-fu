@@ -30,13 +30,14 @@ module StateFu
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options, :helpers
+    attr_reader :states, :events, :options, :helpers, :named_procs
 
     def initialize( name, options={}, &block )
       @states  = [].extend( StateArray  )
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
-      @options = options
+      @named_procs = {}
+      @options            = options
     end
 
     # merge the commands in &block with the existing machine

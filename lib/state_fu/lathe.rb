@@ -73,22 +73,28 @@ module StateFu
     end
 
     def define_hook slot, method_name=nil, &block
-      hook = block_given? ? block : method_name
       unless sprocket.hooks.has_key?( slot )
         raise ArgumentError, "invalid hook type #{slot.inspect} for #{sprocket.class}"
       end
-      case hook
-      when Proc
-        unless (-1..1).include?( hook.arity )
-          raise ArgumentError, "unexpected block arity: #{hook.arity}"
+      if block_given?
+        unless (-1..1).include?( block.arity )
+          raise ArgumentError, "unexpected block arity: #{block.arity}"
         end
-        # SPECME: a proc should clobber any existing proc for this slot
-        sprocket.hooks[slot].delete_if { |h| Proc === h }
-      when Symbol
+        if method_name.is_a?( Symbol )
+          machine.named_procs[method_name] = block
+          hook = method_name
+        else
+          hook = block
+          # allow only one anonymous hook per slot in the interests of
+          # sanity - replace any pre-existing ones
+          sprocket.hooks[slot].delete_if { |h| Proc === h }
+        end
+      elsif method_name.is_a?( Symbol )
+        hook = method_name
         # prevent duplicates
         sprocket.hooks[slot].delete_if { |h| hook == h }
       else
-        raise ArgumentError, hook.class.to_s
+        raise ArgumentError, "#{method_name.class} is not a symbol"
       end
       sprocket.hooks[slot] << hook
     end

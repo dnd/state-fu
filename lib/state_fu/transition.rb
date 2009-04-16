@@ -9,6 +9,7 @@ module StateFu
   class Transition
     include StateFu::Helper
     attr_reader(  :binding,
+                  :machine,
                   :origin,
                   :target,
                   :event,
@@ -16,6 +17,7 @@ module StateFu
                   :errors,
                   :object,
                   :options,
+                  :current_hook_slot,
                   :current_hook )
 
     attr_accessor :only_pretend
@@ -51,6 +53,7 @@ module StateFu
 
       @options    = args.extract_options!.symbolize_keys!
       @binding    = binding
+      @machine    = binding.machine
       @object     = binding.object
       @origin     = binding.current_state
       @target     = target
@@ -62,6 +65,10 @@ module StateFu
       # This is your chance to extend the Transition with custom
       # methods, etc so that it models your problem domain.
       apply!( &block ) if block_given?
+    end
+
+    def hooks_for( element, slot )
+      send(element).hooks[slot]
     end
 
     def hooks()
@@ -79,19 +86,23 @@ module StateFu
     end
 
     def run_hook( hook )
-
-      # FIXME this should have the name of the hook,
-      # not the hook itself
-      @current_hook = hook
-      return if test_only?
+      return if test_only? # TODO - is this what we want?
       case hook
       when Symbol
-        object.send( hook, self )
+        unless proc = machine.named_procs[hook]
+          # call a normal method on the object
+          # passing the transition as the argument
+          object.send( hook, self )
+        end
       when Proc
-        if hook.arity == 1
-          hook.call( self )
+        proc = hook
+      end
+      if proc
+        # it's a named proc - check its arity and call it
+        if proc.arity == 1
+          object.instance_exec( self, &proc )
         else
-          instance_eval( &hook )
+          instance_eval( &proc )
         end
       end
     end
@@ -104,21 +115,23 @@ module StateFu
       return false if fired? # no infinite loops please
       @fired = true
       begin
-        hooks.each do |hook|
-          # begin
+        StateFu::Hooks::ALL_HOOKS.each do |arr|
+          @current_hook_slot = arr
+          hooks = hooks_for( *arr )
+          hooks.each do |hook|
+            @current_hook = hook
             run_hook( hook )
-          # rescue TransitionHalted => e
-            # ensure the error has all our lovely context
-            # e.transition = self
-          #   raise e
-          # end
+          end
         end
+        # transition complete
         @binding.persister.current_state = @target
+        @current_hook_slot               = nil
+        @current_hook                    = nil
         @accepted                        = true
       rescue TransitionHalted => e
         @errors << e
       end
-      return !halted?
+      return accepted?
     end
 
     def halted?
@@ -160,17 +173,10 @@ module StateFu
 
     alias_method :om,             :binding
     alias_method :stateful,       :binding
-    alias_method :zen,            :binding
-    alias_method :machine,        :binding
-    alias_method :zen_machine,    :binding
     alias_method :binding,        :binding
-    alias_method :machine,        :binding
     alias_method :present,        :binding
 
-    alias_method :statefully,     :machine
-    alias_method :machine,        :machine
     alias_method :workflow,       :machine
-    alias_method :zen_machine,    :machine
 
     alias_method :write? ,        :live?
     alias_method :destructive?,   :live?

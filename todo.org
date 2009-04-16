@@ -7,11 +7,10 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * TODOs
-** event fire method on object / binding
-** koan units
-** other units
-** integration specs
-** settle on rr or rspec (!) mocking
+** refactor transition unit specs ( really are integration specs )
+** hooks w/ name & proc should be defined as methods on object?
+** guard conditions: stop transitions without requiring attempted fire!
+** test-only transitions
 
 ====================================================
 
@@ -33,12 +32,8 @@
 *** find permissable events and try firing them; repeat until deadlock
 ** DONE storing meta-information in options for integration with eg Rails controllers, views
 ** Rails helpers for views etc? Tie-in to controller stuff?
-** event hooks
-** conditionals / halting
-*** halt!
-*** halt_if | halt_unless
+** conditionals - guards & test transitions
 *** needs / requires
-
 ** TESTED Persistence w/ Marshall.dump / reload
    works a treat as long as you got no procs
 *** useful though?
@@ -65,8 +60,6 @@
 **** -> common interchange format? ie, hash / marshal.dump / yaml ?
 *** cast to string / json / ... without looking like ass
 *** able to generate dot / graphviz
-
-*
 
 ** Class/object API
 *** should be interchangeable

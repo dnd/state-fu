@@ -127,8 +127,9 @@ describe StateFu::Transition do
           @t.current_state.should == :accepted
         end
 
-        it "should have a current_hook of nil" do
+        it "should have a current_hook && current_hook_slot of nil" do
           @t.current_hook.should == nil
+          @t.current_hook_slot.should == nil
         end
       end # transition after fire
     end # transition instance methods
@@ -489,7 +490,7 @@ describe StateFu::Transition do
       end
     end # a transition ..
 
-    describe "when fired" do
+    describe "fire! calling hooks" do
       before do
         @t      = @obj.state_fu.transition( :go )
         stub( @obj ).before_go(@t)  { @called << :before_go  }
@@ -574,59 +575,116 @@ describe StateFu::Transition do
                               :after_go,
                               :accepted_b ]
         end
+      end   # anonymous hook
 
-        describe "halting the transition during the execute hook" do
-
-          before do
+      describe "adding a named hook with a block" do
+        describe "with arity of -1/0" do
+          it "should call the block in the context of the transition" do
+            called = @called # get us a ref for the closure
             Klass.machine do
               event( :go ) do
-                execute do |ctx|
-                  ctx.halt!("stop")
+                execute(:named_execute) do
+                  raise self.class.inspect unless self.is_a?( StateFu::Transition )
+                  called << :execute_named_proc
                 end
               end
             end
-          end # before
-
-          it "should prevent the transition from being accepted" do
-            @obj.state_fu.state.name.should == :a
             @t.fire!()
-            @obj.state_fu.state.name.should == :a
-            @t.should be_kind_of( StateFu::Transition )
-            @t.should be_halted
-            @t.should_not be_accepted
             @called.should == [ :before_go,
                                 :exiting_a,
-                                :execute_go ]
+                                :execute_go,
+                                :execute_named_proc,
+                                :entering_b,
+                                :after_go,
+                                :accepted_b ]
           end
-        end # halting from execute
-      end   # anon hook
-    end     # when fired
+        end # arity 0
+
+        describe "with arity of 1" do
+          it "should call the proc in the context of the object, passing the transition as the argument" do
+            called = @called # get us a ref for the closure
+            Klass.machine do
+              event( :go ) do
+                execute(:named_execute) do |ctx|
+                  raise ctx.class.inspect unless ctx.is_a?( StateFu::Transition )
+                  raise self.class.inspect unless self.is_a?( Klass )
+                  called << :execute_named_proc
+                end
+              end
+            end
+            @t.fire!()
+            @called.should == [ :before_go,
+                                :exiting_a,
+                                :execute_go,
+                                :execute_named_proc,
+                                :entering_b,
+                                :after_go,
+                                :accepted_b ]
+          end
+        end # arity 1
+      end   # named proc
+
+      describe "halting the transition during the execute hook" do
+
+        before do
+          Klass.machine do
+            event( :go ) do
+              execute do |ctx|
+                ctx.halt!("stop")
+              end
+            end
+          end
+        end # before
+
+        it "should prevent the transition from being accepted" do
+          @obj.state_fu.state.name.should == :a
+          @t.fire!()
+          @obj.state_fu.state.name.should == :a
+          @t.should be_kind_of( StateFu::Transition )
+          @t.should be_halted
+          @t.should_not be_accepted
+          @called.should == [ :before_go,
+                              :exiting_a,
+                              :execute_go ]
+        end
+
+        it "should have current_hook_slot set to where it halted" do
+          @obj.state_fu.state.name.should == :a
+          @t.fire!()
+          @t.current_hook_slot.should == [:event, :execute]
+        end
+
+        it "should have current_hook set to where it halted" do
+          @obj.state_fu.state.name.should == :a
+          @t.fire!()
+          @t.current_hook.should be_kind_of( Proc )
+        end
+
+      end # halting from execute
+    end   # fire! calling hooks
 
   end # machine w/ hooks
 
-  describe "A simple machine w/ 2 states, 1 event, named & proc hooks" do
+  describe "A simple machine w/ named guard conditions" do
     before do
       @machine = Klass.machine do
         state :a do
-          on_exit( :exiting_a )
+          exit_requires( :ok_to_leave? )
         end
 
         state :b do
-          on_entry( :entering_b )
-          accepted( :accepted_b )
+          requires( :ok_to_enter? )
         end
 
-        event( :go ) do
-          from :a, :to => :b
-
-          before  :before_go
-          execute :execute_go
-          after   :after_go
+        event( :go, :from => :a, :to => :b ) do
+          requires( :ok_to_execute? )
         end
 
         initial_state :a
       end
     end
 
-  end # machine w/ named & proc hooks
+    it "should ..."
+
+  end # machine w/guard conditions
 end

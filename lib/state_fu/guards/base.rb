@@ -1,7 +1,7 @@
 module StateFu
   module Guards
     class Base
-      include StateFu::Helper # define apply!
+      include StateFu::Helper # to define apply!
       attr_reader :machine, :name, :message, :method_name, :options
 
       def initialize( machine, name, options={}, &block )
