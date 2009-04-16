@@ -1,15 +1,14 @@
 module StateFu
   class Lathe
 
-    attr_reader :machine, :sprocket, :options
+    # NOTE: Sprocket is the abstract superclass of Event and State
 
-    def self.parse( machine, sprocket = nil, options={}, &block )
-      new( machine, sprocket = nil, options={}, &block )
-    end
+    attr_reader :machine, :sprocket, :options
 
     def initialize( machine, sprocket = nil, options={}, &block )
       @machine  = machine
       @sprocket = sprocket
+      @options  = options.symbolize_keys!
       if sprocket
         sprocket.apply!( options )
       end
@@ -24,24 +23,34 @@ module StateFu
 
     private
 
-    def sprocket?
+    # a 'child' lathe is created by apply_to, to deal with nested
+    # blocks for states / events ( which are sprockets )
+    def child?
       !!@sprocket
     end
-    alias_method :child?, :sprocket?
 
+    # is this the toplevel lathe for a machine?
+    def master?
+      !child?
+    end
+
+    # instantiate a child lathe and apply the given block
     def apply_to( sprocket, options, &block )
       StateFu::Lathe.new( machine, sprocket, options, &block )
       sprocket
     end
 
+    # require that the current sprocket be of a given type
     def require_sprocket( *valid_types )
-      # raise ArgumentError.new unless valid_types.include?( sprocket.class )
+      raise ArgumentError.new unless valid_types.include?( sprocket.class )
     end
 
+    # ensure this is not a child lathe
     def require_no_sprocket()
       require_sprocket( NilClass )
     end
 
+    # abstract method for defining states / events
     def define_sprocket( type, name, options={}, &block )
       name       = name.to_sym
       klass      = StateFu.const_get((a=type.to_s.split('',2);[a.first.upcase, a.last].join))
@@ -65,13 +74,6 @@ module StateFu
       define_sprocket( :event, name, options, &block )
     end
 
-    def __define_hook *args, &block # type, names, options={}, &block
-      options      = args.extract_options!.symbolize_keys!
-      type         = args.shift
-      method_names = args
-      Logger.info "define_hook: not implemented"
-    end
-
     def define_hook slot, method_name=nil, &block
       hook = block_given? ? block : method_name
       unless sprocket.hooks.has_key?( slot )
@@ -82,10 +84,10 @@ module StateFu
         unless (-1..1).include?( hook.arity )
           raise ArgumentError, "unexpected block arity: #{hook.arity}"
         end
-        # SPECME: a proc should clobber any existing proc for this slot
+        # only one anonymous proc per hook - clobber any existing ones.
         sprocket.hooks[slot].delete_if { |h| Proc === h }
       when Symbol
-        # prevent duplicates
+        # prevent duplicate named hooks
         sprocket.hooks[slot].delete_if { |h| hook == h }
       else
         raise ArgumentError, hook.class.to_s
@@ -97,9 +99,11 @@ module StateFu
 
     # helpers are mixed into all binding / transition contexts
     # use them to bend the language to your will
-    def helper_( *modules )
+    def helper( *modules )
       machine.helpers += modules
       machine.helpers.extend( HelperArray )
+      raise NotImplementedError
+
       # names.each do |name|
       #   const_name = name.to_s.camelize
       #   # if we can't find it now, try later in the machinist object's context
@@ -113,7 +117,7 @@ module StateFu
 
     def event( name, options={}, &block )
       require_sprocket( StateFu::State, NilClass )
-      if sprocket? && sprocket.is_a?( StateFu::State ) # in state block
+      if child? && sprocket.is_a?( StateFu::State ) # in state block
         target  = options.symbolize_keys!.delete(:to)
         evt     = define_event( name, options, &block )
         evt.from sprocket
@@ -131,14 +135,14 @@ module StateFu
 
     def needs *a, &b
       require_sprocket( StateFu::Event )
-      # ...
+      raise NotImplementedError
     end
 
     # create an event from *and* to the current state.
     # Creates a loop, useful (only) for hooking behaviours onto.
     def cycle( name, options={}, &block )
       require_sprocket( StateFu::State )
-      #
+      raise NotImplementedError
     end
 
     #

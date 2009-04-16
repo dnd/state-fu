@@ -29,9 +29,7 @@ describe StateFu::TransitionHalted do
       e = StateFu::TransitionHalted.new( @transition )
       e.transition.should == @transition
     end
-
   end
-
 end
 
 describe StateFu::InvalidTransition do
@@ -63,7 +61,5 @@ describe StateFu::InvalidTransition do
       e.origin.should  == @origin
       e.target.should  == @target
     end
-
   end
-
 end

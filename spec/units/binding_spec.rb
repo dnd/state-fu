@@ -1,9 +1,5 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-##
-##
-##
-
 describe StateFu::Binding do
   include MySpecHelper
 

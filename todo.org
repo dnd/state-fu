@@ -7,6 +7,7 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * TODOs
+**  TODO - add support for :all, :except, :only ( lathe.event , state(s) )
 ** simple event firing methods on object / binding
 ** refactor transition unit spec to integration & unit specs
 ** update account example integration spec

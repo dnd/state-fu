@@ -70,12 +70,10 @@ describe "A simple Machine definition" do
       end # machine
     # end # before
 
-    it "parsing it should not throw an error" do
+    # it "parsing it should not throw an error"
       # @machine_spec.should_not raise_error()
       # @machine_spec.call()
-    end
 
-    describe ".." do
-    end
+
   end # describe_1
 end
