@@ -28,7 +28,20 @@ describe StateFu::Event do
       describe "setting origin / target" do
 
         describe "single_target?" do
-          it "should be true if the target is set and there is only one"
+          it "should be nil if the target is not" do
+            stub( @event ).target() { nil }
+            @event.single_target?.should == nil
+          end
+
+          it "should be false if the target has more than one state" do
+            stub( @event ).target() { [@state_a, @state_b] }
+            @event.single_target?.should == false
+          end
+
+          it "should be true if the target is set and there is only one" do
+            stub( @event ).target() { [@state_a] }
+            @event.single_target?.should == true
+          end
         end
 
         describe 'origin=' do

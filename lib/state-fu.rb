@@ -5,6 +5,8 @@
 # Teach your ruby objects the path
 # to a stateful enlightenment
 
+require 'activesupport'
+
 require 'state_fu/core_ext'
 require 'state_fu/logger'
 require 'state_fu/helper'
@@ -25,7 +27,7 @@ require 'state_fu/interface'
 require 'state_fu/transition'
 
 module StateFu
-  DEFAULT_MACHINE    = :om
+  DEFAULT_MACHINE    = :state_fu
 
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )

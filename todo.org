@@ -7,15 +7,20 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * TODOs
-** refactor transition unit specs ( really are integration specs )
+
 ** hooks w/ name & proc should be defined as methods on object?
 ** guard conditions: stop transitions without requiring attempted fire!
 ** test-only transitions
+**  TODO - add support for :all, :except, :only ( lathe.event , state(s) )
+** simple event firing methods on object / binding
+** refactor transition unit spec to integration & unit specs
+** update account example integration spec
+** write cheat / intro
 
 ====================================================
 
 * Bugs
-** Koans are not inherited. Is this a bug?
+** Machines are not inherited. Is this a bug?
    To make them inheritable we'd be back to needing a Binding
    or some other substantial complexity.
    I don't think it's worth it.
@@ -53,7 +58,7 @@
 ** auto-order-by :position option
 ** array mixins to help move stuff around
 
-** Koans should
+** Machines should
 *** be deep-copyable
 **** store blocks passed to them in an array so that they can be replayed?
 **** use a recorder pattern?
@@ -74,6 +79,6 @@
 
 * Other
 ** testing w/ heckle, rcov
-** decide where to use Cucumber & where Rspec
+** Cucumber
 ** benchmark / tune for performance
 *** Cuc. for user-facing API; Rspec for internals?

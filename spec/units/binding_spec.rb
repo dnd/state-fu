@@ -1,9 +1,5 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-##
-##
-##
-
 describe StateFu::Binding do
   include MySpecHelper
 
@@ -35,8 +31,8 @@ describe StateFu::Binding do
       b.should be_kind_of( StateFu::Binding )
       b.machine.should == Klass.machine
       b.object.should == @obj
-      b.method_name.should == :om
-      b.field_name.should  == :om_state
+      b.method_name.should == :state_fu
+      b.field_name.should  == :state_fu_state
     end
   end
 

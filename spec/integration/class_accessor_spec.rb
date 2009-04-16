@@ -37,7 +37,7 @@ describe "A pristine class Klass with StateFu included:" do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_MACHINE.should == :om
+      StateFu::DEFAULT_MACHINE.should == :state_fu
     end
 
     it "should return a StateFu::Machine given Klass.machine()" do
@@ -46,19 +46,19 @@ describe "A pristine class Klass with StateFu included:" do
       Klass.machine.should be_kind_of( StateFu::Machine )
     end
 
-    it "should return { :om => <StateFu::Machine> } given Klass.machines()" do
+    it "should return { :state_fu => <StateFu::Machine> } given Klass.machines()" do
       Klass.should respond_to(:machines)
       machines = Klass.machines()
       machines.should be_kind_of(Hash)
       machines.should_not be_empty
       machines.length.should == 1
-      machines.keys.should == [:om]
+      machines.keys.should == [:state_fu]
       machines.values.first.should be_kind_of( StateFu::Machine )
     end
 
-    it "should returns [:om] given Klass.machine_names()" do
+    it "should returns [:state_fu] given Klass.machine_names()" do
       Klass.should respond_to(:machine_names)
-      Klass.machine_names.should == [:om]
+      Klass.machine_names.should == [:state_fu]
     end
 
     describe "Having called Klass.machine(:two) with an empty block:" do
@@ -81,22 +81,22 @@ describe "A pristine class Klass with StateFu included:" do
         # StateFu::FuSpace.class_machines[Klass][:three].should == :three
       end
 
-      it "should return { :om => <StateFu::Machine>, :two => <StateFu::Machine> } given Klass.machines()" do
+      it "should return { :state_fu => <StateFu::Machine>, :two => <StateFu::Machine> } given Klass.machines()" do
         Klass.should respond_to(:machines)
         machines = Klass.machines()
         machines.should be_kind_of(Hash)
         machines.should_not be_empty
         machines.length.should == 2
-        machines.keys.should include :om
+        machines.keys.should include :state_fu
         machines.keys.should include :two
         machines.values.length.should == 2
         machines.values.each { |v| v.should be_kind_of( StateFu::Machine ) }
       end
 
-      it "should return [:om, :two] give Klass.machine_names (unordered)" do
+      it "should return [:state_fu, :two] give Klass.machine_names (unordered)" do
         Klass.should respond_to(:machine_names)
         Klass.machine_names.length.should == 2
-        Klass.machine_names.should include :om
+        Klass.machine_names.should include :state_fu
         Klass.machine_names.should include :two
       end
     end

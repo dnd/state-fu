@@ -25,7 +25,7 @@ describe StateFu::FuSpace do
     before(:each) do
       Klass.machine do
       end
-      StateFu::DEFAULT_MACHINE.should == :om
+      StateFu::DEFAULT_MACHINE.should == :state_fu
     end
 
     it "should return { Klass => { ... } } given StateFu::FuSpace.class_machines()" do
@@ -35,13 +35,13 @@ describe StateFu::FuSpace do
       machines.values.first.should be_kind_of( Hash )
     end
 
-    it "should return { :om => <StateFu::Machine> } given StateFu::FuSpace.class_machines[Klass]" do
+    it "should return { :state_fu => <StateFu::Machine> } given StateFu::FuSpace.class_machines[Klass]" do
       StateFu::FuSpace.should respond_to(:class_machines)
       machines = StateFu::FuSpace.class_machines[Klass]
       machines.should be_kind_of(Hash)
       machines.should_not be_empty
       machines.length.should == 1
-      machines.keys.should == [:om]
+      machines.keys.should == [:state_fu]
       machines.values.first.should be_kind_of( StateFu::Machine )
     end
 
@@ -52,14 +52,14 @@ describe StateFu::FuSpace do
       fields.values.first.should be_kind_of( Hash )
     end
 
-    it "should return { :om => :om_state } given StateFu::FuSpace.field_names[Klass]" do
+    it "should return { :state_fu => :state_fu_state } given StateFu::FuSpace.field_names[Klass]" do
       StateFu::FuSpace.should respond_to(:field_names)
       fields = StateFu::FuSpace.field_names[Klass]
       fields.should be_kind_of(Hash)
       fields.should_not be_empty
       fields.length.should == 1
-      fields.keys.should == [:om]
-      fields.values.should == [:om_state]
+      fields.keys.should == [:state_fu]
+      fields.values.should == [:state_fu_state]
     end
 
     describe "Having called Klass.machine(:two) with an empty block:" do
@@ -69,13 +69,13 @@ describe StateFu::FuSpace do
         end
       end
 
-      it "should return { :om => <StateFu::Machine>, :two => <StateFu::Machine> } given StateFu::FuSpace.class_machines()" do
+      it "should return { :state_fu => <StateFu::Machine>, :two => <StateFu::Machine> } given StateFu::FuSpace.class_machines()" do
         StateFu::FuSpace.should respond_to(:class_machines)
         machines = StateFu::FuSpace.class_machines[Klass]
         machines.should be_kind_of(Hash)
         machines.should_not be_empty
         machines.length.should == 2
-        machines.keys.sort.should == [:om, :two]
+        machines.keys.sort.should == [:state_fu, :two]
         machines.values.each { |v| v.should be_kind_of( StateFu::Machine ) }
       end
 
