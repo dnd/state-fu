@@ -9,6 +9,12 @@ describe StateFu::Lathe do
     @machine = Object.new()
     @state   = Object.new()
     @event   = Object.new()
+
+    @lathe = StateFu::Lathe.new( @machine )
+    @states = [].extend StateFu::StateArray
+    stub( @machine ).states() { @states }
+    @events = [].extend StateFu::EventArray
+    stub( @machine ).events() { @events }
   end
 
   describe "constructor" do
@@ -34,19 +40,12 @@ describe StateFu::Lathe do
 
   describe "lathe instance with no sprocket (master lathe for a machine)" do
     before do
-      @lathe = StateFu::Lathe.new( @machine )
-      @states = [].extend StateFu::StateArray
-      stub( @machine ).states() { @states }
-      @events = [].extend StateFu::EventArray
-      stub( @machine ).events() { @events }
     end
 
     it "should be master?" do
       @lathe.should be_master
       @lathe.should_not be_child
     end
-
-    describe "helper"
 
     describe "defining a state with .state" do
 
@@ -111,6 +110,19 @@ describe StateFu::Lathe do
         @lathe.event( :wibble, { :meta => :voodoo } ).should == s
         s.options[:meta].should == :voodoo
       end
+
+      it "should create states mentioned in the event and add them to machine.states" do
+        @machine = StateFu::Machine.new( :snoo )
+        @lathe = StateFu::Lathe.new( @machine )
+
+        @lathe.event(:wobble, :from => [:a, :b], :to => :c )
+        @machine.events.should_not be_empty
+        @machine.events.length.should == 1
+        @machine.events.first.name.should == :wobble
+        @machine.states.length.should == 3
+        @machine.states.map(&:name).sort_by {|x| x.to_s }.should == [ :a, :b, :c]
+      end
+
     end # .event
 
     describe "initial_state" do
@@ -133,42 +145,74 @@ describe StateFu::Lathe do
         @machine.states.last.name.should == :thumper
         @machine.initial_state.name.should == :thumper
       end
+    end
 
-      describe "helper" do
-        it "should call machine.helper *args" do
-          mock( @machine ).helper( :fee, :fi, :fo, :fum )
-          @lathe.helper( :fee, :fi, :fo, :fum )
-        end
+    describe "helper" do
+      it "should call machine.helper *args" do
+        mock( @machine ).helper( :fee, :fi, :fo, :fum )
+        @lathe.helper( :fee, :fi, :fo, :fum )
       end
+    end
 
-      #describe "needs" do
-      #  it "..."
-      #end
-
-      #describe "cycle" do
-      #  it "..."
-      #end
-
-      describe "defining a state with .states" do
-        it "should add all states named to the machine if they dont exist"
-        it "should modify ..."
-      end
-
-      describe "all_states" do
-        it "..."
-      end
+    describe "link" do
 
     end
+
+    #describe "needs" do
+    #  it "..."
+    #end
+
+    #describe "cycle" do
+    #  it "..."
+    #end
+
+    describe "defining a state with .states" do
+      it "should add all states named to the machine if they dont exist"
+      it "should modify ..."
+    end
+
+    describe "all_states" do
+      it "..."
+    end
+
+
   end # master lathe instance
 
   describe "a child lathe for a state" do
     before do
+      @master = @lathe
+      @state  = @lathe.state(:a)
+      @lathe  = StateFu::Lathe.new( @machine, @state )
     end
+
+    describe "cycle" do
+      it "should create an event from and to the lathe's sprocket (state)" do
+        @machine.events.should be_empty
+        @machine.states.length.should == 1
+        @lathe.cycle(:rebirth)
+        @machine.events.should_not be_empty
+        @machine.states.length.should == 1
+        cycle = @machine.events.first
+        cycle.from.should == [@event]
+        cycle.to.should   == [@event]
+      end
+    end
+
+
   end
 
   describe "a child lathe for an event" do
     before do
     end
+
+    describe "from" do
+      it "should create any states mentioned which do not exist and add them to machine.states"
+    end
+
+    describe "to" do
+      it "should create any states mentioned which do not exist and add them to machine.states"
+    end
+
   end
 
 end

@@ -107,14 +107,20 @@ module StateFu
     #
 
     def event( name, options={}, &block )
+      options.symbolize_keys!
       require_sprocket( StateFu::State, NilClass )
       if child? && sprocket.is_a?( StateFu::State ) # in state block
-        target  = options.symbolize_keys!.delete(:to)
+        target  = options.delete(:to)
         evt     = define_event( name, options, &block )
         evt.from sprocket
-        evt.to( target ) if target
+        evt.to( target )
       else
-        define_event( name, options, &block )
+        origin = options.delete( :to )
+        target = options.delete( :from )
+        evt    = define_event( name, options, &block )
+        evt.from origin unless origin.nil?
+        evt.to   target unless target.nil?
+        evt
       end
     end
 
@@ -180,7 +186,7 @@ module StateFu
     # can be supplied as a symbol, or array of symbols.
     # any states referenced here will be created if they do not exist.
     def to *args
-      options       = args.extract_options!.symbolize_keys!
+      options         = args.extract_options!.symbolize_keys!
       sprocket.target = args
       if block_given?
         apply_to( sprocket, options, &block )
