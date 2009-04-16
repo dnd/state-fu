@@ -4,7 +4,7 @@ require 'cucumber/rake/task'
 require "date"
 require "fileutils"
 require "rubygems"
-# require "rake/gempackagetask"
+require "rake/gempackagetask"
 
 require "./lib/state_fu/version.rb"
 
@@ -18,43 +18,45 @@ module Rakefile
   end
 end
 
-# stateful_gemspec = Gem::Specification.new do |s|
-#   s.name              = "state_fu-koan"
-#   s.rubyforge_project = "state_fu-koan"
-#   s.version           = :noversion # state_fu::VERSION
-#   s.platform          = Gem::Platform::RUBY
-#   s.has_rdoc          = true
-#   s.extra_rdoc_files  = ["README.rdoc"]
-#   s.summary           = "Teach your Ruby objects the path to enlightenment."
-#   s.description       = s.summary
-#   s.author            = "David Lee"
-#   s.email             = "david@rubyist.net.au"
-#   s.homepage          = "http://github.com/davidlee/state_fu-koan"
-#   s.require_path      = "lib"
-#   s.files             = %w(README.rdoc Rakefile) + Dir.glob("{lib,spec}/**/*")
-# end
+state_fu_gemspec = Gem::Specification.new do |s|
+  s.name              = "state-fu"
+  s.rubyforge_project = "state-fu"
+  s.version           = StateFu::VERSION
+  s.platform          = Gem::Platform::RUBY
+  s.has_rdoc          = true
+#  s.extra_rdoc_files  = ["README.rdoc"]
+  s.summary           = "A rich library for defining finite state machines & workflows"
+  s.description       = s.summary
+  s.author            = "David Lee"
+  s.email             = "david@rubyist.net.au"
+  s.homepage          = "http://github.com/davidlee/state-fu"
+  s.require_path      = "lib"
+#  s.files             = %w(README.rdoc Rakefile) + Dir.glob("{lib,spec}/**/*")
+  s.files             = %w(Rakefile) + Dir.glob("{lib,spec}/**/*")
+end
 
-# Rake::GemPackageTask.new(stateful_gemspec) do |pkg|
-#   pkg.gem_spec = stateful_gemspec
-# end
-#
-# namespace :gem do
-#   desc "Build and install as a RubyGem"
-#   task :install => :package do
-#     sh %{#{'sudo' unless Rakefile.windows?} gem install --local pkg/stateful-#{state_fu::VERSION}*}
-#   end
-#
-#   desc "Generate stateful.gemspec"
-#   task :spec do
-#     unless ENV["RELEASE"] == "true"
-#       stateful_gemspec.version = "#{state_fu::VERSION}.#{Time.now.strftime("%Y%m%d%H%M")}"
-#     end
-#
-#     File.open("stateful.gemspec", "w") do |f|
-#       f.puts(stateful_gemspec.to_ruby)
-#     end
-#   end
-# end
+Rake::GemPackageTask.new(state_fu_gemspec) do |pkg|
+  pkg.gem_spec = state_fu_gemspec
+end
+
+namespace :gem do
+  desc "Build and install as a RubyGem"
+  task :install => :package do
+    sh %{#{'sudo' unless Rakefile.windows?} gem install --local pkg/state-fu-#{StateFu::VERSION}*}
+  end
+
+  desc "Generate state-fu.gemspec"
+  task :spec do
+    unless ENV["RELEASE"] == "true"
+      state_fu_gemspec.version = "#{StateFu::VERSION}.#{Time.now.strftime("%Y%m%d%H%M")}"
+    end
+
+    File.open("state-fu.gemspec", "w") do |f|
+      f.puts(state_fu_gemspec.to_ruby)
+    end
+  end
+end
+
 namespace :spec do
   desc "Run both units and integration specs"
   task :both => [:units, :integration]

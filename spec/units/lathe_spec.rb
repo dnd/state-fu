@@ -135,22 +135,40 @@ describe StateFu::Lathe do
       end
 
       describe "helper" do
-        it "..."
+        it "should call machine.helper *args" do
+          mock( @machine ).helper( :fee, :fi, :fo, :fum )
+          @lathe.helper( :fee, :fi, :fo, :fum )
+        end
       end
 
-      describe "needs" do
-        it "..."
-      end
+      #describe "needs" do
+      #  it "..."
+      #end
 
-      describe "cycle" do
-        it "..."
-      end
+      #describe "cycle" do
+      #  it "..."
+      #end
 
       describe "defining a state with .states" do
         it "should add all states named to the machine if they dont exist"
         it "should modify ..."
       end
 
+      describe "all_states" do
+        it "..."
+      end
+
     end
   end # master lathe instance
+
+  describe "a child lathe for a state" do
+    before do
+    end
+  end
+
+  describe "a child lathe for an event" do
+    before do
+    end
+  end
+
 end

@@ -98,17 +98,8 @@ module StateFu
     public
 
     # helpers are mixed into all binding / transition contexts
-    # use them to bend the language to your will
     def helper( *modules )
-      machine.helpers += modules
-      machine.helpers.extend( HelperArray )
-      raise NotImplementedError
-
-      # names.each do |name|
-      #   const_name = name.to_s.camelize
-      #   # if we can't find it now, try later in the machinist object's context
-      #   machine.helpers << (const_name.constantize rescue const_name )
-      # end
+      machine.helper *modules
     end
 
     #
