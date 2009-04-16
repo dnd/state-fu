@@ -198,9 +198,9 @@ module StateFu
       end
     end
 
-    # def all_states *a, &b
-    #   Logger.info "<StateFu::Lathe.all_states not implemented>"
-    # end
+    def all_states *a, &b
+      raise NotImplementedError
+    end
 
     # Bunch of silly little methods for defining events
 
