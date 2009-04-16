@@ -187,18 +187,22 @@ describe StateFu::Lathe do
 
     describe "cycle" do
       it "should create an event from and to the lathe's sprocket (state)" do
+        @machine = StateFu::Machine.new( :snoo )
+        @master  = StateFu::Lathe.new( @machine )
+        @state   = @master.state(:a)
+        @lathe   = StateFu::Lathe.new( @machine, @state )
+
         @machine.events.should be_empty
         @machine.states.length.should == 1
         @lathe.cycle(:rebirth)
         @machine.events.should_not be_empty
         @machine.states.length.should == 1
         cycle = @machine.events.first
-        cycle.from.should == [@event]
-        cycle.to.should   == [@event]
+        cycle.should be_kind_of( StateFu::Event )
+        cycle.origin.should == [@state]
+        cycle.target.should == [@state]
       end
     end
-
-
   end
 
   describe "a child lathe for an event" do

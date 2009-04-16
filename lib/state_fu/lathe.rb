@@ -139,7 +139,11 @@ module StateFu
     # Creates a loop, useful (only) for hooking behaviours onto.
     def cycle( name, options={}, &block )
       require_sprocket( StateFu::State )
-      raise NotImplementedError
+      evt = define_event( name, options, &block )
+      evt.from sprocket
+      evt.to   sprocket
+      evt
+      # raise NotImplementedError
     end
 
     #
