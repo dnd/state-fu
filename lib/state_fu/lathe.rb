@@ -123,7 +123,7 @@ module StateFu
         evt     = define_event( name, options, &block )
         evt.from sprocket
         evt.to( target )
-      else
+      else # in event block
         origin = options.delete( :from )
         target = options.delete( :to )
         evt    = define_event( name, options, &block )

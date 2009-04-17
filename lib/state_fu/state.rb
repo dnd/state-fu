@@ -26,11 +26,15 @@ module StateFu
     end
 
     def enterable_by?( binding )
-      true
+      entry_requirements.reject do |r|
+        res = binding.evaluate_requirement( r )
+      end.empty?
     end
 
     def exitable_by?( binding )
-      true
+      exit_requirements.reject do |r|
+        binding.evaluate_requirement( r )
+      end.empty?
     end
 
   end

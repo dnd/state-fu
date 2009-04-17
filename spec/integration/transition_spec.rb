@@ -751,8 +751,57 @@ describe StateFu::Transition do
         @binding.valid_events.should == []
       end
 
-    end
+    end # block supplied
 
   end # machine w/guard conditions
+
+
+    describe "A binding for a machine with a state transition requirement" do
+    before do
+      @machine = Klass.machine do
+        event( :go, :from => :a, :to => :b )
+        state( :b ) do
+          requires :entry_ok?
+        end
+      end
+      @obj = Klass.new
+      @binding = @obj.state_fu
+      @event = @machine.events[:go]
+      @a = @machine.states[:a]
+      @b = @machine.states[:b]
+    end
+
+    describe "when no block is supplied for the requirement" do
+
+      it "should be valid if @binding.valid_transitions' values includes the state" do
+        mock( @binding ).valid_transitions{ {@event => [@b] } }
+        @binding.valid_next_states.should == [@b]
+      end
+
+      it "should be valid if state is enterable_by?( @binding)" do
+        mock( @b ).enterable_by?( @binding ) { true }
+        @binding.valid_next_states.should == [@b]
+      end
+
+      it "should not be valid if state is not enterable_by?( @binding)" do
+        mock( @b ).enterable_by?( @binding ) { false }
+        @binding.valid_next_states.should == []
+      end
+
+      it "should be invalid if @obj.entry_ok? is false" do
+        mock( @obj ).entry_ok? { false }
+        @b.entry_requirements.should == [:entry_ok?]
+        # @binding.evaluate_requirement( :entry_ok? ).should == false
+        # @b.enterable_by?( @binding ).should == false
+        @binding.valid_next_states.should == []
+      end
+
+      it "should be valid if @obj.entry_ok? is true" do
+        mock( @obj ).entry_ok? { true }
+        @binding.valid_next_states.should == [@b]
+      end
+
+    end
+  end # state transition requirement
 
 end

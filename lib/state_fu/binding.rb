@@ -44,15 +44,19 @@ module StateFu
     def unmet_requirements_for(event, target)
     end
 
+    def valid_next_states
+      valid_transitions.values.flatten.uniq
+    end
+
     # returns a hash of valid { event_name => [state, state ..] }
     def valid_transitions
       h = {}
       valid_events.each do |e|
-        h[e] = e.targets.select do |s|
-          s.valid_next_state_for?( binding )
+        h[e] = e.target.select do |s|
+          s.enterable_by?( self )
         end
       end
-      # valid_events.select {|e| e.valid_for_binding?( self ) }
+      h
     end
 
     def transition( event, target=nil, *args, &block )
