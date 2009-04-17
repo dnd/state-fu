@@ -90,6 +90,15 @@ module StateFu
       end
     end
 
+    def valid?
+      begin
+        check_requirements!
+        true
+      rescue RequirementError => e
+        false
+      end
+    end
+
     def hooks_for( element, slot )
       send(element).hooks[slot]
     end

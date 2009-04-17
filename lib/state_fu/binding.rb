@@ -13,8 +13,8 @@ module StateFu
       @persister     = StateFu::Persistence.for( self, field_name )
       Logger.info( "Persister added: #@persister ")
 
-      method_factory.install_simple_event_methods_on_binding!
-      method_factory.install_simple_event_methods_on_object!
+      # define event methods on self( binding ) and @object
+      StateFu::MethodFactory.new( self ).install!
     end
     alias_method :o,         :object
     alias_method :obj,       :object
@@ -24,10 +24,6 @@ module StateFu
     alias_method :machine,       :machine
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
-
-    def method_factory
-      @method_factory ||= StateFu::MethodFactory.new( self )
-    end
 
     def field_name
       persister.field_name
@@ -67,10 +63,12 @@ module StateFu
       h
     end
 
+    # initialize a new transition
     def transition( event, target=nil, *args, &block )
       StateFu::Transition.new( self, event, target, *args, &block )
     end
 
+    # sanitize args for fire! and fireable?
     def event_or_array_to_array_of_event_and_target( event_or_array )
       case event_or_array
       when StateFu::Event, Symbol
@@ -85,13 +83,11 @@ module StateFu
       [event,target]
     end
 
+    # check that the event and target are valid
     def fireable?( event_or_array )
       event, target = event_or_array_to_array_of_event_and_target( event_or_array )
-      # ensure we have an actual Event here
-      event         = @machine.events[ event.to_sym ] || raise( ArgumentError )
-      # and that target is non-nil
-      target      ||= event.single_target? ? event.target.first : raise( ArgumentError )
-      valid_transitions[ event ].include?( target )
+      t = transition( event, target )
+      !!t.valid?
     end
 
     # fire event
@@ -117,6 +113,7 @@ module StateFu
       end
     end
 
+    # TODO - give better errors on failed requirements
     def evaluate_requirement!( name )
       evaluate_requirement( name ) || raise( RequirementError )
     end
@@ -165,5 +162,6 @@ module StateFu
     def inspect
       "<#{self.class} #{hash} object=#{@object} machine=#{@machine}>"
     end
+
   end
 end

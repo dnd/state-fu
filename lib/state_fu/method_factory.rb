@@ -9,10 +9,23 @@ module StateFu
       class << @binding; self; end
     end
 
-    def install_simple_event_methods_on_object! # the stateful instance
-      @binding.machine.events.select(&:simple? ).each do |e|
-        define_simple_event_trigger_method_on_object( e )
-        define_simple_event_query_method_on_object( e )
+    def install!
+      define_methods_on_object!
+      define_methods_on_binding!
+    end
+
+    #
+    # object methods
+    #
+
+    def define_methods_on_object! # the stateful instance
+      simple, complex = @binding.machine.events.partition(&:simple? )
+      simple.each do |event|
+        define_simple_event_trigger_method_on_object( event )
+        define_simple_event_query_method_on_object( event )
+      end
+      complex.each do |event|
+
       end
     end
 
@@ -30,7 +43,11 @@ module StateFu
                                   &lambda { |*args| binding.fireable?( event ) } )
     end
 
-    def install_simple_event_methods_on_binding!
+    #
+    # binding methods
+    #
+
+    def define_methods_on_binding!
       @binding.machine.events.select(&:simple? ).each do |e|
         define_simple_event_trigger_method_on_binding( e )
         define_simple_event_query_method_on_binding( e )
