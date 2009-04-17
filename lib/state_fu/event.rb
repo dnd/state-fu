@@ -44,10 +44,17 @@ module StateFu
         all?{ |f| !(f.nil? || f.empty?) }
     end
 
+    def single_origin?
+      origin && origin.is_a?( Array ) && origin.length == 1
+    end
+
     def single_target?
       target && target.is_a?( Array ) && target.length == 1
     end
 
+    def simple?
+      single_origin? && single_target?
+    end
     #
     # Proxy methods to StateFu::Lathe
     #

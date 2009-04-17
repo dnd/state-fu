@@ -1,3 +1,4 @@
+
 #!/usr/bin/env ruby
 #
 # StateFu Machine:
@@ -14,6 +15,7 @@ require 'state_fu/exceptions'
 require 'state_fu/fu_space'
 require 'state_fu/machine'
 require 'state_fu/lathe'
+require 'state_fu/method_factory'
 require 'state_fu/binding'
 require 'state_fu/persistence'
 require 'state_fu/persistence/base'

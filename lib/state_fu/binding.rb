@@ -12,6 +12,9 @@ module StateFu
       raise( ArgumentError, "No field_name" ) unless field_name
       @persister     = StateFu::Persistence.for( self, field_name )
       Logger.info( "Persister added: #@persister ")
+
+      method_factory.install_simple_event_methods_on_binding!
+      method_factory.install_simple_event_methods_on_object!
     end
     alias_method :o,         :object
     alias_method :obj,       :object
@@ -21,6 +24,10 @@ module StateFu
     alias_method :machine,       :machine
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
+
+    def method_factory
+      @method_factory ||= StateFu::MethodFactory.new( self )
+    end
 
     def field_name
       persister.field_name
@@ -142,5 +149,8 @@ module StateFu
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
+    def inspect
+      "<#{self.class} #{hash} object=#{@object} machine=#{@machine}>"
+    end
   end
 end
