@@ -190,11 +190,14 @@ describe StateFu::Lathe do
     end
 
     describe ".cycle( evt_name )" do
-      it "should create a named event from and to the lathe's sprocket (state)" do
+      before do
         @machine = StateFu::Machine.new( :snoo )
         @master  = StateFu::Lathe.new( @machine )
         @state   = @master.state(:a)
         @lathe   = StateFu::Lathe.new( @machine, @state )
+      end
+
+      it "should create a named event from and to the lathe's sprocket (state)" do
 
         @machine.events.should be_empty
         @machine.states.length.should == 1
@@ -207,7 +210,17 @@ describe StateFu::Lathe do
         cycle.target.should == [@state]
       end
 
-      it "should create an event with a default name if given no name"
+      it "should create an event with a default name if given no name" do
+        @machine.events.should be_empty
+        @machine.states.length.should == 1
+        @lathe.cycle
+        @machine.events.should_not be_empty
+        @machine.states.length.should == 1
+        e = @machine.events.first
+        e.name.should == :cycle_a
+        e.origin.should == [@state]
+        e.target.should == [@state]
+      end
 
     end
 
@@ -313,7 +326,13 @@ describe StateFu::Lathe do
         @machine.named_procs[:method_name].should == block
       end
 
+    end  # requires
+
+    describe "event_methods" do
+      describe ":all"
     end
-  end
+  end # master lathe
+
+
 
 end

@@ -268,9 +268,9 @@ describe StateFu::Transition do
           end
         end
 
-        describe "calling fire!( :transfer, nil, :a, :b, :c => :d )" do
+        describe "calling fire!( :transfer, :a, :b, :c => :d )" do
           it "should set args to [:a, :b] and options to :c => :d on the transition" do
-            t = @obj.state_fu.fire!( :transfer, nil, *@args )
+            t = @obj.state_fu.fire!( :transfer, *@args )
             t.args.should    == [ :a, :b ]
             t.options.should == { :c => :d }
           end
@@ -885,19 +885,43 @@ describe StateFu::Transition do
         trans.should be_accepted
       end
 
-      it "should be able to call methods on the transition mixed in via machine.helper"
-
-      it "should be able to access the arguments passed to fire! via transition.args" do
-        args = [:a, :b, { :c => :d }]
+      it "should be able to call methods on the transition mixed in via machine.helper" do
         mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
-          raise "fuck you stan" unless t.args == args
+          t.should respond_to(:my_custom_method)
         end
-        trans = @obj.state_fu.fire!( :run )
+        pending
+      end
+
+      it "should be able to access the args / options passed to fire! via transition.args" do
+        # NOTE a trailing hash gets munged into options - not args
+        args = [:a, :b, { 'c' => :d }]
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          t.args.should == [:a, :b]
+          t.options.should == {:c => :d}
+        end
+        trans = @obj.state_fu.fire!( :run, *args )
         trans.should be_accepted
       end
     end # method defined on object
 
-    describe "a proc defined in the machine definition" do
+    describe "a block passed to binding.transition" do
+      it "should execute in the context of the transition initializer after it's set up" do
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          t.args.should == ['who','yo','daddy?']
+          t.options.should == {:hi => :mum}
+        end
+        trans = @obj.state_fu.transition( :run ) do
+          @args    = %w/ who yo daddy? /
+          @options = {:hi => :mum}
+        end
+        trans.fire!
+
+        trans = @obj.state_fu.transition( :run ) do |t|
+          t.args    = %w/ who yo daddy? /
+          t.options = {:hi => :mum}
+        end
+
+      end
     end
 
   end # args with fire!

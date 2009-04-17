@@ -9,6 +9,10 @@
 * TODOs
 
 ** simple event firing methods on object / binding
+   state_fu.method_maker.simple!( binding )
+   # => state_fu.run!( *args ) = binding.fire!(:run, ... , *args )
+   for simple events only
+
 ** spec / code to test passing arguments to transitions
 
 ** spec / code for introspection of unmet requirements for transitions

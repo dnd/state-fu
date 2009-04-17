@@ -166,7 +166,8 @@ module StateFu
 
     # create an event from *and* to the current state.
     # Creates a loop, useful (only) for hooking behaviours onto.
-    def cycle( name, options={}, &block )
+    def cycle( name=nil, options={}, &block )
+      name ||= "cycle_#{sprocket.name.to_s}"
       require_sprocket( StateFu::State )
       evt = define_event( name, options, &block )
       evt.from sprocket

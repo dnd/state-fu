@@ -22,10 +22,6 @@ module StateFu
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
 
-    def method_maker
-      Object.new
-    end
-
     def field_name
       persister.field_name
     end
@@ -69,12 +65,22 @@ module StateFu
     end
 
     # fire event
-    def fire!( event, target=nil, *args, &block)
+    def fire!( event_or_array, *args, &block)
+      case event_or_array
+      when StateFu::Event, Symbol
+        event  = event_or_array
+        target = nil
+      when Array
+        event, target = event_or_array
+      end
+      raise ArgumentError.new( event_or_array.inspect ) unless
+        [StateFu::Event, Symbol  ].include?( event.class  ) &&
+        [StateFu::State, NilClass].include?( target.class )
+
       t = transition( event, target, *args, &block )
       t.fire!
       t
     end
-    alias_method :call!,       :fire!
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
@@ -108,7 +114,7 @@ module StateFu
                                               err_msg )
       when 1
         event = next_events.first
-        fire!( event, nil, *args, &block )
+        fire!( event, *args, &block )
       else
         err_msg = "There is more than one candidate event for next!"
         raise StateFu::InvalidTransition.new( self,
@@ -123,7 +129,7 @@ module StateFu
       cycle_events = events.select {|e| e.target == [current_state] }
       if cycle_events.length == 1
         event = cycle_events.first
-        fire!( event, nil, *args, &block )
+        fire!( event, *args, &block )
       else
         err_msg = "Cannot cycle! unless there is exactly one event leading from the current state to itself"
         raise StateFu::InvalidTransition.new( self,

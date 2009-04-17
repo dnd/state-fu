@@ -20,7 +20,7 @@ module StateFu
                   :current_hook_slot,
                   :current_hook )
 
-    attr_accessor :test_only
+    attr_accessor :test_only, :args, :options
 
     def initialize( binding, event, target=nil, *args, &block )
       # ensure event is a StateFu::Event
