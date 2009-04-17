@@ -12,6 +12,10 @@
    state_fu.method_maker.simple!( binding )
    # => state_fu.run!( *args ) = binding.fire!(:run, ... , *args )
    for simple events only
+** lathe( event ) .from should support hash syntax:
+
+   event( :go, :from => { :intro => :outro } )
+   event( :go, :from => { :intro => [:outro, :exit] } )
 
 ** spec / code to test passing arguments to transitions
 

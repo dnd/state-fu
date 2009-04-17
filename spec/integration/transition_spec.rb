@@ -894,7 +894,7 @@ describe StateFu::Transition do
         end
         t3 = @obj.state_fu.transition( :run )
 
-        # triple check for contaminants
+        # triple check for contamination
         t1.should_not respond_to(:my_rad_method)
         t2.should     respond_to(:my_rad_method)
         t3.should_not respond_to(:my_rad_method)

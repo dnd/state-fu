@@ -282,7 +282,7 @@ describe StateFu::Lathe do
       stub( @machine ).find_or_create_states_by_name([:b]) { [:b] }
 
       @master = @lathe
-      @event  = @lathe.event( :x )
+      @event  = @lathe.event( :go )
       @lathe  = StateFu::Lathe.new( @machine, @event )
     end
 
@@ -329,8 +329,31 @@ describe StateFu::Lathe do
     end  # requires
 
     describe "event_methods" do
-      describe ":all"
-    end
+      describe "default" do
+
+        before do
+          reset!
+          make_pristine_class('Klass')
+          @machine = Klass.machine do
+            event( :go, :from => :intro, :to => :outro )
+            # event( :go, :from => { :intro => :outro } )
+          end
+          @obj = Klass.new
+          @binding = @obj.state_fu
+        end
+
+        it "should add instance methods to the binding for each simple event" do
+          @machine.events.length.should == 1
+          e = @machine.events.first
+          e.name.should == :go
+          @binding.should respond_to(:go!)
+          mock( @binding ).fire!( :go, [:argybargy] )
+          @binding.go!( :argbargy )
+        end
+        it "should not add instance methods to the binding for complex events"
+        it "should not clobber an existing method"
+      end
+    end # event methods
   end # master lathe
 
 
