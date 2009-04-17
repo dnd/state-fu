@@ -250,6 +250,9 @@ describe StateFu::Transition do
           trans.should respond_to(:snoo)
           trans.snoo.should == [trans]
         end
+
+        it "should raise an error when there is no next state"
+        it "should raise an error when there is more than one next state"
       end # next!
 
       describe "passing args / options to the transition" do
@@ -801,7 +804,102 @@ describe StateFu::Transition do
         @binding.valid_next_states.should == [@b]
       end
 
+    end # no block
+
+    describe "when a block is supplied for the requirement" do
+
+      it "should be a valid event if the block is true " do
+        @machine.named_procs[:entry_ok?] = Proc.new() { true }
+        @binding.valid_next_states.should == [@b]
+
+        @machine.named_procs[:entry_ok?] = Proc.new() { |binding| true }
+        @binding.valid_next_states.should == [@b]
+      end
+
+      it "should not be a valid event if the block is false" do
+        @machine.named_procs[:entry_ok?] = Proc.new() { false }
+        @binding.valid_next_states.should == []
+
+        @machine.named_procs[:entry_ok?] = Proc.new() { |binding| false }
+        @binding.valid_next_states.should == []
+      end
+
+    end # block supplied
+  end # machine with state transition requirement
+
+  describe "a hook method accessing the transition, object, binding and arguments to fire!" do
+    before do
+      reset!
+      make_pristine_class("Klass")
+      Klass.machine do
+        event(:run, :from => :start, :to => :finish ) do
+          execute( :run_exec )
+        end
+      end # machine
+      @obj = Klass.new()
+    end # before
+
+    describe "a method defined on the stateful object" do
+
+      it "should have self as the object itself" do
+        called = false
+        obj    = @obj
+        Klass.class_eval do
+          define_method( :run_exec ) do |t|
+            raise "self is #{self} not #{@obj}" unless self == obj
+            called = true
+          end
+        end
+        called.should == false
+        trans = @obj.state_fu.fire!(:run)
+        called.should == true
+      end
+
+      it "should receive a transition and be able to access the binding, etc through it" do
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          raise "not a transition" unless t.is_a?( StateFu::Transition )
+          raise "no binding" unless t.binding.is_a?( StateFu::Binding )
+          raise "no machine" unless t.machine.is_a?( StateFu::Machine )
+          raise "no object" unless t.object.is_a?( Klass )
+        end
+        trans = @obj.state_fu.fire!(:run)
+      end
+
+      it "should be able to conditionally execute code based on whether the transition is a test" do
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          raise "SHOULD NOT EXECUTE" unless t.testing?
+        end
+        trans = @obj.state_fu.transition( :run )
+        trans.test_only = true
+        trans.fire!
+        trans.should be_accepted
+      end
+
+      it "should be able to call methods on the transition defined in its constructor block" do
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          raise "SHOULD NOT EXECUTE" unless t.testing?
+        end
+        trans = @obj.state_fu.transition( :run )
+        trans.test_only = true
+        trans.fire!
+        trans.should be_accepted
+      end
+
+      it "should be able to call methods on the transition mixed in via machine.helper"
+
+      it "should be able to access the arguments passed to fire! via transition.args" do
+        args = [:a, :b, { :c => :d }]
+        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
+          raise "fuck you stan" unless t.args == args
+        end
+        trans = @obj.state_fu.fire!( :run )
+        trans.should be_accepted
+      end
+    end # method defined on object
+
+    describe "a proc defined in the machine definition" do
     end
-  end # state transition requirement
+
+  end # args with fire!
 
 end

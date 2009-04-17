@@ -22,6 +22,10 @@ module StateFu
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
 
+    def method_maker
+      Object.new
+    end
+
     def field_name
       persister.field_name
     end
@@ -42,6 +46,7 @@ module StateFu
     end
 
     def unmet_requirements_for(event, target)
+      raise NotImplementedError
     end
 
     def valid_next_states

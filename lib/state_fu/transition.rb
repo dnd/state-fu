@@ -20,7 +20,7 @@ module StateFu
                   :current_hook_slot,
                   :current_hook )
 
-    attr_accessor :only_pretend
+    attr_accessor :test_only
 
     def initialize( binding, event, target=nil, *args, &block )
       # ensure event is a StateFu::Event
@@ -75,13 +75,11 @@ module StateFu
       # ensure requirements are satisfied
       # for the state being exited
       unless origin.exitable_by?( binding )
-        raise "EXITABLE"
         raise RequirementError
       end
 
       # for the state being entered
       unless target.enterable_by?( binding )
-        raise "ENTERABLE"
         raise RequirementError
       end
 
@@ -110,7 +108,7 @@ module StateFu
     end
 
     def run_hook( hook )
-      return if test_only? # TODO - is this what we want?
+      # return if test_only? # TODO - is this what we want?
       case hook
       when Symbol
         unless proc = machine.named_procs[hook]
@@ -168,7 +166,7 @@ module StateFu
     end
 
     def testing?
-      !!@testing
+      !!@test_only
     end
 
     def live?
