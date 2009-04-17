@@ -37,6 +37,30 @@ module StateFu
       StateFu::Lathe.new( self, &block )
     end
 
+    def helper_modules
+      helpers.map do |h|
+        case h
+        when String, Symbol
+          Object.const_get( h.to_s.classify )
+        when Module
+          h
+        else
+          raise ArgumentError.new( h.class.inspect )
+        end
+      end
+    end
+
+    def inject_helpers_into( obj )
+      metaclass = class << obj; self; end
+
+      mods = helper_modules()
+      metaclass.class_eval do
+        mods.each do |mod|
+          include( mod )
+        end
+      end
+    end
+
     # the modules listed here will be mixed into Binding and
     # Transition objects for this machine. use this to define methods,
     # references or data useful to you during transitions, event

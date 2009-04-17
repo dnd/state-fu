@@ -62,8 +62,9 @@ module StateFu
       @errors     = []
       @testing    = @options.delete( :test_only )
 
-      # This is your chance to extend the Transition with custom
-      # methods, etc so that it models your problem domain.
+      machine.inject_helpers_into( self )
+
+      # do stuff with the transition in a block, if you like
       apply!( &block ) if block_given?
     end
 

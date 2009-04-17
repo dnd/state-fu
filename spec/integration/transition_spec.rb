@@ -831,7 +831,7 @@ describe StateFu::Transition do
     before do
       reset!
       make_pristine_class("Klass")
-      Klass.machine do
+      @machine = Klass.machine do
         event(:run, :from => :start, :to => :finish ) do
           execute( :run_exec )
         end
@@ -875,21 +875,29 @@ describe StateFu::Transition do
         trans.should be_accepted
       end
 
-      it "should be able to call methods on the transition defined in its constructor block" do
-        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
-          raise "SHOULD NOT EXECUTE" unless t.testing?
-        end
-        trans = @obj.state_fu.transition( :run )
-        trans.test_only = true
-        trans.fire!
-        trans.should be_accepted
-      end
-
       it "should be able to call methods on the transition mixed in via machine.helper" do
-        mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
-          t.should respond_to(:my_custom_method)
+        t1 = @obj.state_fu.transition( :run)
+        t1.should_not respond_to(:my_rad_method)
+
+        @machine.helper :my_rad_helper
+        module ::MyRadHelper
+          def my_rad_method( x )
+            x
+          end
         end
-        pending
+        t2 = @obj.state_fu.transition( :run )
+        t2.should respond_to( :my_rad_method )
+        t2.my_rad_method( 6 ).should == 6
+
+        @machine.instance_eval do
+          helpers.pop
+        end
+        t3 = @obj.state_fu.transition( :run )
+
+        # triple check for contaminants
+        t1.should_not respond_to(:my_rad_method)
+        t2.should     respond_to(:my_rad_method)
+        t3.should_not respond_to(:my_rad_method)
       end
 
       it "should be able to access the args / options passed to fire! via transition.args" do
