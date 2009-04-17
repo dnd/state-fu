@@ -40,12 +40,12 @@ module StateFu
     alias_method :state, :current_state
 
     def events
-      machine.events.select {|e| e.complete? && e.from?( current_state ) }
+      machine.events.select {|e| e.complete? && e.from?( current_state ) }.extend ArrayWithSymbolAccessor
     end
     alias_method :events_from_current_state,  :events
 
     def valid_events
-      events.select {|e| e.fireable_by?( self ) }
+      events.select {|e| e.fireable_by?( self ) }.extend ArrayWithSymbolAccessor
     end
 
     def unmet_requirements_for(event, target)
@@ -53,7 +53,7 @@ module StateFu
     end
 
     def valid_next_states
-      valid_transitions.values.flatten.uniq
+      valid_transitions.values.flatten.uniq.extend ArrayWithSymbolAccessor
     end
 
     # returns a hash of valid { event_name => [state, state ..] }
@@ -71,8 +71,7 @@ module StateFu
       StateFu::Transition.new( self, event, target, *args, &block )
     end
 
-    # fire event
-    def fire!( event_or_array, *args, &block)
+    def event_or_array_to_array_of_event_and_target( event_or_array )
       case event_or_array
       when StateFu::Event, Symbol
         event  = event_or_array
@@ -83,7 +82,21 @@ module StateFu
       raise ArgumentError.new( event_or_array.inspect ) unless
         [StateFu::Event, Symbol  ].include?( event.class  ) &&
         [StateFu::State, NilClass].include?( target.class )
+      [event,target]
+    end
 
+    def fireable?( event_or_array )
+      event, target = event_or_array_to_array_of_event_and_target( event_or_array )
+      # ensure we have an actual Event here
+      event         = @machine.events[ event.to_sym ] || raise( ArgumentError )
+      # and that target is non-nil
+      target      ||= event.single_target? ? event.target.first : raise( ArgumentError )
+      valid_transitions[ event ].include?( target )
+    end
+
+    # fire event
+    def fire!( event_or_array, *args, &block)
+      event, target = event_or_array_to_array_of_event_and_target( event_or_array )
       t = transition( event, target, *args, &block )
       t.fire!
       t

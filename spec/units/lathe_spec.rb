@@ -343,7 +343,25 @@ describe StateFu::Lathe do
 
       describe "default - define simple event methods on binding" do
 
-        it "should add a ? method for each simple event which is true when the event is valid"
+        # TODO - split this up into units
+
+        it "should add a ? method for each simple event which is true when the event is valid" do
+          @machine.events[:simple_enough].should be_simple
+
+          @binding.should respond_to(:simple_enough?)
+          @obj.state_fu.state.should == @machine.states[:intro]
+          @binding.fireable?( :simple_enough ).should == true
+
+          e = @machine.events[:simple_enough]
+          @binding.valid_transitions[e].should be_kind_of( Array )
+          @binding.valid_transitions[e].length.should == 1
+          @binding.valid_transitions[e].should include( @machine.states[:outro] )
+          @binding.simple_enough?.should == true
+
+          stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
+          @binding.fireable?( :simple_enough ).should == false
+          @binding.simple_enough?.should == false
+        end
 
         it "should add instance methods to the binding to fire each simple event" do
           @machine.events[:simple_enough].should be_simple
@@ -382,7 +400,13 @@ describe StateFu::Lathe do
           @obj.should_not respond_to(:too_complex!)
         end
 
-        it "should add a ? method for each simple event which is true when the event is valid"
+        it "should add a ? method for each simple event which is true when the event is valid" do
+          @machine.events[:simple_enough].should be_simple
+          @obj.should respond_to(:simple_enough?)
+          @obj.simple_enough?.should == true
+          stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
+          @obj.simple_enough?.should == false
+        end
         it "should add instance methods to the stateful instance to fire each simple event"
         it "should not add instance methods to the binding for complex events"
         it "should not clobber an existing method"
