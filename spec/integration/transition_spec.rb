@@ -374,7 +374,7 @@ describe StateFu::Transition do
 
           lambda do
             @obj.state_fu.transition( :go, :awol )
-          end.should raise_error( StateFu::InvalidTransition )
+          end.should raise_error( ArgumentError )
         end
 
         it "should return a transition with the specified target" do
@@ -395,7 +395,7 @@ describe StateFu::Transition do
 
           lambda do
             @obj.state_fu.fire!( :go, :awol )
-          end.should raise_error( StateFu::InvalidTransition )
+          end.should raise_error( ArgumentError )
         end
       end # state_fu.fire!
 
@@ -665,7 +665,7 @@ describe StateFu::Transition do
 
   end # machine w/ hooks
 
-  describe "A simple machine w/ a transition requirement without a block" do
+  describe "A binding for a machine with an event transition requirement" do
     before do
       @machine = Klass.machine do
         event( :go, :from => :a, :to => :b ) do
@@ -674,9 +674,84 @@ describe StateFu::Transition do
 
         initial_state :a
       end
+      @obj = Klass.new
+      @binding = @obj.state_fu
+      @event = @machine.events[:go]
+      @a = @machine.states[:a]
+      @b = @machine.states[:b]
     end
 
-    it "should ..."
+    describe "when no block is supplied for the requirement" do
+
+      it "should have an event named :go" do
+        @machine.events[:go].requirements.should == [:ok?]
+        @machine.events[:go].should be_complete
+        @machine.states.map(&:name).sort_by(&:to_s).should == [:a, :b]
+        @a.should be_kind_of( StateFu::State )
+        @event.should be_kind_of( StateFu::Event )
+        @event.origin.map(&:name).should == [:a]
+        @binding.current_state.should == @machine.states[:a]
+        @event.from?( @machine.states[:a] ).should be_true
+        @machine.events[:go].from?( @binding.current_state ).should be_true
+        @binding.events.should_not be_empty
+      end
+
+      it "should contain :go in @binding.valid_events if evt.fireable_by? is true for the binding" do
+        mock( @event ).fireable_by?( @binding ) { true }
+        @binding.valid_events.should == [@event]
+      end
+
+      it "should contain :go in @binding.valid_events if @binding.evaluate_requirement( :ok? ) is true" do
+        mock( @binding ).evaluate_requirement( :ok? ) { true }
+        @binding.current_state.should == @machine.initial_state
+        @binding.events.should == @machine.events
+        @binding.valid_events.should == [@event]
+      end
+
+      it "should contain the event in @binding.valid_events if @obj.ok? is true" do
+        mock( @obj ).ok? { true }
+        @binding.current_state.should == @machine.initial_state
+        @binding.events.should == @machine.events
+        @binding.valid_events.should == [@event]
+      end
+
+      it "should not contain :go in @binding.valid_events if !@obj.ok?" do
+        mock( @obj ).ok? { false }
+        @binding.events.should == @machine.events
+        @binding.valid_events.should == []
+      end
+
+      it "should raise a RequirementError if requirements are not satisfied" do
+        mock( @obj ).ok? { false }
+        lambda do
+          @obj.state_fu.fire!( :go )
+        end.should raise_error( StateFu::RequirementError )
+      end
+
+      it "should have useful info on the error about the failed requirement"
+
+    end # no block
+
+    describe "when a block is supplied for the requirement" do
+
+      it "should be a valid event if the block is true " do
+        @machine.named_procs[:ok?] = Proc.new() { true }
+        @binding.valid_events.should == [@event]
+
+        @machine.named_procs[:ok?] = Proc.new() { |binding| true }
+        @binding.valid_events.should == [@event]
+
+      end
+
+      it "should not be a valid event if the block is false" do
+        @machine.named_procs[:ok?] = Proc.new() { false }
+        @binding.valid_events.should == []
+
+        @machine.named_procs[:ok?] = Proc.new() { |binding| false }
+        @binding.valid_events.should == []
+      end
+
+    end
 
   end # machine w/guard conditions
 

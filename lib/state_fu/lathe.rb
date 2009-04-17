@@ -42,7 +42,7 @@ module StateFu
 
     # require that the current sprocket be of a given type
     def require_sprocket( *valid_types )
-      raise ArgumentError.new unless valid_types.include?( sprocket.class )
+      raise ArgumentError.new("Lathe is for a #{sprocket.class}, not one of #{valid_types.inspect}") unless valid_types.include?( sprocket.class )
     end
 
     # ensure this is not a child lathe
@@ -124,8 +124,8 @@ module StateFu
         evt.from sprocket
         evt.to( target )
       else
-        origin = options.delete( :to )
-        target = options.delete( :from )
+        origin = options.delete( :from )
+        target = options.delete( :to )
         evt    = define_event( name, options, &block )
         evt.from origin unless origin.nil?
         evt.to   target unless target.nil?

@@ -24,31 +24,31 @@ module StateFu
 
     def initialize( binding, event, target=nil, *args, &block )
       # ensure event is a StateFu::Event
-      if event.is_a?( Symbol )
-        event = binding.machine.events[ event ]
+      if event.is_a?( Symbol ) && e = binding.machine.events[ event ]
+        event = e
       end
-      if !event.is_a?( StateFu::Event )
-        raise ArgumentError, event.inspect
-      end
+      raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a?( StateFu::Event )
 
-      # ensure target is a valid StateFu::State
-      if target.nil?
+      # infer target if necessary
+      case target
+      when StateFu::State # good
+      when Symbol
+        target = binding.machine.states[ target ] ||
+          raise( ArgumentError, "target cannot be determined" )
+      when NilClass
         if event.target.is_a?( Array ) && event.target.length == 1
           target = event.target.first
         else
           raise( ArgumentError, "target cannot be determined" )
         end
+      else
+        raise ArgumentError.new( target.inspect )
       end
-      if target.is_a?( Symbol )
-        target = binding.machine.states[ target ]
-      end
+
+      # ensure target is valid for the event
       unless event.target.include?( target )
-        err_msg = "Illegal target #{target}"
-        raise( StateFu::InvalidTransition.new( binding,
-                                               event,
-                                               binding.current_state,
-                                               target,
-                                               err_msg ))
+        raise( StateFu::InvalidTransition.new( binding, event, binding.current_state, target,
+                                               "Illegal target #{target} for #{event}" ))
       end
 
       @options    = args.extract_options!.symbolize_keys!
@@ -65,6 +65,30 @@ module StateFu
       # This is your chance to extend the Transition with custom
       # methods, etc so that it models your problem domain.
       apply!( &block ) if block_given?
+    end
+
+    def check_requirements!
+      #
+      # TODO - better errors with more info !!
+      #
+
+      # ensure requirements are satisfied
+      # for the state being exited
+      unless origin.exitable_by?( binding )
+        raise "EXITABLE"
+        raise RequirementError
+      end
+
+      # for the state being entered
+      unless target.enterable_by?( binding )
+        raise "ENTERABLE"
+        raise RequirementError
+      end
+
+      # for the event being fired
+      unless event.fireable_by?( binding )
+        raise RequirementError
+      end
     end
 
     def hooks_for( element, slot )
@@ -113,6 +137,7 @@ module StateFu
 
     def fire!
       return false if fired? # no infinite loops please
+      check_requirements!
       @fired = true
       begin
         StateFu::Hooks::ALL_HOOKS.each do |arr|

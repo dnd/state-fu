@@ -121,6 +121,8 @@ describe StateFu::Lathe do
         @machine.events.first.name.should == :wobble
         @machine.states.length.should == 3
         @machine.states.map(&:name).sort_by {|x| x.to_s }.should == [ :a, :b, :c]
+        @machine.events[:wobble].origin.map(&:name).should == [:a,:b]
+        @machine.events[:wobble].target.map(&:name).should == [:c]
       end
 
     end # .event
@@ -209,6 +211,16 @@ describe StateFu::Lathe do
 
     end
 
+    describe ".event" do
+      it "should create any states mentioned which do not exist and add them to machine.states" do
+        mock( @machine ).find_or_create_states_by_name([:a]) { [:a] }
+        mock( @machine ).find_or_create_states_by_name([:b]) { [:b] }
+        event = @lathe.event( :go, :from => :a, :to => :b )
+        event.origin.should == [:a]
+        event.target.should == [:b]
+      end
+    end
+
     describe ".requires()" do
 
       before do
@@ -253,16 +265,55 @@ describe StateFu::Lathe do
 
   describe "a child lathe for an event" do
     before do
+      stub( @machine ).find_or_create_states_by_name([:a]) { [:a] }
+      stub( @machine ).find_or_create_states_by_name([:b]) { [:b] }
+
+      @master = @lathe
+      @event  = @lathe.event( :x )
+      @lathe  = StateFu::Lathe.new( @machine, @event )
     end
 
-    describe "from" do
+    describe ".from" do
+
       it "should create any states mentioned which do not exist and add them to machine.states"
+      it "should set the origin to the result of machine.find_or_create_states_by_name" do
+        mock( @machine ).find_or_create_states_by_name([:a, :b]) { [:a, :b] }
+        @lathe.from( :a, :b )
+        @event.origin.should == [:a, :b]
+        @event.target.should == nil
+      end
+      it "should ... on successive invocations"
     end
 
-    describe "to" do
+    describe ".to" do
       it "should create any states mentioned which do not exist and add them to machine.states"
+      it "should ... on successive invocations"
     end
 
+    describe ".requires()" do
+
+      before do
+        @event.requirements.should == []
+      end
+
+      it "should add :method_name to event.requirements given a name" do
+        @lathe.requires( :method_name )
+        @event.requirements.should == [:method_name]
+      end
+
+      it "should add to machine.named_procs if a block is given" do
+        class << @machine
+          attr_accessor :named_procs
+        end
+        @machine.named_procs = {}
+        block = lambda { puts "wee" }
+        @machine.named_procs.should == {}
+        @lathe.requires( :method_name, &block )
+        @event.requirements.should == [:method_name]
+        @machine.named_procs[:method_name].should == block
+      end
+
+    end
   end
 
 end

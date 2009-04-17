@@ -1,5 +1,16 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
+describe StateFu::RequirementError do
+
+  describe "constructor" do
+    before do
+      @transition = Object.new()
+    end
+
+    it "..."
+  end
+end
+
 describe StateFu::TransitionHalted do
 
   describe "constructor" do

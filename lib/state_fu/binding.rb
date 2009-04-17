@@ -37,6 +37,24 @@ module StateFu
     end
     alias_method :events_from_current_state,  :events
 
+    def valid_events
+      events.select {|e| e.fireable_by?( self ) }
+    end
+
+    def unmet_requirements_for(event, target)
+    end
+
+    # returns a hash of valid { event_name => [state, state ..] }
+    def valid_transitions
+      h = {}
+      valid_events.each do |e|
+        h[e] = e.targets.select do |s|
+          s.valid_next_state_for?( binding )
+        end
+      end
+      # valid_events.select {|e| e.valid_for_binding?( self ) }
+    end
+
     def transition( event, target=nil, *args, &block )
       StateFu::Transition.new( self, event, target, *args, &block )
     end
@@ -50,6 +68,23 @@ module StateFu
     alias_method :call!,       :fire!
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
+
+    # pretty similar to transition.run_hook
+    def evaluate_requirement( name )
+      if proc = machine.named_procs[name]
+        if proc.arity == 1
+          object.instance_exec( self, &proc )
+        else
+          instance_eval( &proc )
+        end
+      else
+        object.send( name )
+      end
+    end
+
+    def evaluate_requirement!( name )
+      evaluate_requirement( name ) || raise( RequirementError )
+    end
 
     # fire event to move to the next state, if there is only one possible state.
     # otherwise raise an error ( NoNextStateError)

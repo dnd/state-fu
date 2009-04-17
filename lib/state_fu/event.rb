@@ -59,6 +59,12 @@ module StateFu
       lathe.to( *a, &b )
     end
 
+    def fireable_by?( binding )
+      requirements.reject do |r|
+        binding.evaluate_requirement( r )
+      end.empty?
+    end
+
     private
     def get_states_list_by_name( list )
       machine.find_or_create_states_by_name( [list].flatten.map(&:to_sym) )

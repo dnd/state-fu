@@ -4,6 +4,10 @@ module StateFu
     attr_reader :binding, :options
   end
 
+  class RequirementError < Exception
+
+  end
+
   class TransitionHalted < Exception
     attr_reader :transition
 

@@ -25,5 +25,13 @@ module StateFu
       end
     end
 
+    def enterable_by?( binding )
+      true
+    end
+
+    def exitable_by?( binding )
+      true
+    end
+
   end
 end
