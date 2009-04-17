@@ -665,19 +665,11 @@ describe StateFu::Transition do
 
   end # machine w/ hooks
 
-  describe "A simple machine w/ named guard conditions" do
+  describe "A simple machine w/ a transition requirement without a block" do
     before do
       @machine = Klass.machine do
-        state :a do
-          exit_requires( :ok_to_leave? )
-        end
-
-        state :b do
-          requires( :ok_to_enter? )
-        end
-
         event( :go, :from => :a, :to => :b ) do
-          requires( :ok_to_execute? )
+          requires( :ok? )
         end
 
         initial_state :a
@@ -687,4 +679,5 @@ describe StateFu::Transition do
     it "should ..."
 
   end # machine w/guard conditions
+
 end

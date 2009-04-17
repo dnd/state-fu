@@ -178,6 +178,8 @@ describe StateFu::Lathe do
 
   end # master lathe instance
 
+  # child lathe - created and yielded within nested blocks in a
+  # machine definition
   describe "a child lathe for a state" do
     before do
       @master = @lathe
@@ -185,8 +187,8 @@ describe StateFu::Lathe do
       @lathe  = StateFu::Lathe.new( @machine, @state )
     end
 
-    describe "cycle" do
-      it "should create an event from and to the lathe's sprocket (state)" do
+    describe ".cycle( evt_name )" do
+      it "should create a named event from and to the lathe's sprocket (state)" do
         @machine = StateFu::Machine.new( :snoo )
         @master  = StateFu::Lathe.new( @machine )
         @state   = @master.state(:a)
@@ -202,6 +204,50 @@ describe StateFu::Lathe do
         cycle.origin.should == [@state]
         cycle.target.should == [@state]
       end
+
+      it "should create an event with a default name if given no name"
+
+    end
+
+    describe ".requires()" do
+
+      before do
+        @state.exit_requirements.should == []
+        @state.entry_requirements.should == []
+      end
+
+      it "should add :method_name to state.entry_requirements given a name" do
+        @lathe.requires( :method_name )
+        @state.entry_requirements.should == [:method_name]
+        @state.exit_requirements.should == []
+      end
+
+
+      it "should add :method_name to state.entry_requirements given a name and :on => :exit" do
+        @lathe.requires( :method_name, :on => :exit )
+        @state.exit_requirements.should == [:method_name]
+        @state.entry_requirements.should == []
+      end
+
+      it "should add :method_name to entry_requirements and exit_requirements given a name and :on => [:entry, :exit]" do
+        @lathe.requires( :method_name, :on => [:entry, :exit] )
+        @state.exit_requirements.should == [:method_name]
+        @state.entry_requirements.should == [:method_name]
+      end
+
+      it "should add to machine.named_procs if a block is given" do
+        class << @machine
+          attr_accessor :named_procs
+        end
+        @machine.named_procs = {}
+        block = lambda { puts "wee" }
+        @machine.named_procs.should == {}
+        @lathe.requires( :method_name, :on => [:entry, :exit], &block )
+        @state.exit_requirements.should == [:method_name]
+        @state.entry_requirements.should == [:method_name]
+        @machine.named_procs[:method_name].should == block
+      end
+
     end
   end
 

@@ -39,7 +39,7 @@ module StateFu
   end
 
   # Stuff shared between StateArray and EventArray
-  module StateOrEventArray
+  module ArrayWithSymbolAccessor
     # Pass a symbol to the array and get the object with that .name
     # [<Foo @name=:bob>][:bob]
     # => <Foo @name=:bob>
@@ -65,7 +65,7 @@ module StateFu
 
   # Array extender. Used by Machine to keep a list of states.
   module StateArray
-    include StateOrEventArray
+    include ArrayWithSymbolAccessor
 
     # is there exactly one possible event to fire, with a single
     # target event?
@@ -80,7 +80,7 @@ module StateFu
 
   # Array extender. Used by Machine to keep a list of events.
   module EventArray
-    include StateOrEventArray
+    include ArrayWithSymbolAccessor
 
     # return all events transitioning from the given state
     def from( origin )
@@ -108,7 +108,6 @@ module StateFu
   module HelperArray
 
   end
-
 
   # Extend an Array with this. It's a fairly compact implementation,
   # though it won't be super fast with lots of elements.
@@ -144,4 +143,5 @@ module StateFu
       map(&:last)
     end
   end  # OrderedHash
+
 end

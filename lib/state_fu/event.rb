@@ -1,11 +1,16 @@
 module StateFu
   class Event < StateFu::Sprocket
 
-    attr_reader :origin, :target
+    attr_reader :origin, :target, :requirements
 
     #
     # TODO - event guards
     #
+
+    def initialize(machine, name, options={})
+      @requirements = [].extend ArrayWithSymbolAccessor
+      super( machine, name, options )
+    end
 
     def origin_names
       origin ? origin.map(&:to_sym) : nil

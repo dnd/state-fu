@@ -79,19 +79,22 @@ module StateFu
         raise ArgumentError, "invalid hook type #{slot.inspect} for #{sprocket.class}"
       end
       if block_given?
-        unless (-1..1).include?( block.arity )
-          raise ArgumentError, "unexpected block arity: #{block.arity}"
-        end
-        if method_name.is_a?( Symbol )
+        # unless (-1..1).include?( block.arity )
+        #   raise ArgumentError, "unexpected block arity: #{block.arity}"
+        # end
+        case method_name
+        when Symbol
           machine.named_procs[method_name] = block
           hook = method_name
-        else
+        when NilClass
           hook = block
           # allow only one anonymous hook per slot in the interests of
           # sanity - replace any pre-existing ones
           sprocket.hooks[slot].delete_if { |h| Proc === h }
+        else
+          raise ArgumentError.new( method_name.inspect )
         end
-      elsif method_name.is_a?( Symbol )
+      elsif method_name.is_a?( Symbol ) # no block
         hook = method_name
         # prevent duplicates
         sprocket.hooks[slot].delete_if { |h| hook == h }
@@ -136,10 +139,30 @@ module StateFu
       args.each { |name| event( name.to_sym, options, &block) }
     end
 
-    def needs *a, &b
-      require_sprocket( StateFu::Event )
-      raise NotImplementedError
+    def requires( name, options={}, &block )
+      require_sprocket( StateFu::Event, StateFu::State )
+      options.symbolize_keys!
+      raise ArgumentError.new( name.inspect ) unless name.is_a?( Symbol )
+      case sprocket
+      when StateFu::State
+        on = [(options.delete(:on) || [:entry])].flatten
+        sprocket.entry_requirements << name if on.include?( :entry )
+        sprocket.exit_requirements  << name if on.include?( :exit  )
+      when StateFu::Event
+        sprocket.requirements << name
+      end
+      if block_given?
+        #unless (-1..1).include?( block.arity )
+        #  raise ArgumentError, "unexpected block arity: #{block.arity}"
+        #end
+        machine.named_procs[name] = block
+      end
     end
+    alias_method :must,         :requires
+    alias_method :must_be,      :requires
+    alias_method :needs,        :requires
+    alias_method :satisfy,      :requires
+    alias_method :must_satisfy, :requires
 
     # create an event from *and* to the current state.
     # Creates a loop, useful (only) for hooking behaviours onto.
