@@ -79,7 +79,7 @@ module StateFu
       end
       raise ArgumentError.new( event_or_array.inspect ) unless
         [StateFu::Event, Symbol  ].include?( event.class  ) &&
-        [StateFu::State, NilClass].include?( target.class )
+        [StateFu::State, Symbol, NilClass].include?( target.class )
       [event,target]
     end
 

@@ -8,16 +8,20 @@
 ==================================================
 * TODOs
 
-** simple event firing methods on object / binding
-   state_fu.method_maker.simple!( binding )
-   # => state_fu.run!( *args ) = binding.fire!(:run, ... , *args )
-   for simple events only
+* rename origin, target to origins, targets
+
+* global hooks for both state & event hooks
+
+* support :ALL, :only and :except
+** when using event.to and .from
+** when defining hooks on multiple events / states (NOT globally)
+
+* configurable method definitions for object / lathe
+
 ** lathe( event ) .from should support hash syntax:
 
    event( :go, :from => { :intro => :outro } )
    event( :go, :from => { :intro => [:outro, :exit] } )
-
-** spec / code to test passing arguments to transitions
 
 ** spec / code for introspection of unmet requirements for transitions
 ** spec / code for introspection of transitionHalted exceptions during a transition
@@ -25,8 +29,9 @@
 *** enclose stuff that's destructive in a block which only executes if it's not a test transition
     i.e, destructively do .... end
 
+** more logging
+
 **  TODO - add support for :all, :except, :only ( lathe.event , state(s) )
-** default method name for cycle
 
 ** refactor transition unit spec to integration & unit specs
 ** update account example integration spec
