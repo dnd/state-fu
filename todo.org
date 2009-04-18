@@ -8,24 +8,15 @@
 ==================================================
 * TODOs
 
-** configurable method definitions for object / lathe
-
-** lathe( event ) .from should support hash syntax:
-   event( :go, :from => { :intro => :outro } )
-   event( :go, :from => { :intro => [:outro, :exit] } )
+** configurable event method definitions for object / lathe
 
 ** spec / code for introspection of unmet requirements for transitions
 ** spec / code for introspection of transitionHalted exceptions during a transition
-** test-only transitions - what would this do exactly?
-*** enclose stuff that's destructive in a block which only executes if it's not a test transition
-    i.e, destructively do .... end
 
 ** ensure event methods are callable before calling state_fu!
 *** use method_missing to call .state_fu! then try again / super
 
 ** more logging
-
-** refactor transition unit spec to integration & unit specs
 ** update account example integration spec
 ** write cheat / intro / examples
 ** auto transitions and default arguments
@@ -38,13 +29,12 @@
    To make them inheritable we'd be back to needing a Binding
    or some other substantial complexity.
    I don't think it's worth it.
+** method definitions for event firing cannot be called on the stateful object before state_fu[!] has been called (which instantiates the methods).
 
 * Decisions
 ** removed ability to have procs as origin / target states
-*** not worth the complexity / fugly code
-*** can use guard conditions on states to test if they're available
-*** performance
-*** can use conditions on events to check if something's valid at transition time
+*** not worth the complexity, too hard to debug in real use, performance
+*** can easily add all states as potential candidates, to be screened via requirements
 
 * Wishlist
 ** test storing meta-information in options for integration with eg Rails controllers, views
