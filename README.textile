@@ -3,14 +3,21 @@ h1. State-Fu
 h2. What is it?
 
 State-Fu is:
+
  * an unique toolkit for state-oriented programming
+
  * a rich DSL for describing workflows, rules engines and behaviour
+
  * probably deceptively familiar in outward appearance
 
 It lets you describe:
+
  * series of discrete states
+
  * events which can change the current state
+
  * rules about when these events can occur
+
  * behaviours which occur when they do
 
 Other libraries exist for ruby which do some or all of these
