@@ -35,8 +35,8 @@ describe StateFu::Transition do
 
     it "should have one event :transfer, from :src to :dest" do
       @machine.events.length.should == 1
-      @event.origin.should          == [@origin]
-      @event.target.should          == [@target]
+      @event.origin.should          == @origin
+      @event.target.should          == @target
     end
 
     describe "instance methods on a transition" do
@@ -152,7 +152,6 @@ describe StateFu::Transition do
           trans.object.should  == @obj
           trans.origin.should  == @origin
           trans.target.should  == @target
-          trans.target.should  == @target
           trans.options.should == {}
           trans.errors.should  == []
           trans.args.should    == []
@@ -166,7 +165,6 @@ describe StateFu::Transition do
           trans.binding.should == @obj.state_fu
           trans.object.should  == @obj
           trans.origin.should  == @origin
-          trans.target.should  == @target
           trans.target.should  == @target
           trans.options.should == {}
           trans.errors.should  == []
@@ -360,8 +358,8 @@ describe StateFu::Transition do
     end
 
     it "should have an event from [:a, :b] to [:x, :y]" do
-      @event.origin.should == [@a, @b]
-      @event.target.should == [@x, @y]
+      @event.origins.should == [@a, @b]
+      @event.targets.should == [@x, @y]
       @obj.state_fu.state.should == @a
     end
 
@@ -370,7 +368,7 @@ describe StateFu::Transition do
 
     describe "state_fu instance methods" do
       describe "state_fu.transition" do
-        it "should raise an ArgumentError unless a valid target state is supplied" do
+        it "should raise an ArgumentError unless a valid targets state is supplied" do
           lambda do
             @obj.state_fu.transition( :go )
           end.should raise_error( ArgumentError )
@@ -380,7 +378,7 @@ describe StateFu::Transition do
           end.should raise_error( ArgumentError )
         end
 
-        it "should return a transition with the specified target" do
+        it "should return a transition with the specified targets" do
           t = @obj.state_fu.transition( :go, :x )
           t.should be_kind_of( StateFu::Transition )
 
@@ -391,7 +389,7 @@ describe StateFu::Transition do
       end  # state_fu.transition
 
       describe "state_fu.fire!" do
-        it "should raise an ArgumentError unless a valid target state is supplied" do
+        it "should raise an ArgumentError unless a valid targets state is supplied" do
           lambda do
             @obj.state_fu.fire!( :go )
           end.should raise_error( ArgumentError )
@@ -692,7 +690,7 @@ describe StateFu::Transition do
         @machine.states.map(&:name).sort_by(&:to_s).should == [:a, :b]
         @a.should be_kind_of( StateFu::State )
         @event.should be_kind_of( StateFu::Event )
-        @event.origin.map(&:name).should == [:a]
+        @event.origins.map(&:name).should == [:a]
         @binding.current_state.should == @machine.states[:a]
         @event.from?( @machine.states[:a] ).should be_true
         @machine.events[:go].from?( @binding.current_state ).should be_true

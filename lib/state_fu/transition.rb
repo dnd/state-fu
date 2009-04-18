@@ -34,19 +34,17 @@ module StateFu
       when StateFu::State # good
       when Symbol
         target = binding.machine.states[ target ] ||
-          raise( ArgumentError, "target cannot be determined" )
+          raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
       when NilClass
-        if event.target.is_a?( Array ) && event.target.length == 1
-          target = event.target.first
-        else
-          raise( ArgumentError, "target cannot be determined" )
+        unless target = event.target
+          raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
         end
       else
         raise ArgumentError.new( target.inspect )
       end
 
       # ensure target is valid for the event
-      unless event.target.include?( target )
+      unless event.targets.include?( target )
         raise( StateFu::InvalidTransition.new( binding, event, binding.current_state, target,
                                                "Illegal target #{target} for #{event}" ))
       end

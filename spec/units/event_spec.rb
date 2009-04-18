@@ -27,47 +27,47 @@ describe StateFu::Event do
     describe "Instance methods" do
       describe "setting origin / target" do
 
-        describe "single_target?" do
-          it "should be nil if the target is not" do
-            stub( @event ).target() { nil }
-            @event.single_target?.should == nil
+        describe "target" do
+          it "should be nil if targets is nil" do
+            stub( @event ).targets() { nil }
+            @event.target.should == nil
           end
 
-          it "should be false if the target has more than one state" do
-            stub( @event ).target() { [@state_a, @state_b] }
-            @event.single_target?.should == false
+          it "should be nil if targets has more than one state" do
+            stub( @event ).targets() { [@state_a, @state_b] }
+            @event.target.should == nil
           end
 
-          it "should be true if the target is set and there is only one" do
-            stub( @event ).target() { [@state_a] }
-            @event.single_target?.should == true
+          it "should be the sole state if targets is set and there is only one" do
+            stub( @event ).targets() { [@state_a] }
+            @event.target.should == @state_a
           end
         end
 
-        describe 'origin=' do
+        describe 'origins=' do
           it "should call get_states_list_by_name with its argument" do
             mock( @machine ).find_or_create_states_by_name( [:initial] ) { }
-            @event.origin= :initial
+            @event.origins= :initial
           end
 
           it "should set @origin to the result" do
             mock( @machine ).find_or_create_states_by_name( [:initial] ) { :result }
-            @event.origin= :initial
-            @event.origin.should == :result
+            @event.origins= :initial
+            @event.origins.should == :result
           end
 
         end
 
-        describe 'target=' do
+        describe 'targets=' do
           it "should call get_states_list_by_name with its argument" do
             mock( @machine ).find_or_create_states_by_name( [:initial] ) { }
-            @event.target= :initial
+            @event.targets= :initial
           end
 
           it "should set @target to the result" do
             mock( @machine ).find_or_create_states_by_name( [:initial] ) { :result }
-            @event.target= :initial
-            @event.target.should == :result
+            @event.targets= :initial
+            @event.targets.should == :result
           end
         end
 
@@ -104,12 +104,12 @@ describe StateFu::Event do
 
               it "should set @event.origin to the returned array of origin states" do
                 @event.from :initial, :to => :final
-                @event.origin.should == [@initial]
+                @event.origins.should == [@initial]
               end
 
               it "should set @event.target to the returned array of target states" do
                 @event.from :initial, :to => :final
-                @event.target.should == [@final]
+                @event.targets.should == [@final]
               end
             end
 
@@ -140,7 +140,7 @@ describe StateFu::Event do
             it "should set @event.target to machine.find_or_create_states_by_name( :final )" do
               mock( @machine ).find_or_create_states_by_name([:final]) { [@final] }
               @event.to :final
-              @event.target.should == [@final]
+              @event.targets.should == [@final]
             end
           end
         end
@@ -152,13 +152,13 @@ describe StateFu::Event do
           mock( @machine ).find_or_create_states_by_name([:initial]) { [@initial] }
           mock( @machine ).find_or_create_states_by_name([:final]) { [@final] }
           @event.from :initial, :to => :final
-          @event.origin.should == [@initial]
+          @event.origin.should == @initial
           mock( @initial ).to_sym().times(any_times) { :initial }
           @event.origin_names.should == [:initial]
         end
 
         it "should return nil when origin is nil" do
-          mock( @event ).origin().times(any_times) { nil }
+          mock( @event ).origins().times(any_times) { nil }
           @event.origin_names.should == nil
         end
 
@@ -166,37 +166,37 @@ describe StateFu::Event do
 
       describe 'target_names' do
         it "should return an array of state names in target when target is not nil" do
-          mock( @event ).target.times( any_times ) { [@final] }
+          mock( @event ).targets.times( any_times ) { [@final] }
           mock( @final ).to_sym { :final }
           @event.target_names.should == [:final]
         end
 
         it "should return nil when target is nil" do
-          mock( @event ).target().times(any_times) { nil }
+          mock( @event ).targets().times(any_times) { nil }
           @event.target_names.should == nil
         end
       end
 
       describe 'to?' do
         it "should return true given a symbol which is the name of a state in @target" do
-          mock( @event ).target.times(any_times) {  [StateFu::State.new(@machine,:a)] }
+          mock( @event ).targets.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.to?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @target" do
-          mock( @event ).target.times(any_times) {  [StateFu::State.new(@machine,:a)] }
+          mock( @event ).targets.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.to?( :b ).should == false
         end
       end
 
       describe 'from?' do
         it "should return true given a symbol which is the name of a state in @origin" do
-          mock( @event ).origin.times(any_times) {  [StateFu::State.new(@machine,:a)] }
+          mock( @event ).origins.times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.from?( :a ).should == true
         end
 
         it "should return false given a symbol which is not the name of a state in @origin" do
-          mock( @event ).origin().times(any_times) {  [StateFu::State.new(@machine,:a)] }
+          mock( @event ).origins().times(any_times) {  [StateFu::State.new(@machine,:a)] }
           @event.from?( :b ).should == false
         end
       end
@@ -207,14 +207,14 @@ describe StateFu::Event do
         end
 
         it "should be true when origin / target are both not nil" do
-          mock( @event ).origin { [:a] }
-          mock( @event ).target { [:b] }
+          mock( @event ).origins { [:a] }
+          mock( @event ).targets { [:b] }
           @event.complete?.should == true
         end
 
         it "should be false when either origin / target are nil" do
-          mock( @event ).origin { [:a] }
-          mock( @event ).target { nil  }
+          mock( @event ).origins { [:a] }
+          mock( @event ).targets { nil  }
           @event.complete?.should == false
         end
 

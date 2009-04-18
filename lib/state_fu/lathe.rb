@@ -119,16 +119,16 @@ module StateFu
       options.symbolize_keys!
       require_sprocket( StateFu::State, NilClass )
       if child? && sprocket.is_a?( StateFu::State ) # in state block
-        target  = options.delete(:to)
-        evt     = define_event( name, options, &block )
+        targets  = options.delete(:to)
+        evt      = define_event( name, options, &block )
         evt.from sprocket
-        evt.to( target )
+        evt.to( targets )
       else # in event block
-        origin = options.delete( :from )
-        target = options.delete( :to )
-        evt    = define_event( name, options, &block )
-        evt.from origin unless origin.nil?
-        evt.to   target unless target.nil?
+        origins = options.delete( :from )
+        targets = options.delete( :to )
+        evt     = define_event( name, options, &block )
+        evt.from origins unless origins.nil?
+        evt.to   targets unless targets.nil?
         evt
       end
     end
@@ -198,15 +198,15 @@ module StateFu
 
     # TODO - add support for :all, :except, :only
     #
-    # Sets event.origin and optionally event.target.
+    # Sets event.origins and optionally event.targets.
     # both can be supplied as a symbol, array of symbols.
     # any states referenced here will be created if they do not exist.
     def from *args, &block
       require_sprocket( StateFu::Event )
       options           = args.extract_options!.symbolize_keys!
-      sprocket.origin     = args
+      sprocket.origins  = args
       to                = options.delete(:to)
-      to && sprocket.target = to
+      to && sprocket.targets = to
       if block_given?
         apply_to( sprocket, options, &block )
       else
@@ -216,12 +216,12 @@ module StateFu
 
     # TODO - add support for :all, :except, :only
     #
-    # Sets event.target
+    # Sets event.targets
     # can be supplied as a symbol, or array of symbols.
     # any states referenced here will be created if they do not exist.
     def to *args
       options         = args.extract_options!.symbolize_keys!
-      sprocket.target = args
+      sprocket.targets = args
       if block_given?
         apply_to( sprocket, options, &block )
       else

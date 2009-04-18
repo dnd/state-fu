@@ -121,8 +121,8 @@ describe StateFu::Lathe do
         @machine.events.first.name.should == :wobble
         @machine.states.length.should == 3
         @machine.states.map(&:name).sort_by {|x| x.to_s }.should == [ :a, :b, :c]
-        @machine.events[:wobble].origin.map(&:name).should == [:a,:b]
-        @machine.events[:wobble].target.map(&:name).should == [:c]
+        @machine.events[:wobble].origins.map(&:name).should == [:a,:b]
+        @machine.events[:wobble].targets.map(&:name).should == [:c]
       end
 
     end # .event
@@ -206,8 +206,8 @@ describe StateFu::Lathe do
         @machine.states.length.should == 1
         cycle = @machine.events.first
         cycle.should be_kind_of( StateFu::Event )
-        cycle.origin.should == [@state]
-        cycle.target.should == [@state]
+        cycle.origins.should == [@state]
+        cycle.targets.should == [@state]
       end
 
       it "should create an event with a default name if given no name" do
@@ -218,8 +218,8 @@ describe StateFu::Lathe do
         @machine.states.length.should == 1
         e = @machine.events.first
         e.name.should == :cycle_a
-        e.origin.should == [@state]
-        e.target.should == [@state]
+        e.origins.should == [@state]
+        e.targets.should == [@state]
       end
 
     end
@@ -229,8 +229,8 @@ describe StateFu::Lathe do
         mock( @machine ).find_or_create_states_by_name([:a]) { [:a] }
         mock( @machine ).find_or_create_states_by_name([:b]) { [:b] }
         event = @lathe.event( :go, :from => :a, :to => :b )
-        event.origin.should == [:a]
-        event.target.should == [:b]
+        event.origins.should == [:a]
+        event.targets.should == [:b]
       end
     end
 
@@ -289,11 +289,11 @@ describe StateFu::Lathe do
     describe ".from" do
 
       it "should create any states mentioned which do not exist and add them to machine.states"
-      it "should set the origin to the result of machine.find_or_create_states_by_name" do
+      it "should set the origins to the result of machine.find_or_create_states_by_name" do
         mock( @machine ).find_or_create_states_by_name([:a, :b]) { [:a, :b] }
         @lathe.from( :a, :b )
-        @event.origin.should == [:a, :b]
-        @event.target.should == nil
+        @event.origins.should == [:a, :b]
+        @event.targets.should == nil
       end
       it "should ... on successive invocations"
     end
@@ -408,10 +408,10 @@ describe StateFu::Lathe do
           @obj.simple_enough?.should == false
         end
 
-        it "should add a query method for events with multiple target, which takes the target as its sole argument and  is true when the event is valid" do
+        it "should add a query method for events with multiple targets, which takes the targets as its sole argument and  is true when the event is valid" do
           @machine.events[:too_complex].should_not be_simple
           @obj.should respond_to(:too_complex?)
-          lambda { @obj.too_complex? }.should raise_error( ArgumentError ) # needs to be told the target
+          lambda { @obj.too_complex? }.should raise_error( ArgumentError ) # needs to be told the targets
           lambda { @obj.too_complex?(:tax_returns) }.should_not raise_error()
 
           @binding.fireable?( [:too_complex, :tax_returns] ).should == true

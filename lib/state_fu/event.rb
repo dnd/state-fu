@@ -1,7 +1,7 @@
 module StateFu
   class Event < StateFu::Sprocket
 
-    attr_reader :origin, :target, :requirements
+    attr_reader :origins, :targets, :requirements
 
     #
     # TODO - event guards
@@ -13,11 +13,11 @@ module StateFu
     end
 
     def origin_names
-      origin ? origin.map(&:to_sym) : nil
+      origins ? origins.map(&:to_sym) : nil
     end
 
     def target_names
-      target ? target.map(&:to_sym) : nil
+      targets ? targets.map(&:to_sym) : nil
     end
 
     def to?( state )
@@ -28,33 +28,34 @@ module StateFu
       origin_names.include?( state.to_sym )
     end
 
-    def origin=( arg )
-      @origin = get_states_list_by_name( arg )
+    def origins=( arg )
+      @origins = get_states_list_by_name( arg )
     end
 
-    def target=( arg )
-      @target = get_states_list_by_name( arg )
+    def targets=( arg )
+      @targets = get_states_list_by_name( arg )
     end
 
-    # complete?(:origin) # do we have an origin?
-    # complete?          # do we have an origin and target?
+    # complete?(:origins) # do we have an origins?
+    # complete?          # do we have an origins and targets?
     def complete?( field = nil )
-      ( field && [field] ||  [:origin, :target] ).
+      ( field && [field] ||  [:origins, :targets] ).
         map{ |s| send(s) }.
         all?{ |f| !(f.nil? || f.empty?) }
     end
 
-    def single_origin?
-      origin && origin.is_a?( Array ) && origin.length == 1
+    def origin
+      origins && origins.length == 1 && origins[0] || nil
     end
 
-    def single_target?
-      target && target.is_a?( Array ) && target.length == 1
+    def target
+      targets && targets.length == 1 && targets[0] || nil
     end
 
     def simple?
-      single_origin? && single_target?
+      !! ( origin && target )
     end
+
     #
     # Proxy methods to StateFu::Lathe
     #

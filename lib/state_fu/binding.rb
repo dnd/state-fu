@@ -57,7 +57,7 @@ module StateFu
     def valid_transitions
       h = {}
       valid_events.each do |e|
-        h[e] = e.target.select do |s|
+        h[e] = e.targets.select do |s|
           s.enterable_by?( self )
         end
       end
@@ -81,7 +81,7 @@ module StateFu
       raise ArgumentError.new( event_or_array.inspect ) unless
         [StateFu::Event, Symbol  ].include?( event.class  ) &&
         [StateFu::State, Symbol, NilClass].include?( target.class )
-      [event,target]
+      [event, target]
     end
 
     # check that the event and target are valid
@@ -122,7 +122,7 @@ module StateFu
     # fire event to move to the next state, if there is only one possible state.
     # otherwise raise an error ( NoNextStateError)
     def next!( *args, &block )
-      next_events = events.select {|e| e.target.length == 1 }
+      next_events = events.select {|e| e.target }
       case next_events.length
       when 0
         err_msg = "There is no event for next!"
@@ -144,7 +144,7 @@ module StateFu
     alias_method :next_state!, :next!
 
     def cycle!( *args, &block )
-      cycle_events = events.select {|e| e.target == [current_state] }
+      cycle_events = events.select {|e| e.target == current_state }
       if cycle_events.length == 1
         event = cycle_events.first
         fire!( event, *args, &block )
