@@ -1,31 +1,58 @@
-#!/usr/bin/env ruby
-require 'redcloth'; puts RedCloth.new( DATA.read ).to_html
-__END__
+h1. State-Fu
 
-h1. StateFu
+h2. What is it?
 
-State Fu is a rich framework for describing state machines,
-workflows and rules engines in ruby and/or Rails.
+State-Fu is:
+ * an unique toolkit for state-oriented programming
+ * a rich DSL for describing workflows, rules engines and behaviour
+ * probably deceptively familiar in outward appearance
 
-It aims to be the most featureful, expressive and powerful such
-library available, without sacrificing ease of use, clarity, or
-performance.
+It lets you describe:
+ * series of discrete states
+ * events which can change the current state
+ * rules about when these events can occur
+ * behaviours which occur when they do
 
-h2. Status
+Other libraries exist for ruby which do some or all of these
+things. "What's different about State-Fu?", you may ask.
 
-State-Fu is currently under active development. I'm not yet using it
-in production, but it has a fairly stable API, reasonable spec
-coverage and should have features sufficient for most use cases.
+Those libraries you've played with are toys. They're made of
+plastic. State-Fu is forged from a reassuringly dense but
+unidentifiable metal which comes only from the rarest of meteorites,
+and it ticks when you hold it up to your ear.
 
-It plays nicely with both ActiveRecord models and standard ruby
-classes; it requires ActiveSupport but not ActiveRecord, and will use
-an ActiveRecord column for persistence if an appropriate column
-exists. You can even mix machines using ActiveRecord- &
-attribute-based persistence on the same model.
+Some of the features which set State-Fu apart are:
 
-Until I've written an introductory example specifically for this
-README, you can take a look at the specs (especially the integration
-specs) for example usage.
+ * use an ActiveRecord field for state persistence, or just an
+   attribute
 
-Note that the 'rspec' and 'rr' gems are required to run the specs.
+ * use both, on the same class, for different workflows
 
+ * use any number of workflows on the same object / model, or re-use
+   them across multiple classes
+
+ * a rich set of event hooks to drive application behaviour
+
+ * events can transition from / to any number of states
+
+ * guard conditions determine at runtime whether a particular state
+   transition can occur
+
+ * transitions can be halted midway, and you can actually determine
+   why, and where from
+
+ * use helpers to extend State-Fu to suit your problem domain
+
+ * define behaviour as methods on your objects, or keep it all in the
+   state machine itself
+
+ * store arbitrary meta-data on any component of a machine (a simple
+   but insanely useful tool for integration)
+
+ * design for transparency, introspection and ease of debugging means
+   a dynamic, powerful system you can actually use
+
+ * fast, lightweight and useful enough to use in any ruby
+   project - works with Rails but does not require it.
+
+ * works with ruby 1.8 and 1.9
