@@ -99,7 +99,6 @@ module StateFu
       alias_method :stateful,    :binding
       alias_method :workflow,    :binding
       alias_method :engine,      :binding
-      alias_method :machine,     :binding # not strictly accurate, but makes sense sometimes
       alias_method :context,     :binding
       alias_method :om,          :binding # historical
       # Gain awareness of all bindings (state contexts) this object

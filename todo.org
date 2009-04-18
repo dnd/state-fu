@@ -8,6 +8,11 @@
 ==================================================
 * TODOs
 
+* create accessor method for named machines
+  eg Klass.machine(:foo) do ... end; k = Klass.new; k.foo # return binding
+
+* use method_missing to call .state_fu! then try again / super
+
 * rename origin, target to origins, targets
 
 * global hooks for both state & event hooks

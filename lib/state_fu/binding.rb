@@ -1,13 +1,14 @@
 module StateFu
   class Binding
 
-    attr_reader :object, :machine, :method_name, :persister, :transitions
+    attr_reader :object, :machine, :method_name, :persister, :transitions, :options
 
-    def initialize( machine, object, method_name )
+    def initialize( machine, object, method_name, options={} )
       @machine       = machine
       @object        = object
       @method_name   = method_name
       @transitions   = []
+      @options       = options.symbolize_keys!
       field_name     = StateFu::FuSpace.field_names[object.class][@method_name]
       raise( ArgumentError, "No field_name" ) unless field_name
       @persister     = StateFu::Persistence.for( self, field_name )
@@ -160,7 +161,7 @@ module StateFu
     alias_method :transition!, :fire!
 
     def inspect
-      "<#{self.class} #{hash} object=#{@object} machine=#{@machine}>"
+      "#<#{self.class} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} machine=#{@machine.inspect} options=#{options.inspect}>"
     end
 
   end

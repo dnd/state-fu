@@ -29,13 +29,15 @@ module StateFu
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
       @named_procs = {}
-      @options            = options
+      @options = options
     end
 
-    # merge the commands in &block with the existing machine
+    # merge the commands in &block with the existing machine; returns
+    # a lathe for the machine.
     def apply!( &block )
       StateFu::Lathe.new( self, &block )
     end
+    alias_method :lathe, :apply!
 
     def helper_modules
       helpers.map do |h|
@@ -121,6 +123,10 @@ module StateFu
         end
         state
       end
+    end
+
+    def inspect
+      "#<#{self.class} ##{__id__} states=#{state_names.inspect} events=#{event_names.inspect} options=#{options.inspect}>"
     end
 
   end
