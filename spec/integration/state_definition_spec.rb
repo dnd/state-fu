@@ -78,20 +78,19 @@ describe "Adding states to a Machine" do
     describe "calling machine() { state(:bird) {|s| .. } }" do
 
       it "should yield the state to the block as |s|" do
-        lathe = nil
+        state = nil
         Klass.machine() do
           state(:bird) do |s|
-            lathe = s
+            state = s
           end
         end
-        lathe.should be_kind_of( StateFu::Lathe )
-        lathe.sprocket.should be_kind_of( StateFu::State )
-        lathe.sprocket.name.should == :bird
+        state.should be_kind_of( StateFu::State )
+        state.name.should == :bird
       end
 
     end
 
-    describe "calling machine() { state(:bird) {  .. } }" do
+    describe "calling machine() { state(:bird) {  ...  } }" do
 
       it "should instance_eval the block as a StateFu::Lathe" do
         lathe = nil

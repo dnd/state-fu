@@ -70,17 +70,92 @@ describe StateFu::Lathe do
       end
 
       it "should update the named state if it exists" do
-        @lathe.state( :wibble )
+        @lathe.state( :wibble, { :nick => :wobble } )
         @machine.states.should_not be_empty
         @machine.states.length.should == 1
         s = @machine.states.first
         @lathe.state( :wibble, { :meta => :voodoo } ).should == s
         s.options[:meta].should == :voodoo
+        s.options[:nick].should == :wobble
       end
 
     end # .state
 
-    describe "defining a event with .event" do
+    describe "defining multiple states with .states" do
+
+      it "should add all states named to the machine if they dont exist" do
+        @lathe.states :a, :b, :c, {:group => :alphabet} do
+          requires :jackson_five
+        end
+        @machine.states.length.should == 3
+        @machine.states.map(&:name).should == [:a, :b, :c]
+        @machine.states.each {|s| s.options[:group].should == :alphabet }
+        @machine.states.each {|s| s.entry_requirements.should include(:jackson_five) }
+      end
+
+      it "should apply the block / options to each named state if it already exists" do
+        @lathe.state :lemon do
+          requires :squinty_face
+        end
+        @lathe.states :mango, :orange, :lemon, {:group => :fruit } do
+          requires :knife
+          on_entry :peel
+        end
+        @lathe.states :orange, :lemon, :mandarin,  { :type  => :citrus } do
+          requires :juicer
+          on_entry :juice
+        end
+        states = @machine.states
+        states[:mango   ].options.should == { :group => :fruit }
+        states[:lemon   ].options.should == { :group => :fruit, :type => :citrus }
+        states[:mandarin].options.should == { :type => :citrus }
+        states[:mango   ].entry_requirements.should == [:knife]
+        states[:lemon   ].entry_requirements.should == [:squinty_face, :knife, :juicer]
+        states[:mandarin].entry_requirements.should == [:juicer]
+        states[:mango   ].hooks[:entry].should == [:peel]
+        states[:lemon   ].hooks[:entry].should == [:peel, :juice]
+        states[:mandarin].hooks[:entry].should == [:juice]
+      end
+
+      it "should apply to all existing states given :ALL" do
+        @lathe.states :hot, :cold
+        names = []
+        @lathe.states :ALL do |s|
+          names << s.name
+        end
+        names.should == [:hot, :cold]
+      end
+
+      it "should apply to all existing states given no arguments" do
+        @lathe.states :hot, :cold
+        names = []
+        @lathe.states do |s|
+          names << s.name
+        end
+        names.should == [:hot, :cold]
+      end
+
+      # TODO
+      it "should apply to all existing states except those named given :except => [...]" do
+        @lathe.states :hot, :cold, :warm
+
+        names = []
+        @lathe.states :ALL, :except => :warm do |s|
+          names << s.name
+        end
+        names.should == [:hot, :cold]
+
+        names = []
+        @lathe.states :ALL, :except => [:hot, :cold] do |s|
+          names << s.name
+        end
+        names.should == [:warm]
+
+      end
+
+    end # states
+
+    describe "defining an event with .event" do
 
       it "should add a event to the lathe's machine.events if the named event does not exist" do
         @lathe.event( :wibble )
@@ -127,6 +202,84 @@ describe StateFu::Lathe do
 
     end # .event
 
+    describe "defining multiple events with .events" do
+
+      it "should add all events named to the machine if they dont exist" do
+        @lathe.event :tickle
+        @lathe.events :hit, :smack, :punch, {:group => :acts_of_violence} do
+          requires :strong_stomach
+        end
+        e = @machine.events
+        e.length.should == 4
+        e.map(&:name).should == [:tickle, :hit, :smack, :punch]
+        e[:tickle].options[:group].should == nil
+        e[:punch ].options[:group].should == :acts_of_violence
+        e[:tickle].requirements.should == []
+        e[:punch ].requirements.should == [:strong_stomach]
+      end
+
+      it "should apply the block / options to each named event if it already exists" do
+        @lathe.event :fart, { :socially_acceptable => false } do
+          requires :tilt_to_one_side
+          after :inhale_through_nose
+        end
+
+        @lathe.event :smile, { :socially_acceptable => true } do
+          requires :teeth
+          after :close_mouth
+        end
+
+        @lathe.events :smile, :fart, { :group => :human_actions } do
+          requires :corporeal_body, :free_will
+          after :blink
+        end
+        e = @machine.events
+        e[:fart].options[:socially_acceptable].should == false
+        e[:smile].options[:socially_acceptable].should == true
+        e[:fart].requirements.should == [:tilt_to_one_side, :corporeal_body, :free_will]
+        e[:smile].requirements.should == [:teeth, :corporeal_body, :free_will]
+        e[:fart].hooks[:after].should == [:inhale_through_nose, :blink]
+        e[:smile].hooks[:after].should == [:close_mouth, :blink]
+      end
+
+      it "should apply to all existing events given :ALL" do
+        @lathe.events :spit, :run
+        names = []
+        @lathe.events :ALL do |s|
+          names << s.name
+        end
+        names.should == [:spit, :run]
+      end
+
+      it "should apply to all existing events given no arguments" do
+        @lathe.events :dance, :juggle
+        names = []
+        @lathe.events do |s|
+          names << s.name
+        end
+        names.should == [:dance, :juggle]
+      end
+
+      # TODO
+      it "should apply to all existing events except those named given :except => [...]" do
+        @lathe.events :wink, :bow, :salute
+
+        names = []
+        @lathe.events :ALL, :except => :salute do |s|
+          names << s.name
+        end
+        names.should == [:wink, :bow]
+
+        names = []
+        @lathe.events :ALL, :except => [:bow, :wink] do |s|
+          names << s.name
+        end
+        names.should == [:salute]
+
+      end
+
+    end # events
+
     describe "initial_state" do
 
       it "should set the initial state to its argument, creating if it does not exist" do
@@ -155,28 +308,6 @@ describe StateFu::Lathe do
         @lathe.helper( :fee, :fi, :fo, :fum )
       end
     end
-
-    describe "link" do
-
-    end
-
-    #describe "needs" do
-    #  it "..."
-    #end
-
-    #describe "cycle" do
-    #  it "..."
-    #end
-
-    describe "defining a state with .states" do
-      it "should add all states named to the machine if they dont exist"
-      it "should modify ..."
-    end
-
-    describe "all_states" do
-      it "..."
-    end
-
 
   end # master lathe instance
 
@@ -260,6 +391,13 @@ describe StateFu::Lathe do
         @state.entry_requirements.should == [:method_name]
       end
 
+      it "should add multiple method_names if more than one is given" do
+        @lathe.requires( :method_one, :method_two )
+        @lathe.requires( :method_three, :method_four, :on => [:exit] )
+        @state.entry_requirements.should == [:method_one, :method_two]
+        @state.exit_requirements.should  == [:method_three, :method_four]
+      end
+
       it "should add to machine.named_procs if a block is given" do
         class << @machine
           attr_accessor :named_procs
@@ -328,102 +466,5 @@ describe StateFu::Lathe do
 
     end  # requires
 
-    # TODO - move to eg method_factory integration spec
-    describe "event_methods" do
-
-      before do
-        make_pristine_class('Klass')
-        @machine = Klass.machine do
-          event( :simple_enough, :from => :intro, :to => :outro )
-          event( :too_complex, :from => :rocket_science, :to => [:moonwalking, :tax_returns] )
-        end
-        @obj     = Klass.new
-        @binding = @obj.state_fu
-      end
-
-      describe "default - define simple event methods on binding" do
-
-        # TODO - split this up into units
-
-        it "should add a ? method for each simple event which is true when the event is valid" do
-          @machine.events[:simple_enough].should be_simple
-
-          @binding.should respond_to(:simple_enough?)
-          @obj.state_fu.state.should == @machine.states[:intro]
-          @binding.fireable?( :simple_enough ).should == true
-
-          e = @machine.events[:simple_enough]
-          @binding.valid_transitions[e].should be_kind_of( Array )
-          @binding.valid_transitions[e].length.should == 1
-          @binding.valid_transitions[e].should include( @machine.states[:outro] )
-          @binding.simple_enough?.should == true
-
-          stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
-          @binding.fireable?( :simple_enough ).should == false
-          @binding.simple_enough?.should == false
-        end
-
-        it "should add instance methods to the binding to fire each simple event" do
-          @machine.events[:simple_enough].should be_simple
-          @binding.should respond_to(:simple_enough!)
-          @binding.current_state.should == @machine.states[:intro]
-
-          e = @machine.events[:simple_enough]
-          mock.proxy( @binding ).fire!( e, :argybargy )
-          t = @binding.simple_enough!( :argybargy )
-
-          t.should be_kind_of( StateFu::Transition )
-          t.event.should == e
-          t.origin.should == @machine.states[:intro]
-          t.target.should == @machine.states[:outro]
-          t.should be_accepted
-          @binding.current_state.should == @machine.states[:outro]
-        end
-
-        it "should not add instance methods to the binding for complex events" do
-          @machine.events[:too_complex].should_not be_simple
-          @binding.should_not respond_to(:too_complex!)
-        end
-
-        it "should not clobber an existing method"
-      end # default - simple binding event methods
-
-      describe "default - define simple event methods on stateful object" do
-
-        it "should add instance methods to the stateful object to fire each simple event" do
-          @machine.events[:simple_enough].should be_simple
-          @obj.should respond_to( :simple_enough! )
-        end
-
-        it "should not add instance methods to the stateful object for complex events" do
-          @machine.events[:too_complex].should_not be_simple
-          @obj.should_not respond_to(:too_complex!)
-        end
-
-        it "should add a query method for each simple event which is true when the event is valid" do
-          @machine.events[:simple_enough].should be_simple
-          @obj.should respond_to(:simple_enough?)
-          @obj.simple_enough?.should == true
-          stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
-          @obj.simple_enough?.should == false
-        end
-
-        it "should add a query method for events with multiple targets, which takes the targets as its sole argument and  is true when the event is valid" do
-          @machine.events[:too_complex].should_not be_simple
-          @obj.should respond_to(:too_complex?)
-          lambda { @obj.too_complex? }.should raise_error( ArgumentError ) # needs to be told the targets
-          lambda { @obj.too_complex?(:tax_returns) }.should_not raise_error()
-
-          @binding.fireable?( [:too_complex, :tax_returns] ).should == true
-          @obj.too_complex?(:tax_returns).should == true
-          stub( @machine.states[:tax_returns] ).enterable_by?( @binding ) { false }
-          @obj.too_complex?(:tax_returns).should == false
-        end
-
-        it "should add instance methods to the stateful instance to fire each simple event"
-        it "should not add instance methods to the binding for complex events"
-        it "should not clobber an existing method"
-      end # default - stateful object simple event methods
-    end # event methods
   end # ?
 end

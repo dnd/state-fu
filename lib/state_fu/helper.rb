@@ -61,6 +61,15 @@ module StateFu
       map(&:name)
     end
 
+    # SPECME
+    def except *syms
+      reject {|el| syms.flatten.compact.map(&:to_sym).include?(el.to_sym) } #.extend ArrayWithSymbolAccessor
+    end
+
+    def only *syms
+      select {|el| syms.flatten.compact.map(&:to_sym).include?(el.to_sym) } #.extend ArrayWithSymbolAccessor
+    end
+
   end
 
   # Array extender. Used by Machine to keep a list of states.

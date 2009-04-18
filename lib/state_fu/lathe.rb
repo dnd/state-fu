@@ -14,7 +14,7 @@ module StateFu
       end
       if block_given?
         if block.arity == 1
-          yield self
+          yield sprocket
         else
           instance_eval( &block )
         end
@@ -133,29 +133,27 @@ module StateFu
       end
     end
 
-    def events( *args, &block )
-      require_no_sprocket()
-      options = args.extract_options!.symbolize_keys!
-      args.each { |name| event( name.to_sym, options, &block) }
-    end
-
-    def requires( name, options={}, &block )
+    def requires( *args, &block )
       require_sprocket( StateFu::Event, StateFu::State )
-      options.symbolize_keys!
-      raise ArgumentError.new( name.inspect ) unless name.is_a?( Symbol )
-      case sprocket
-      when StateFu::State
-        on = [(options.delete(:on) || [:entry])].flatten
-        sprocket.entry_requirements << name if on.include?( :entry )
-        sprocket.exit_requirements  << name if on.include?( :exit  )
-      when StateFu::Event
-        sprocket.requirements << name
+      options = args.extract_options!.symbolize_keys!
+      names   = args
+      if block_given? && args.length > 1
+        raise ArgumentError.new("cannot supply a block for multiple requirements")
       end
-      if block_given?
-        #unless (-1..1).include?( block.arity )
-        #  raise ArgumentError, "unexpected block arity: #{block.arity}"
-        #end
-        machine.named_procs[name] = block
+      on = nil
+      names.each do |name|
+        raise ArgumentError.new( name.inspect ) unless name.is_a?( Symbol )
+        case sprocket
+        when StateFu::State
+          on ||= [(options.delete(:on) || [:entry])].flatten
+          sprocket.entry_requirements << name if on.include?( :entry )
+          sprocket.exit_requirements  << name if on.include?( :exit  )
+        when StateFu::Event
+          sprocket.requirements << name
+        end
+        if block_given?
+          machine.named_procs[name] = block
+        end
       end
     end
     alias_method :must,         :requires
@@ -188,12 +186,6 @@ module StateFu
     def state( name, options={}, &block )
       require_no_sprocket()
       define_state( name, options, &block )
-    end
-
-    def states( *args, &block )
-      require_no_sprocket()
-      options = args.extract_options!.symbolize_keys!
-      args.each { |name| state( name, options, &block) }
     end
 
     # TODO - add support for :all, :except, :only
@@ -229,9 +221,29 @@ module StateFu
       end
     end
 
-    def all_states *a, &b
-      raise NotImplementedError
+    #
+    # do something with all states / events
+    #
+    def each_sprocket( type, *args, &block)
+      require_no_sprocket()
+      options = args.extract_options!.symbolize_keys!
+      if args == [:ALL] || args == []
+        args = machine.send("#{type}s").except( options.delete(:except) )
+      end
+      args.each { |name| self.send( type, name, options.dup, &block) }
     end
+
+    def states( *args, &block )
+      each_sprocket( 'state', *args, &block )
+    end
+    alias_method :all_states, :states
+    alias_method :each_state, :states
+
+    def events( *args, &block )
+      each_sprocket( 'event', *args, &block )
+    end
+    alias_method :all_events, :events
+    alias_method :each_event, :events
 
     # Bunch of silly little methods for defining events
 

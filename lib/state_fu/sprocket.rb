@@ -5,7 +5,7 @@ module StateFu
     attr_reader :machine, :name, :options, :hooks
 
     def initialize(machine, name, options={})
-      @machine    = machine
+      @machine = machine
       @name    = name.to_sym
       @options = options.symbolize_keys!
       @hooks   = StateFu::Hooks.for( self )
