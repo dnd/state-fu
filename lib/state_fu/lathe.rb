@@ -195,7 +195,7 @@ module StateFu
     # Sets event.origins and optionally event.targets.
     # both can be supplied as a symbol, array of symbols.
     # any states referenced here will be created if they do not exist.
-    def from *args, &block
+    def from *args #, &block
       require_sprocket( StateFu::Event )
       options           = args.extract_options!.symbolize_keys!
       sprocket.origins  = args
@@ -206,11 +206,16 @@ module StateFu
         sprocket.origins = options.keys[0]
         sprocket.targets = options.values[0]
       end
-      if block_given?
-        apply_to( sprocket, options, &block )
-      else
-        apply_to( sprocket, options )
-      end
+      #if block_given?
+      #  apply_to( sprocket, options, &block )
+      #else
+      #  apply_to( sprocket, options )
+      #end
+    end
+
+    def _from *args, &block
+      require_sprocket( StateFu::Event )
+      sprocket.from( *args, &block )
     end
 
     # TODO - add support for :all, :except, :only
