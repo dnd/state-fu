@@ -23,6 +23,11 @@ module StateFu
       complex.each do |event|
         define_complex_event_query_method_on_object( event )
       end
+      define_accessor_for_binding()
+    end
+
+    def define_accessor_for_binding()
+      name = @binding.method_name
     end
 
     def define_simple_event_trigger_method_on_object( event )

@@ -8,20 +8,18 @@
 ==================================================
 * TODOs
 
-* create accessor method for named machines
-  eg Klass.machine(:foo) do ... end; k = Klass.new; k.foo # return binding
+** create accessor method for named machines
+   eg Klass.machine(:foo) do ... end; k = Klass.new; k.foo # return binding
 
-* use method_missing to call .state_fu! then try again / super
+** use method_missing to call .state_fu! then try again / super
 
-* rename origin, target to origins, targets
+** global hooks for both state & event hooks
 
-* global hooks for both state & event hooks
+** support :ALL, :only and :except - lathe.event, .states
+*** when using event.to and .from
+*** when defining hooks on multiple events / states (NOT globally)
 
-* support :ALL, :only and :except
-** when using event.to and .from
-** when defining hooks on multiple events / states (NOT globally)
-
-* configurable method definitions for object / lathe
+** configurable method definitions for object / lathe
 
 ** lathe( event ) .from should support hash syntax:
 
@@ -36,11 +34,11 @@
 
 ** more logging
 
-**  TODO - add support for :all, :except, :only ( lathe.event , state(s) )
-
 ** refactor transition unit spec to integration & unit specs
 ** update account example integration spec
-** write cheat / intro
+** write cheat / intro / examples
+** auto transitions and default arguments
+*** find permissable events and try firing them; repeat until deadlock
 
 ====================================================
 
@@ -58,14 +56,12 @@
 *** can use conditions on events to check if something's valid at transition time
 
 * Wishlist
-** auto transitions and default arguments
-*** find permissable events and try firing them; repeat until deadlock
-** DONE storing meta-information in options for integration with eg Rails controllers, views
+** test storing meta-information in options for integration with eg Rails controllers, views
 ** Rails helpers for views etc? Tie-in to controller stuff?
 ** conditionals - guards & test transitions
 *** needs / requires
-** TESTED Persistence w/ Marshall.dump / reload
-   works a treat as long as you got no procs
+** Persistence w/ Marshall.dump / reload ;; json / yaml ;;
+   Marshal works a treat as long as you got no procs
 *** useful though?
 *** other formats?
 **** YAML
@@ -101,6 +97,7 @@
 * Specs pending
 
 * Code smells
+** specs
 
 * Other
 ** testing w/ heckle, rcov

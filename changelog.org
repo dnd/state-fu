@@ -1,0 +1,4 @@
+* rename origin, target to origins, targets
+** create accessor method for named machines
+   eg Klass.machine(:foo) do ... end; k = Klass.new; k.foo # return binding
+

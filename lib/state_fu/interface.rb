@@ -3,16 +3,14 @@ module StateFu
     # Provides access to StateFu to your classes.  Plenty of aliases are
     # provided so you can use whatever makes sense to you.
     module ClassMethods
+
       # TODO:
       # take option :alias => false (disable aliases) or :alias
       # => :foo (use foo as class & instance accessor)
 
       #
-      # Given no arguments, return the default machine (:om) for the
+      # Given no arguments, return the default machine (:state_fu) for the
       # class, creating it if it did not exist.
-      #
-      # Why is it called :om? This library was originally called
-      # Zen::Koan, and this remains in tribute.
       #
       # Given a symbol, return the machine by that name, creating it
       # if it didn't exist.
@@ -27,7 +25,7 @@ module StateFu
       #                          # equivalent to Klass.machine(:om)
       # Klass.machine(:workflow) # another totally separate machine
       #
-      # machine( name=:om, options[:field_name], &block )
+      # machine( name=:state_fu, options[:field_name], &block )
 
       def machine( *args, &block )
         options = args.extract_options!.symbolize_keys!
@@ -100,7 +98,8 @@ module StateFu
       alias_method :workflow,    :binding
       alias_method :engine,      :binding
       alias_method :context,     :binding
-      alias_method :om,          :binding # historical
+
+
       # Gain awareness of all bindings (state contexts) this object
       # has contemplated into being.
       # Returns a Hash of { :name => <StateFu::Binding>, ... }
@@ -122,19 +121,18 @@ module StateFu
       # It's useful to call this before_create w/
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.
-      def assemble!( *names )
+      def state_fu!( *names )
         if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
           names = self.class.machine_names()
         end
         names.map { |n| binding( n ) }
       end
-      alias_method :fu!,               :assemble!
-      alias_method :stfu!,             :assemble!
-      alias_method :state_fu!,         :assemble!
-      alias_method :init_machines!,    :assemble!
-      alias_method :initialize_state!, :assemble!
-      alias_method :build_workflow!,   :assemble!
-      alias_method :meditate!,         :assemble! # historical
+      alias_method :fu!,               :state_fu!
+      alias_method :stfu!,             :state_fu!
+      alias_method :state_fu!,         :state_fu!
+      alias_method :init_machines!,    :state_fu!
+      alias_method :initialize_state!, :state_fu!
+      alias_method :build_workflow!,   :state_fu!
     end
   end
 end

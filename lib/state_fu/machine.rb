@@ -80,6 +80,14 @@ module StateFu
       field_name ||= name.to_s.underscore.tr(' ', '_') + DEFAULT_FIELD_NAME_SUFFIX
       field_name   = field_name.to_sym
       StateFu::FuSpace.insert!( klass, self, name, field_name )
+      # define an accessor method with the given name
+      unless name == StateFu::DEFAULT_MACHINE
+        klass.class_eval do
+          define_method name do
+            state_fu( name )
+          end
+        end
+      end
     end
 
     def empty?
