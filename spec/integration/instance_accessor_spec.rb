@@ -13,81 +13,87 @@ describe "An instance of Klass with StateFu included:" do
     @k = Klass.new()
   end
 
-  it "should return nil given .om()" do
-    @k.om().should be_nil
-  end
+  describe "when no machine is defined" do
+    it "should return nil given .state_fu()" do
+      @k.binding().should be_nil
+    end
 
-  it "should return {} given .bindings()" do
-    @k.bindings().should == {}
-  end
+    it "should return {} given .bindings()" do
+      @k.bindings().should == {}
+    end
 
-  it "should return [] given .meditate!()" do
-    @k.meditate!.should == []
-  end
+    it "should return [] given .state_fu!()" do
+      @k.state_fu!.should == []
+    end
+  end # no machine
 
-  describe "Having called Klass.machine() with an empty block:" do
+  describe "when an empty machine is defined for the class with the default name:" do
     before(:each) do
-      Klass.machine do
-      end
+      Klass.machine() {}
       StateFu::DEFAULT_MACHINE.should == :state_fu
     end
 
-    it "should return a StateFu::Binding given .om()" do
-      @k.om().should be_kind_of( StateFu::Binding )
+    it "should return a StateFu::Binding given .state_fu()" do
+      @k.state_fu().should be_kind_of( StateFu::Binding )
     end
 
-    describe "before .om() or .meditate!" do
+    describe "before a binding is instantiated by calling .state_fu() or .state_fu!" do
       it "should return {} given .bindings()" do
         @k.bindings().should == {}
       end
     end
 
-    describe "after .om()" do
+    describe "after a binding is instantiated with .state_fu()" do
+      before do
+        @k.state_fu()
+      end
+
       it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
-        @k.om()
         @k.bindings().length.should == 1
         @k.bindings().keys.should == [:state_fu]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
 
-    describe "after .meditate!()" do
+    describe "after .state_fu!()" do
       it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
-        @k.meditate!()
+        @k.state_fu!()
         @k.bindings().length.should == 1
         @k.bindings().keys.should == [:state_fu]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
 
-    it "should return [<StateFu::Binding>] given .meditate!()" do
-      @k.meditate!.length.should == 1
+    it "should return [<StateFu::Binding>] given .state_fu!()" do
+      @k.state_fu!.length.should == 1
+      @k.state_fu!.first.should be_kind_of( StateFu::Binding )
     end
 
-    describe "Having called Klass.machine(:two) with an empty block:" do
+    describe "when there is an empty machine called :two for the class" do
       before(:each) do
-        Klass.machine(:two) do
-        end
+        Klass.machine(:two) {}
       end
 
-      it "should return the same Binding given .om() and .om(:state_fu)" do
+      it "should return the same Binding given .state_fu() and .state_fu(:state_fu)" do
         @k.binding().should be_kind_of( StateFu::Binding )
-        @k.binding().should == @k.om(:state_fu)
+        @k.binding().should == @k.state_fu(:state_fu)
       end
 
-      it "should return a StateFu::Binding given .om(:two)" do
-        @k.om(:two).should be_kind_of( StateFu::Binding )
-        @k.om(:two).should_not == @k.om(:state_fu)
+      it "should return a StateFu::Binding for the machine called :two given .state_fu(:two)" do
+        @k.state_fu(:two).should be_kind_of( StateFu::Binding )
+        @k.state_fu(:two).should_not == @k.state_fu(:state_fu)
+        @k.state_fu(:two).machine.should == Klass.machine(:two)
       end
 
-      it "should return nil given .om(:hibiscus)" do
-        @k.om(:hibiscus).should be_nil
+      it "should return nil when .state_fu() is called with the name of a machine which doesn't exist" do
+        @k.state_fu(:hibiscus).should be_nil
       end
 
-      it "should return [<StateFu::Binding>,<StateFu::Binding>] given .meditate!" do
-        @k.meditate!.should be_kind_of( Array )
-        @k.meditate!.length.should == 2
-        @k.meditate!.each { |m| m.should be_kind_of( StateFu::Binding ) }
+      it "should return an array of the two StateFu::Bindings given .state_fu!" do
+        @k.state_fu!.should be_kind_of( Array )
+        @k.state_fu!.length.should == 2
+        @k.state_fu!.each { |m| m.should be_kind_of( StateFu::Binding ) }
+        @k.state_fu!.map(&:method_name).should == [:state_fu, :two]
       end
     end
   end

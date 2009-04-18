@@ -48,38 +48,8 @@ describe "Adding events to a Machine outside a state block" do
           Klass.machine.events.first.should be_kind_of( StateFu::Event )
           Klass.machine.events.first.name.should == :die
         end
-
-# it "should have the target_state_names [:dead]" do
-#   e = Klass.machine.events.first
-#   e.should respond_to(:target_names)
-#   e.target_names.should == [:dead]
-# end
-#
-# it "should have the origin_state_names [:alive]" do
-#   e = Klass.machine.events.first
-#   e.should respond_to(:origin_names)
-#   e.origin_names.should == [:alive]
-# end
-#
-# it "should be simple? because it has only one target and origin" do
-#   e = Klass.machine.events.first
-#   e.should respond_to(:simple?)
-#   e.should be_simple
-# end
-#
-# it "should have the target_state_name :dead" do
-#   e = Klass.machine.events.first
-#   e.should respond_to(:target_name)
-#   e.target_name.should == :dead
-# end
-#
-# it "should have the origin_state_name :alive" do
-#   e = Klass.machine.events.first
-#   e.should respond_to(:target_state_name)
-#   e.origin_state_name.should == :alive
-# end
-#
       end
+
     end
 
     # arity of blocks is optional, thanks to magic fairy dust ;)

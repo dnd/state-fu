@@ -8,12 +8,20 @@
 ==================================================
 * TODOs
 
-** create accessor method for named machines
-   eg Klass.machine(:foo) do ... end; k = Klass.new; k.foo # return binding
-
-** use method_missing to call .state_fu! then try again / super
-
 ** global hooks for both state & event hooks
+
+lathe do
+  all_states do
+    requires
+    *hooks
+  end
+
+  all_events do
+    requires
+    *hooks
+  end
+
+end
 
 ** support :ALL, :only and :except - lathe.event, .states
 *** when using event.to and .from
@@ -31,6 +39,9 @@
 ** test-only transitions - what would this do exactly?
 *** enclose stuff that's destructive in a block which only executes if it's not a test transition
     i.e, destructively do .... end
+
+** ensure event methods are callable before calling state_fu!
+*** use method_missing to call .state_fu! then try again / super
 
 ** more logging
 
