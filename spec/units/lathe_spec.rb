@@ -366,14 +366,38 @@ describe StateFu::Lathe do
 
     end
 
-    describe ".event" do
-      it "should create any states mentioned which do not exist and add them to machine.states" do
-        mock( @machine ).find_or_create_states_by_name([:a]) { [:a] }
-        mock( @machine ).find_or_create_states_by_name([:b]) { [:b] }
-        event = @lathe.event( :go, :from => :a, :to => :b )
-        event.origins.should == [:a]
-        event.targets.should == [:b]
+    describe ".event(:name)" do
+      before do
+        mock( @machine ).find_or_create_states_by_name( @lathe.sprocket ) { @lathe.sprocket }
       end
+
+      it "should create the named event if it does not exist" do
+        @machine.events.should be_empty
+        @lathe.event(:poop)
+        @machine.events.should_not be_empty
+        @machine.events[:poop].should be_kind_of( StateFu::Event )
+      end
+
+      it "should update the named event if it does exist" do
+        @lathe.machine.should == @machine
+        @lathe.event(:poop)
+        @machine.events[:poop].options.should == {}
+        @lathe.event(:poop, :lick => :me )
+        @machine.events[:poop].options[:lick].should == :me
+      end
+
+      it "should yield a created event given a block with arity 1" do
+        @machine.events.length.should == 0
+        @lathe.event(:poop) do |e| # yield the event
+          e.should be_kind_of( StateFu::Event )
+          e.name.should == :poop
+          e.options[:called] = true
+        end
+        @machine.events.length.should == 1
+        e = @machine.events[:poop]
+        e.options[:called].should == true
+      end
+
     end
 
     describe ".requires()" do
@@ -427,8 +451,8 @@ describe StateFu::Lathe do
 
   describe "a child lathe for an event" do
     before do
-      stub( @machine ).find_or_create_states_by_name([:a]) { [:a] }
-      stub( @machine ).find_or_create_states_by_name([:b]) { [:b] }
+      stub( @machine ).find_or_create_states_by_name(:a) { [:a] }
+      stub( @machine ).find_or_create_states_by_name(:b) { [:b] }
 
       @master = @lathe
       @event  = @lathe.event( :go )
@@ -439,7 +463,7 @@ describe StateFu::Lathe do
 
       it "should create any states mentioned which do not exist and add them to machine.states"
       it "should set the origins to the result of machine.find_or_create_states_by_name" do
-        mock( @machine ).find_or_create_states_by_name([:a, :b]) { [:a, :b] }
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
         @lathe.from( :a, :b )
         @event.origins.should == [:a, :b]
         @event.targets.should == nil

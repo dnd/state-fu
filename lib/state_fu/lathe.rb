@@ -14,7 +14,11 @@ module StateFu
       end
       if block_given?
         if block.arity == 1
-          yield sprocket
+          if sprocket
+            yield sprocket
+          else
+            raise ArgumentError
+          end
         else
           instance_eval( &block )
         end
@@ -190,47 +194,14 @@ module StateFu
       define_state( name, options, &block )
     end
 
-    # TODO - add support for :all, :except, :only
-    #
-    # Sets event.origins and optionally event.targets.
-    # both can be supplied as a symbol, array of symbols.
-    # any states referenced here will be created if they do not exist.
-    def from *args #, &block
-      require_sprocket( StateFu::Event )
-      options           = args.extract_options!.symbolize_keys!
-      sprocket.origins  = args
-      to                = options.delete(:to)
-      if to
-        sprocket.targets = to
-      elsif args.empty? && options.length == 1
-        sprocket.origins = options.keys[0]
-        sprocket.targets = options.values[0]
-      end
-      #if block_given?
-      #  apply_to( sprocket, options, &block )
-      #else
-      #  apply_to( sprocket, options )
-      #end
-    end
-
-    def _from *args, &block
+    def from *args, &block
       require_sprocket( StateFu::Event )
       sprocket.from( *args, &block )
     end
 
-    # TODO - add support for :all, :except, :only
-    #
-    # Sets event.targets
-    # can be supplied as a symbol, or array of symbols.
-    # any states referenced here will be created if they do not exist.
-    def to *args
-      options         = args.extract_options!.symbolize_keys!
-      sprocket.targets = args
-      if block_given?
-        apply_to( sprocket, options, &block )
-      else
-        apply_to( sprocket, options )
-      end
+    def to *args, &block
+      require_sprocket( StateFu::Event )
+      sprocket.to( *args, &block )
     end
 
     #

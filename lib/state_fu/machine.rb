@@ -121,11 +121,12 @@ module StateFu
 
     # given a messy bunch of symbols, find or create a list of
     # matching States.
-    def find_or_create_states_by_name( *names )
-      names.flatten.select do |s|
-        s.is_a?( Symbol ) || s.is_a?( StateFu::State )
-      end.map do |s|
+    def find_or_create_states_by_name( *args )
+      args = args.compact.flatten
+      raise ArgumentError.new( args.inspect ) unless args.all? { |a| [Symbol, StateFu::State].include? a.class }
+      args.map do |s|
         unless state = states[s.to_sym]
+          # TODO clean this line up
           state = s.is_a?( StateFu::State ) ? s : StateFu::State.new( self, s )
           self.states << state
         end

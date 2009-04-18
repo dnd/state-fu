@@ -28,12 +28,12 @@ module StateFu
       origin_names.include?( state.to_sym )
     end
 
-    def origins=( arg )
-      @origins = get_states_list_by_name( arg )
+    def origins=( *args )
+      @origins = machine.find_or_create_states_by_name( *args.flatten )
     end
 
-    def targets=( arg )
-      @targets = get_states_list_by_name( arg )
+    def targets=( *args )
+      @targets = machine.find_or_create_states_by_name( *args.flatten )
     end
 
     # complete?(:origins) # do we have an origins?
@@ -56,26 +56,34 @@ module StateFu
       !! ( origin && target )
     end
 
-    #
-    # Proxy methods to StateFu::Lathe
-    #
-    def from *a, &b
-      lathe.from( *a, &b )
+    def from *args
+      options = args.extract_options!.symbolize_keys!
+      args.flatten!
+      to = options.delete(:to)
+      if args.empty? && !to
+        if options.length == 1
+          self.origins= options.keys[0]
+          self.targets= options.values[0]
+        else
+          raise options.inspect
+        end
+      else
+        self.origins= *args
+        self.targets= to unless to.nil?
+      end
     end
 
-    def to *a, &b
-      lathe.to( *a, &b )
+    def to *args
+      options = args.extract_options!.symbolize_keys!
+      args.flatten!
+      raise options.inspect unless options.empty?
+      self.targets= *args
     end
 
     def fireable_by?( binding )
       requirements.reject do |r|
         binding.evaluate_requirement( r )
       end.empty?
-    end
-
-    private
-    def get_states_list_by_name( list )
-      machine.find_or_create_states_by_name( [list].flatten.map(&:to_sym) )
     end
 
   end
