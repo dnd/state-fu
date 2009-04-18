@@ -36,24 +36,43 @@ module StateFu
     alias_method :at,    :current_state
     alias_method :state, :current_state
 
+    # a list of events which can fire from the current_state
     def events
       machine.events.select {|e| e.complete? && e.from?( current_state ) }.extend ArrayWithSymbolAccessor
     end
     alias_method :events_from_current_state,  :events
 
+    # the subset of events() whose requirements for firing are met
     def valid_events
+      return [] unless current_state.exitable_by?( self )
       events.select {|e| e.fireable_by?( self ) }.extend ArrayWithSymbolAccessor
+    end
+
+    def invalid_events
+      events - valid_events
     end
 
     def unmet_requirements_for(event, target)
       raise NotImplementedError
     end
 
+    # the counterpart to valid_events - the states we can arrive at in
+    # the firing of one event, taking into account event and state
+    # transition requirements
     def valid_next_states
       valid_transitions.values.flatten.uniq.extend ArrayWithSymbolAccessor
     end
 
-    # returns a hash of valid { event_name => [state, state ..] }
+    def next_states
+      raise NotImplementedError
+    end
+
+    def invalid_next_states
+      states - valid_states
+    end
+
+    # returns a hash of { event => [states] } whose transition
+    # requirements are met
     def valid_transitions
       h = {}
       valid_events.each do |e|
@@ -84,14 +103,14 @@ module StateFu
       [event, target]
     end
 
-    # check that the event and target are valid
+    # check that the event and target are "valid" (all requirements met)
     def fireable?( event_or_array )
       event, target = event_or_array_to_array_of_event_and_target( event_or_array )
       t = transition( event, target )
-      !!t.valid?
+      !! t.requirements_met?
     end
 
-    # fire event
+    # construct an event transition and fire it
     def fire!( event_or_array, *args, &block)
       event, target = event_or_array_to_array_of_event_and_target( event_or_array )
       t = transition( event, target, *args, &block )
@@ -101,7 +120,8 @@ module StateFu
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
-    # pretty similar to transition.run_hook
+    # pretty similar to transition.run_hook - evaluate a requirement
+    # depending whether it's a method or proc, and its arity
     def evaluate_requirement( name )
       if proc = machine.named_procs[name]
         if proc.arity == 1
@@ -120,7 +140,9 @@ module StateFu
     end
 
     # fire event to move to the next state, if there is only one possible state.
-    # otherwise raise an error ( NoNextStateError)
+    # otherwise raise an error ( InvalidTransition )
+    # TODO - make a 'soft' version of this which returns a transition
+    # or false
     def next!( *args, &block )
       next_events = events.select {|e| e.target }
       case next_events.length
@@ -143,6 +165,9 @@ module StateFu
     end
     alias_method :next_state!, :next!
 
+    # fire an event to & from the current state, or raise InvalidTransition
+    # TODO - make a 'soft' version of this which returns a transition
+    # or false
     def cycle!( *args, &block )
       cycle_events = events.select {|e| e.target == current_state }
       if cycle_events.length == 1
@@ -160,6 +185,7 @@ module StateFu
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
+    # display sensibly
     def inspect
       "#<#{self.class} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} machine=#{@machine.inspect} options=#{options.inspect}>"
     end

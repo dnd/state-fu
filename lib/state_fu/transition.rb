@@ -88,7 +88,7 @@ module StateFu
       end
     end
 
-    def valid?
+    def requirements_met?
       begin
         check_requirements!
         true
