@@ -8,7 +8,7 @@ State-Fu is:
 
  * a rich DSL for describing workflows, rules engines and behaviour
 
- * probably deceptively familiar in outward appearance
+ * something you've probably wanted for a long time but didn't know it
 
 It lets you describe:
 
@@ -28,33 +28,38 @@ plastic. State-Fu is forged from a reassuringly dense but
 unidentifiable metal which comes only from the rarest of meteorites,
 and it ticks when you hold it up to your ear.
 
+State-Fu is elegant, powerful and transparent enough that you can use
+it to drive substantial parts of your application, and actually want
+to do so.
+
 Some of the features which set State-Fu apart are:
 
+ * a lovely, simple and flexible API
+
  * use an ActiveRecord field for state persistence, or just an
-   attribute
+   attribute - or use both, on the same class, for different workflows
 
- * use both, on the same class, for different workflows
-
- * use any number of workflows on the same object / model, or re-use
+ * define any number of workflows on the same object / model, or re-use
    them across multiple classes
-
- * a rich set of event hooks to drive application behaviour
 
  * events can transition from / to any number of states
 
+ * drive application behaviour with a rich set of event hooks
+
+ * define behaviour as methods on your objects, or keep it all in the
+   state machine itself
+
  * guard conditions determine at runtime whether a particular state
-   transition can occur
+   transition can occur, and if not, tell a user what they must do
+   to satisfy the requirements
 
  * transitions can be halted midway, and you can actually determine
    why, and where from
 
  * use helpers to extend State-Fu to suit your problem domain
 
- * define behaviour as methods on your objects, or keep it all in the
-   state machine itself
-
- * store arbitrary meta-data on any component of a machine (a simple
-   but insanely useful tool for integration)
+ * store arbitrary meta-data on any component of a machine - a simple
+   but extremely useful tool for integration
 
  * design for transparency, introspection and ease of debugging means
    a dynamic, powerful system you can actually use
@@ -62,4 +67,4 @@ Some of the features which set State-Fu apart are:
  * fast, lightweight and useful enough to use in any ruby
    project - works with Rails but does not require it.
 
- * works with ruby 1.8 and 1.9
+State-Fu works with ruby 1.8 and 1.9.
