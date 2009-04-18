@@ -58,6 +58,7 @@ module StateFu
       options.symbolize_keys!
       if sprocket = collection[name]
         apply_to( sprocket, options, &block )
+        sprocket
       else
         sprocket = klass.new( machine, name, options )
         collection << sprocket
@@ -121,9 +122,10 @@ module StateFu
       if child? && sprocket.is_a?( StateFu::State ) # in state block
         targets  = options.delete(:to)
         evt      = define_event( name, options, &block )
-        evt.from sprocket
-        evt.to( targets )
-      else # in event block
+        evt.from sprocket unless evt.origins
+        evt.to( targets ) unless targets.nil?
+        evt
+      else # in master lathe
         origins = options.delete( :from )
         targets = options.delete( :to )
         evt     = define_event( name, options, &block )
@@ -198,7 +200,12 @@ module StateFu
       options           = args.extract_options!.symbolize_keys!
       sprocket.origins  = args
       to                = options.delete(:to)
-      to && sprocket.targets = to
+      if to
+        sprocket.targets = to
+      elsif args.empty? && options.length == 1
+        sprocket.origins = options.keys[0]
+        sprocket.targets = options.values[0]
+      end
       if block_given?
         apply_to( sprocket, options, &block )
       else

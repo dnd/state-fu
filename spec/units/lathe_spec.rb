@@ -186,7 +186,7 @@ describe StateFu::Lathe do
         s.options[:meta].should == :voodoo
       end
 
-      it "should create states mentioned in the event and add them to machine.states" do
+      it "should create states mentioned in the event definition and add them to machine.states" do
         @machine = StateFu::Machine.new( :snoo )
         @lathe = StateFu::Lathe.new( @machine )
 
@@ -198,6 +198,17 @@ describe StateFu::Lathe do
         @machine.states.map(&:name).sort_by {|x| x.to_s }.should == [ :a, :b, :c]
         @machine.events[:wobble].origins.map(&:name).should == [:a,:b]
         @machine.events[:wobble].targets.map(&:name).should == [:c]
+      end
+
+      it "should allow definition of events using :from => {*origin => *target}" do
+        @machine = StateFu::Machine.new( :hash_it_up )
+        @lathe = StateFu::Lathe.new( @machine )
+        e = @lathe.event(:snooze, :from => { :nine => :ten } )
+        e.name.should == :snooze
+        e.origins.length.should == 1
+        e.origin.name.should == :nine
+        e.targets.length.should == 1
+        e.target.name.should == :ten
       end
 
     end # .event
@@ -434,6 +445,7 @@ describe StateFu::Lathe do
         @event.targets.should == nil
       end
       it "should ... on successive invocations"
+      it "should set both origin and target if a hash is given" # {:o => :t }
     end
 
     describe ".to" do

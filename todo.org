@@ -8,29 +8,9 @@
 ==================================================
 * TODOs
 
-** global hooks for both state & event hooks
-
-lathe do
-  all_states do
-    requires
-    *hooks
-  end
-
-  all_events do
-    requires
-    *hooks
-  end
-
-end
-
-** support :ALL, :only and :except - lathe.event, .states
-*** when using event.to and .from
-*** when defining hooks on multiple events / states (NOT globally)
-
 ** configurable method definitions for object / lathe
 
 ** lathe( event ) .from should support hash syntax:
-
    event( :go, :from => { :intro => :outro } )
    event( :go, :from => { :intro => [:outro, :exit] } )
 
