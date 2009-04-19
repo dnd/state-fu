@@ -11,17 +11,27 @@ describe StateFu::Binding do
   end
 
   describe "constructor" do
-    it "should create a new Binding given valid arguments" do
+    before do
       mock( StateFu::FuSpace ).field_names() do
         {
           Klass => { :example => :example_field }
         }
       end
+    end
+
+    it "should create a new Binding given valid arguments" do
       b = StateFu::Binding.new( Klass.machine, @obj, :example )
       b.should be_kind_of( StateFu::Binding )
       b.object.should      == @obj
       b.machine.should     == Klass.machine
       b.method_name.should == :example
+    end
+
+    it "should add any options supplied to the binding" do
+      b = StateFu::Binding.new( Klass.machine, @obj, :example,
+                                :colour => :red,
+                                :style  => [:robust, :fruity] )
+      b.options.should == { :colour => :red, :style  => [:robust, :fruity] }
     end
   end
 

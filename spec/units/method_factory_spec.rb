@@ -231,10 +231,11 @@ describe StateFu::MethodFactory do
         end # with valid transitions
 
         describe "when the machine is empty" do
-          @machine = Klass.machine() {}
-
-          @obj     = Klass.new
-          @binding = @obj.state_fu
+          before do
+            @machine = Klass.machine() {}
+            @obj     = Klass.new
+            @binding = @obj.state_fu
+          end
           describe "cycle methods:" do
             describe "cycle" do
               it "should return nil" do
