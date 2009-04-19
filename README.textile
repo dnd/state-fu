@@ -81,10 +81,13 @@ It is also delightfully elegant and easy to use for simple things:
 
 A few of the features which set State-Fu apart for more ambitious work are:
 
- * its lovely, simple and flexible API
+ * its lovely, simple and flexible API gives you plenty of choices
 
  * use an ActiveRecord field for state persistence, or just an
    attribute - or use both, on the same class, for different workflows
+
+ * customising the persistence mechanism (eg to use a Rails session,
+   or a text file) is as easy as defining a getter and setter method
 
  * define any number of workflows on the same object / model, or re-use
    them across multiple classes
@@ -96,17 +99,27 @@ A few of the features which set State-Fu apart for more ambitious work are:
  * define behaviour as methods on your objects, or keep it all in the
    state machine itself
 
- * guard conditions determine at runtime whether a particular state
-   transition can occur, and if not, tell a user what they must do
-   to satisfy the requirements
+ * requirements determine at runtime whether a particular state
+   transition can occur, and if not, can tell a user what they must do
+   to satisfy the requirements.
 
- * transitions can be halted midway, and you can actually determine
-   why, and where from
+ * requirement failure messages can be generated at runtime, making
+   use of whatever application and state-machine context they need
 
- * use helpers, etc to extend State-Fu to suit your problem domain
+ * transitions can be halted mid-execution, and you can actually
+   determine why, and where from
 
- * store arbitrary meta-data on any component of a machine - a simple
-   but extremely useful tool for integration
+ * in every event hook, requirement filter and other method /
+   callback, you have complete and tidy access to your classes, the
+   state machine, and the transition context. Use real ruby code
+   anywhere, without breathing through a straw
+
+ * extend State-Fu with helper modules, or raw blocks of ruby code, to
+   model your problem domain - globally, per machine, or for an
+   individual event transition
+
+ * store arbitrary meta-data on any component of State-Fu - a simple
+   but extremely powerful tool for integration
 
  * design for transparency, introspection and ease of debugging means
    a dynamic, powerful system you can actually use
