@@ -10,7 +10,7 @@ begin
     def self.up
       create_table :example_records do |t|
         t.string :name,           :null => false
-        t.string :state_fu_state, :null => false
+        t.string :state_fu_field, :null => false
         t.string :status
         t.timestamps
       end
@@ -63,14 +63,14 @@ begin
         @ex = ExampleRecord.new( :name => "exemplar" )
       end # before
 
-      it "should have an active_record string column 'state_fu_state' " do
-        col = ExampleRecord.columns.detect {|c| c.name == "state_fu_state" }
+      it "should have an active_record string column 'state_fu_field' " do
+        col = ExampleRecord.columns.detect {|c| c.name == "state_fu_field" }
         col.type.should == :string
       end
 
       describe "StateFu::Persistence.active_record_column?" do
-        it "should return true for ExampleRecord, :state_fu_state " do
-          StateFu::Persistence.active_record_column?( ExampleRecord, :state_fu_state ).should == true
+        it "should return true for ExampleRecord, :state_fu_field" do
+          StateFu::Persistence.active_record_column?( ExampleRecord, :state_fu_field ).should == true
         end
 
         it "should return true for ExampleRecord, :status" do
@@ -83,21 +83,21 @@ begin
       end
 
 
-      it "should have an active_record persister with the default field_name 'state_fu_state' " do
+      it "should have an active_record persister with the default field_name 'state_fu_field' " do
         @ex.state_fu
         @ex.state_fu.should be_kind_of( StateFu::Binding )
         @ex.state_fu.persister.should be_kind_of( StateFu::Persistence::ActiveRecord )
-        @ex.state_fu.persister.field_name.should == :state_fu_state
+        @ex.state_fu.persister.field_name.should == :state_fu_field
       end
 
-      it "should fail to save because of a not-null constraint on state_fu_state" do
+      it "should fail to save because of a not-null constraint on state_fu_field" do
         lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
-        @ex.state_fu_state.should == nil
+        @ex.state_fu_field.should == nil
       end
 
       it "should save successfully after .state_fu is called, which sets the persistence field" do
         @ex.state_fu
-        @ex.state_fu_state.should == 'initial'
+        @ex.state_fu_field.should == 'initial'
         @ex.save!
       end
 
@@ -113,22 +113,22 @@ begin
         it "should create a record given only a name, with the field set to the initial state" do
           ex = ExampleRecord.new( :name => "exemplar" )
           ex.should be_valid
-          ex.state_fu_state.should == nil
+          ex.state_fu_field.should == nil
           ex.save!
           ex.should_not be_new_record
-          ex.state_fu_state.should == 'initial'
+          ex.state_fu_field.should == 'initial'
           ex.state_fu.state.name.should == :initial
         end
 
         it "should update the field after a transition is completed" do
           ex = ExampleRecord.create!( :name => "exemplar" )
           ex.state_fu.state.name.should == :initial
-          ex.state_fu_state.should == 'initial'
+          ex.state_fu_field.should == 'initial'
           t =  ex.state_fu.fire!( :change )
           t.should be_accepted
           ex.state_fu.state.name.should == :final
-          ex.state_fu_state.should == 'final'
-          ex.attributes['state_fu_state'].should == 'final'
+          ex.state_fu_field.should == 'final'
+          ex.attributes['state_fu_field'].should == 'final'
           ex.save!
         end
 
@@ -136,7 +136,7 @@ begin
           before do
             @r = ExampleRecord.create!( :name => "exemplar" )
             @r.change!
-            @r.state_fu_state.should == 'final'
+            @r.state_fu_field.should == 'final'
             @r.save!
           end
 

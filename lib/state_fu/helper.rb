@@ -163,15 +163,21 @@ module StateFu
         end
       end
 
+      def call_on_object_with_self( name )
+        # call a normal method on the object
+        # passing the transition as the argument if expected
+        if object.method(name).arity == 1
+          object.send( name, self )
+        else
+          object.send( name )
+        end
+      end
+
       def evaluate_named_proc_or_method( name )
-        if proc = machine.named_procs[ name ]
+        if (name.is_a?( Proc ) && proc = name) || proc = machine.named_procs[ name ]
           evaluate &proc
         else
-          if object.method(name).arity == 1
-            object.send( name, self )
-          else
-            object.send( name )
-          end
+          call_on_object_with_self( name )
         end
       end
     end

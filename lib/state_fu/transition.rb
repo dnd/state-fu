@@ -84,7 +84,7 @@ module StateFu
     end
 
     def check_requirements!
-      raise RequirementError unless requirements_met?
+      raise RequirementError.new( unmet_requirements.inspect ) unless requirements_met?
     end
 
     def requirements_met?
@@ -111,25 +111,7 @@ module StateFu
     end
 
     def run_hook( hook )
-      # return if test_only? # TODO - is this what we want?
-      case hook
-      when Symbol
-        unless proc = machine.named_procs[hook]
-          # call a normal method on the object
-          # passing the transition as the argument
-          object.send( hook, self )
-        end
-      when Proc
-        proc = hook
-      end
-      if proc
-        # it's a named proc - check its arity and call it
-        if proc.arity == 1
-          object.instance_exec( self, &proc )
-        else
-          instance_eval( &proc )
-        end
-      end
+      evaluate_named_proc_or_method( hook )
     end
 
     def halt!( message )

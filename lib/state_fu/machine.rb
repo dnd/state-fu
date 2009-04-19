@@ -2,7 +2,6 @@ module StateFu
   class Machine
     include Helper
 
-    DEFAULT_FIELD_NAME_SUFFIX = '_state'
 
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
@@ -81,7 +80,7 @@ module StateFu
     # make it so a class which has included StateFu has a binding to
     # this machine
     def bind!( klass, name=StateFu::DEFAULT_MACHINE, field_name = nil )
-      field_name ||= name.to_s.underscore.tr(' ', '_') + DEFAULT_FIELD_NAME_SUFFIX
+      field_name ||= name.to_s.underscore.tr(' ', '_') + StateFu::Persistence::DEFAULT_FIELD_NAME_SUFFIX
       field_name   = field_name.to_sym
       StateFu::FuSpace.insert!( klass, self, name, field_name )
       # define an accessor method with the given name

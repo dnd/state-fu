@@ -40,4 +40,10 @@ module MySpecHelper
     StateFu::FuSpace.reset!
   end
 
+  def set_method_arity( object, method_name, needed_arity = 1 )
+    a = Object.new
+    stub( a ).arity() { needed_arity }
+    stub( object ).method(method_name) { a }
+  end
+
 end

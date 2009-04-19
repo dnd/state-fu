@@ -5,7 +5,6 @@ module StateFu
   end
 
   class RequirementError < Exception
-
   end
 
   class TransitionHalted < Exception

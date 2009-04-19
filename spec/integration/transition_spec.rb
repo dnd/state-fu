@@ -1,6 +1,7 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-# TODO - this is really an integration spec and should be moved as appropriate
+# TODO - refactor me into manageable chunks
+
 describe StateFu::Transition do
   include MySpecHelper
   before do
@@ -89,10 +90,10 @@ describe StateFu::Transition do
 
         it "should change the field when persistence is via an attribute" do
           @obj.state_fu.persister.should be_kind_of( StateFu::Persistence::Attribute )
-          @obj.state_fu.persister.field_name.should == :state_fu_state
-          @obj.send( :state_fu_state ).should == "src"
+          @obj.state_fu.persister.field_name.should == :state_fu_field
+          @obj.send( :state_fu_field ).should == "src"
           @t.fire!
-          @obj.send( :state_fu_state ).should == "dest"
+          @obj.send( :state_fu_field ).should == "dest"
         end
       end # transition.fire!
 
@@ -186,6 +187,8 @@ describe StateFu::Transition do
           trans.should be_kind_of( StateFu::Transition )
           trans.should respond_to(:snoo)
           trans.snoo.should == [trans]
+          t2 = @obj.state_fu.transition( :transfer )
+          t2.should_not respond_to( :snoo)
         end
       end # state_fu.transition
 
@@ -249,8 +252,14 @@ describe StateFu::Transition do
           trans.snoo.should == [trans]
         end
 
-        it "should raise an error when there is no next state"
-        it "should raise an error when there is more than one next state"
+        it "should raise an error when there is no next state" do
+          Klass.machine(:noop) {}
+          lambda { @obj.noop.next! }.should raise_error( StateFu::InvalidTransition )
+        end
+        it "should raise an error when there is more than one next state" do
+          Klass.machine(:toomany) { event( :go, :from => :one, :to => [:a,:b,:c] ) }
+          lambda { @obj.toomany.next! }.should raise_error( StateFu::InvalidTransition )
+        end
       end # next!
 
       describe "passing args / options to the transition" do
@@ -517,7 +526,9 @@ describe StateFu::Transition do
           :execute_go,
           :entering_b,
           :after_go,
-          :accepted_b ]
+          :accepted_b ].each do |method_name|
+          set_method_arity( @obj, method_name, 1 )
+        end
 
       end
 
@@ -528,6 +539,7 @@ describe StateFu::Transition do
         mock( @obj ).entering_b(@t) { @called << :entering_b }
         mock( @obj ).after_go(@t)   { @called << :after_go   }
         mock( @obj ).accepted_b(@t) { @called << :accepted_b }
+
         @t.fire!()
         @called.should == [ :before_go,
                             :exiting_a,
@@ -734,7 +746,7 @@ describe StateFu::Transition do
       end
 
       it "should raise a RequirementError if requirements are not satisfied" do
-        mock( @obj ).ok? { false }
+        stub( @obj ).ok? { false }
         lambda do
           @obj.state_fu.fire!( :go )
         end.should raise_error( StateFu::RequirementError )
@@ -767,8 +779,7 @@ describe StateFu::Transition do
 
   end # machine w/guard conditions
 
-
-    describe "A binding for a machine with a state transition requirement" do
+  describe "A binding for a machine with a state transition requirement" do
     before do
       @machine = Klass.machine do
         event( :go, :from => :a, :to => :b )
@@ -871,6 +882,7 @@ describe StateFu::Transition do
           raise "no machine" unless t.machine.is_a?( StateFu::Machine )
           raise "no object" unless t.object.is_a?( Klass )
         end
+        set_method_arity( @obj, :run_exec, 1 )
         trans = @obj.state_fu.fire!(:run)
       end
 
@@ -878,6 +890,7 @@ describe StateFu::Transition do
         mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
           raise "SHOULD NOT EXECUTE" unless t.testing?
         end
+        set_method_arity( @obj, :run_exec, 1 )
         trans = @obj.state_fu.transition( :run )
         trans.test_only = true
         trans.fire!
@@ -916,6 +929,7 @@ describe StateFu::Transition do
           t.args.should == [:a, :b]
           t.options.should == {:c => :d}
         end
+        set_method_arity( @obj, :run_exec, 1 )
         trans = @obj.state_fu.fire!( :run, *args )
         trans.should be_accepted
       end
@@ -923,10 +937,15 @@ describe StateFu::Transition do
 
     describe "a block passed to binding.transition" do
       it "should execute in the context of the transition initializer after it's set up" do
+        Klass.class_eval do
+          def run_exec( a ); raise "!"; end
+        end
         mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
           t.args.should == ['who','yo','daddy?']
           t.options.should == {:hi => :mum}
         end
+        set_method_arity( @obj, :run_exec, 1)
+        # @obj.method(:run_exec).arity.should == 1
         trans = @obj.state_fu.transition( :run ) do
           @args    = %w/ who yo daddy? /
           @options = {:hi => :mum}

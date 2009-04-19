@@ -74,7 +74,7 @@ describe StateFu::Binding do
       b.machine.should == Klass.machine
       b.object.should == @obj
       b.method_name.should == :state_fu
-      b.field_name.should  == :state_fu_state
+      b.field_name.should  == :state_fu_field
     end
   end
 

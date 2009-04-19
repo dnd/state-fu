@@ -35,11 +35,13 @@ module StateFu
       persister.current_state
     end
     alias_method :at,    :current_state
+    alias_method :now,   :current_state
     alias_method :state, :current_state
 
     def current_state_name
       current_state.name
     end
+    alias_method :name,  :current_state_name
 
     # a list of events which can fire from the current_state
     def events

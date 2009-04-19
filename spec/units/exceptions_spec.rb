@@ -7,7 +7,6 @@ describe StateFu::RequirementError do
       @transition = Object.new()
     end
 
-    it "..."
   end
 end
 

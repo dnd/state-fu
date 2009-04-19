@@ -1,5 +1,6 @@
 module StateFu
   module Persistence
+    DEFAULT_FIELD_NAME_SUFFIX = '_field'
 
     def self.active_record_column?( klass, field_name )
       Object.const_defined?("ActiveRecord") &&

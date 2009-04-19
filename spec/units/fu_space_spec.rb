@@ -59,7 +59,7 @@ describe StateFu::FuSpace do
       fields.should_not be_empty
       fields.length.should == 1
       fields.keys.should == [:state_fu]
-      fields.values.should == [:state_fu_state]
+      fields.values.should == [:state_fu_field]
     end
 
     describe "Having called Klass.machine(:two) with an empty block:" do

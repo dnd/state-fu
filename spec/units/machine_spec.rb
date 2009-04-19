@@ -93,7 +93,7 @@ describe StateFu::Machine do
       it "should generate a field name if none is given" do
         klass      = Klass
         name       = :StinkJuice
-        field_name = 'stink_juice_state'
+        field_name = 'stink_juice_field'
         mock( StateFu::FuSpace ).insert!( Klass, @mchn, name, field_name.to_sym ) {}
         @mchn.bind!( Klass, name )
       end
