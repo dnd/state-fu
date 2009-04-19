@@ -6,9 +6,14 @@
 
 # i.e., don't expect it to be up to date.
 ==================================================
+* meta
+** lighthouse tickets
+** google group
+** docs
+** wiki
+** manual
 
 * features
-
 ** spec / code for introspection of transitionHalted exceptions during a transition
 ** configurable event method definitions for object / lathe
 ** ensure event methods are callable before calling state_fu!

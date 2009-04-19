@@ -2,7 +2,6 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
 describe "Document" do
   before do
-
     class Document
       include StateFu
       attr_accessor :author
@@ -20,16 +19,18 @@ describe "Document" do
           on_entry :update_rss
           requires :author
         end
+
+        event :delete, :from => :ALL, :to => :deleted do
+          execute :destroy
+        end
       end
     end
 
-  end
-
-  describe "a new document with no attributes" do
-    before do
-      @doc = Document.new
+    @doc = Document.new
       @doc.status
     end
+
+  describe "a new document with no attributes" do
 
     it "should have a status.name of :draft" do
       @doc.status.name.should == :draft
@@ -51,7 +52,6 @@ describe "Document" do
 
   describe "a new document with an author" do
     before do
-      @doc = Document.new
       @doc.author = "Susan"
     end
 
@@ -77,28 +77,32 @@ describe "Document" do
       @doc.status.publish!
       @doc.status.current_state_name.should == :published
     end
+
+    describe "status_field attribute" do
+
+      it "should be private" do
+        @doc.status.persister.field_name.should == :status_field
+        lambda { @doc.status_field }.should raise_error( NoMethodError )
+      end
+
+      it "should have an initial value of 'draft'" do
+        @doc.instance_eval { status_field }.should == "draft"
+      end
+
+      it "should be set to 'published' after publish! is called successfully" do
+        @doc.status.publish!
+        @doc.instance_eval { status_field }.should == "published"
+      end
+    end  # status_field
+  end # with author
+
+  describe "delete!" do
+
+    it "should execute destroy()" do
+      mock( @doc ).destroy() {}
+      @doc.status.delete!
+    end
+
   end
 
-  describe "status_field attribute" do
-    before do
-      @doc = Document.new
-      @doc.author = "Susan"
-      @doc.status
-    end
-
-    it "should be private" do
-      @doc.status.persister.field_name.should == :status_field
-      lambda { @doc.status_field }.should raise_error( NoMethodError )
-    end
-
-    it "should have an initial value of 'draft'" do
-      @doc.instance_eval { status_field }.should == "draft"
-    end
-
-    it "should be set to 'published' after publish! is called successfully" do
-      @doc.status.publish!
-      @doc.instance_eval { status_field }.should == "published"
-    end
-
-  end
 end
