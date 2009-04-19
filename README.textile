@@ -79,9 +79,9 @@ my_doc.status.name      => :published  # and the state has been updated.
 </code>
 </pre>
 
-Some of the features which set State-Fu apart are:
+A few of the features which set State-Fu apart for more ambitious work are:
 
- * a lovely, simple and flexible API
+ * its lovely, simple and flexible API
 
  * use an ActiveRecord field for state persistence, or just an
    attribute - or use both, on the same class, for different workflows
@@ -103,7 +103,7 @@ Some of the features which set State-Fu apart are:
  * transitions can be halted midway, and you can actually determine
    why, and where from
 
- * use helpers to extend State-Fu to suit your problem domain
+ * use helpers, etc to extend State-Fu to suit your problem domain
 
  * store arbitrary meta-data on any component of a machine - a simple
    but extremely useful tool for integration
