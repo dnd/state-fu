@@ -8,6 +8,8 @@
 ==================================================
 * TODOs
 
+** fire methods for complex events
+** transition constructor methods for events
 ** configurable event method definitions for object / lathe
 
 ** spec / code for introspection of unmet requirements for transitions

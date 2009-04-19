@@ -53,7 +53,7 @@ module StateFu
     end
 
     def simple?
-      !! ( origin && target )
+      !! ( origins && target )
     end
 
     def from *args

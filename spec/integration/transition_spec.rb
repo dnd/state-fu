@@ -258,9 +258,9 @@ describe StateFu::Transition do
           @args = [:a, :b, {:c => :d }]
         end
 
-        describe "calling transition( :transfer, nil, :a, :b, :c => :d )" do
+        describe "calling transition( :transfer, :a, :b, :c => :d )" do
           it "should set args to [:a, :b] and options to :c => :d on the transition" do
-            t = @obj.state_fu.transition( :transfer, nil, *@args )
+            t = @obj.state_fu.transition( :transfer, *@args )
             t.args.should    == [ :a, :b ]
             t.options.should == { :c => :d }
           end
@@ -368,22 +368,33 @@ describe StateFu::Transition do
 
     describe "state_fu instance methods" do
       describe "state_fu.transition" do
-        it "should raise an ArgumentError unless a valid targets state is supplied" do
+        it "should raise an ArgumentError unless a valid targets state is supplied or can be inferred" do
           lambda do
             @obj.state_fu.transition( :go )
           end.should raise_error( ArgumentError )
 
           lambda do
-            @obj.state_fu.transition( :go, :awol )
+            @obj.state_fu.transition( [:go, nil] )
           end.should raise_error( ArgumentError )
-        end
-
-        it "should return a transition with the specified targets" do
-          t = @obj.state_fu.transition( :go, :x )
-          t.should be_kind_of( StateFu::Transition )
 
           lambda do
-            @obj.state_fu.transition( :go, :y )
+            @obj.state_fu.transition( [:go, :awol] )
+          end.should raise_error( ArgumentError )
+
+          lambda do
+            @obj.state_fu.transition( [:go, :x] )
+            @obj.state_fu.transition( [:go, :y] )
+          end.should_not raise_error( ArgumentError )
+        end
+
+        it "should return a transition with the specified destination" do
+          t = @obj.state_fu.transition( [:go, :x] )
+          t.should be_kind_of( StateFu::Transition )
+          t.event.name.should == :go
+          t.target.name.should == :x
+
+          lambda do
+            @obj.state_fu.transition( [:go, :y] )
           end.should_not raise_error( )
         end
       end  # state_fu.transition
@@ -395,7 +406,7 @@ describe StateFu::Transition do
           end.should raise_error( ArgumentError )
 
           lambda do
-            @obj.state_fu.fire!( :go, :awol )
+            @obj.state_fu.fire!( [ :go, :awol ] )
           end.should raise_error( ArgumentError )
         end
       end # state_fu.fire!

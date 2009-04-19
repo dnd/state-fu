@@ -3,70 +3,11 @@ module StateFu
 
     def initialize( binding )
       @binding = binding
+      define_event_methods_on( binding )
     end
 
     def install!
-      define_methods_on_object!
-      define_methods_on_binding!
-    end
-
-    #
-    # object methods
-    #
-
-    def define_methods_on_object! # the stateful instance
-      simple, complex = @binding.machine.events.partition(&:simple? )
-      simple.each do |event|
-        define_simple_event_trigger_method_on_object( event )
-        define_simple_event_query_method_on_object( event )
-      end
-      complex.each do |event|
-        define_complex_event_query_method_on_object( event )
-      end
-    end
-
-    def define_simple_event_trigger_method_on_object( event )
-      binding     = @binding
-      define_method_on_metaclass( @binding.object, "#{event.name}!" ) do |*args|
-        binding.fire!( event, *args )
-      end
-    end
-
-    def define_simple_event_query_method_on_object( event )
-      binding     = @binding
-      define_method_on_metaclass( @binding.object, "#{event.name}?" ) do
-        binding.fireable?( event )
-      end
-    end
-
-    def define_complex_event_query_method_on_object( event )
-      binding     = @binding
-      define_method_on_metaclass( @binding.object, "#{event.name}?") do |target|
-        binding.fireable?( [event.name, target] )
-      end
-    end
-
-    #
-    # binding methods
-    #
-
-    def define_methods_on_binding!
-      @binding.machine.events.select(&:simple? ).each do |e|
-        define_simple_event_trigger_method_on_binding( e )
-        define_simple_event_query_method_on_binding( e )
-      end
-    end
-
-    def define_simple_event_trigger_method_on_binding( event )
-      define_method_on_metaclass( @binding, "#{event.name}!" ) do |*args|
-        fire!( event, *args )
-      end
-    end
-
-    def define_simple_event_query_method_on_binding( event )
-      define_method_on_metaclass( @binding, "#{event.name}?" ) do
-        fireable?( event )
-      end
+      define_event_methods_on( @binding.object )
     end
 
     def define_method_on_metaclass( object, method_name, &block )
@@ -77,5 +18,57 @@ module StateFu
       end
     end
 
+    def define_event_methods_on( obj )
+      _binding        = @binding
+      simple, complex = @binding.machine.events.partition(&:simple? )
+
+      # method definitions for simple events (only one possible target)
+      simple.each do |event|
+        # obj.event_name( *args )
+        # returns a new transition
+        method_name = event.name
+        define_method_on_metaclass( obj, method_name ) do |*args|
+          _binding.transition( event, *args )
+        end
+
+        # obj.event_name?()
+        # true if the event is fireable? (ie, requirements met)
+        method_name = "#{event.name}?"
+        define_method_on_metaclass( obj, method_name ) do
+          _binding.fireable?( event )
+        end
+
+        # obj.event_name!( *args )
+        # creates, fires and returns a transition
+        method_name = "#{event.name}!"
+        define_method_on_metaclass( obj, method_name ) do |*args|
+          _binding.fire!( event, *args )
+        end
+      end
+
+      # method definitions for complex events (target must be specified)
+      complex.each do |event|
+        # obj.event_name( target, *args )
+        # returns a new transition
+        define_method_on_metaclass( obj, event.name ) do |target, *args|
+          _binding.transition( [event, target], *args )
+        end
+
+        # obj.event_name?( target )
+        # true if the event is fireable? (ie, requirements met)
+        method_name = "#{event.name}?"
+        define_method_on_metaclass( obj, method_name ) do |target|
+          _binding.fireable?( [event, target] )
+        end
+
+        # obj.event_name!( target, *args )
+        # creates, fires and returns a transition
+        method_name = "#{event.name}!"
+        define_method_on_metaclass( obj, method_name ) do |target,*args|
+          _binding.fire!( [event, target], *args )
+        end
+
+      end
+    end
   end
 end

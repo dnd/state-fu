@@ -88,8 +88,13 @@ module StateFu
       StateFu::Transition.new( self, event, target, *args, &block )
     end
 
+    def transition( event_or_array, *args, &block )
+      event, target = parse_destination( event_or_array )
+      StateFu::Transition.new( self, event, target, *args, &block )
+    end
+
     # sanitize args for fire! and fireable?
-    def event_or_array_to_array_of_event_and_target( event_or_array )
+    def parse_destination( event_or_array )
       case event_or_array
       when StateFu::Event, Symbol
         event  = event_or_array
@@ -105,15 +110,15 @@ module StateFu
 
     # check that the event and target are "valid" (all requirements met)
     def fireable?( event_or_array )
-      event, target = event_or_array_to_array_of_event_and_target( event_or_array )
-      t = transition( event, target )
+      event, target = parse_destination( event_or_array )
+      t = transition( [event, target] )
       !! t.requirements_met?
     end
 
     # construct an event transition and fire it
     def fire!( event_or_array, *args, &block)
-      event, target = event_or_array_to_array_of_event_and_target( event_or_array )
-      t = transition( event, target, *args, &block )
+      event, target = parse_destination( event_or_array )
+      t = transition( [event, target], *args, &block )
       t.fire!
       t
     end

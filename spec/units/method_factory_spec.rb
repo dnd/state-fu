@@ -8,96 +8,272 @@ describe StateFu::MethodFactory do
 
     before do
       make_pristine_class('Klass')
-      @machine = Klass.machine do
-        event( :simple_enough, :from => :intro, :to => :outro )
-        event( :too_complex, :from => :rocket_science, :to => [:moonwalking, :tax_returns] )
-      end
-      @obj     = Klass.new
-      @binding = @obj.state_fu
     end
 
-    describe "default - define simple event methods on binding" do
+    describe "defined on the binding" do
+      describe "when the event is simple (has only one possible target)" do
+        before do
+          @machine = Klass.machine do
+            event( :simple_event,
+                   :from => { [:a, :b] => :targ } )
+          end # machine
+          @obj     = Klass.new
+          @binding = @obj.state_fu
+        end # before
 
-      # TODO - split this up into units
+        it "should be simple?" do
+          e = @machine.events[:simple_event]
+          e.origins.length.should == 2
+          e.targets.length.should == 1
+          e.should be_simple
+        end
 
-      it "should add a ? method for each simple event which is true when the event is valid" do
-        @machine.events[:simple_enough].should be_simple
+        describe "method which returns an unfired transition" do
+          it "should have the same name as the event" do
+            @binding.should respond_to(:simple_event)
+          end
 
-        @binding.should respond_to(:simple_enough?)
-        @obj.state_fu.state.should == @machine.states[:intro]
-        @binding.fireable?( :simple_enough ).should == true
+          it "should return a new transition if called without any arguments" do
+            t = @binding.simple_event()
+            t.should be_kind_of( StateFu::Transition )
+            t.target.should == @machine.states[:targ]
+            t.event.should == @machine.events[:simple_event]
+            t.should_not be_fired
+          end
 
-        e = @machine.events[:simple_enough]
-        @binding.valid_transitions[e].should be_kind_of( Array )
-        @binding.valid_transitions[e].length.should == 1
-        @binding.valid_transitions[e].should include( @machine.states[:outro] )
-        @binding.simple_enough?.should == true
+          it "should add any arguments / options it is called with to the transition" do
+            t = @binding.simple_event(:a, :b, :c, {'d' => 'e'})
+            t.should be_kind_of( StateFu::Transition )
+            t.target.should == @machine.states[:targ]
+            t.event.should == @machine.events[:simple_event]
+            t.args.should == [:a,:b,:c]
+            t.options.should == {:d => 'e'}
+          end
+        end # transition builder
 
-        stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
-        @binding.fireable?( :simple_enough ).should == false
-        @binding.simple_enough?.should == false
-      end
+        describe "method which tests if the event is fireable?" do
+          it "should have the name of the event suffixed with ?" do
+            @binding.should respond_to(:simple_event?)
+          end
 
-      it "should add instance methods to the binding to fire each simple event" do
-        @machine.events[:simple_enough].should be_simple
-        @binding.should respond_to(:simple_enough!)
-        @binding.current_state.should == @machine.states[:intro]
+          it "should be true when the binding says it\'s fireable?" do
+            @binding.fireable?( :simple_event ).should == true
+            @binding.simple_event?.should == true
+          end
 
-        e = @machine.events[:simple_enough]
-        mock.proxy( @binding ).fire!( e, :argybargy )
-        t = @binding.simple_enough!( :argybargy )
+          it "should be false when the binding says it\'s not fireable?" do
+            mock( @binding ).fireable?( anything ) { false }
+            @binding.simple_event?.should == false
+          end
+        end # fireable?
 
-        t.should be_kind_of( StateFu::Transition )
-        t.event.should == e
-        t.origin.should == @machine.states[:intro]
-        t.target.should == @machine.states[:outro]
-        t.should be_accepted
-        @binding.current_state.should == @machine.states[:outro]
-      end
+        describe "bang (!) method which creates, fires and returns a transition" do
+          it "should have the name of the event suffixed with a bang (!)" do
+            @binding.should respond_to(:simple_event!)
+          end
 
-      it "should not add instance methods to the binding for complex events" do
-        @machine.events[:too_complex].should_not be_simple
-        @binding.should_not respond_to(:too_complex!)
-      end
+          it "should return a fired transition" do
+            t = @binding.simple_event!
+            t.should be_kind_of( StateFu::Transition )
+            t.should be_fired
+          end
 
-      it "should not clobber an existing method"
-    end # default - simple binding event methods
+          it "should pass any arguments to the transition as args / options" do
+            t = @binding.simple_event!( :a, :b, {'c' => :d } )
+            t.should be_kind_of( StateFu::Transition )
+            t.args.should    == [:a, :b ]
+            t.options.should == { :c => :d }
+          end
+        end # bang!
+      end # simple
 
-    describe "default - define simple event methods on stateful object" do
+      describe "when the event is complex (has more than one possible target)" do
+        before do
+          @machine = Klass.machine do
+            state :orphan
+            event( :complex_event,
+                   :from => :home,
+                   :to => [ :x, :y, :z ] )
+          end # machine
+          @obj     = Klass.new
+          @binding = @obj.state_fu
+        end # before
 
-      it "should add instance methods to the stateful object to fire each simple event" do
-        @machine.events[:simple_enough].should be_simple
-        @obj.should respond_to( :simple_enough! )
-      end
+        it "should not be simple?" do
+          e = @machine.events[:complex_event]
+          e.origins.length.should == 1
+          e.targets.length.should == 3
+          e.should_not be_simple
+        end
 
-      it "should not add instance methods to the stateful object for complex events" do
-        @machine.events[:too_complex].should_not be_simple
-        @obj.should_not respond_to(:too_complex!)
-      end
+        describe "method which returns an unfired transition" do
+          it "should have the same name as the event" do
+            @binding.should respond_to(:complex_event)
+          end
 
-      it "should add a query method for each simple event which is true when the event is valid" do
-        @machine.events[:simple_enough].should be_simple
-        @obj.should respond_to(:simple_enough?)
-        @obj.simple_enough?.should == true
-        stub( @machine.states[:outro] ).enterable_by?( @binding ) { false }
-        @obj.simple_enough?.should == false
-      end
+          it "should raise an error if called without any arguments" do
+            lambda { @binding.complex_event() }.should raise_error( ArgumentError )
+          end
 
-      it "should add a query method for events with multiple targets, which takes the targets as its sole argument and  is true when the event is valid" do
-        @machine.events[:too_complex].should_not be_simple
-        @obj.should respond_to(:too_complex?)
-        lambda { @obj.too_complex? }.should raise_error( ArgumentError ) # needs to be told the targets
-        lambda { @obj.too_complex?(:tax_returns) }.should_not raise_error()
+          it "should raise an ArgumentError if called with a nonexistent target state" do
+            lambda { @binding.complex_event(:nonexistent) }.should raise_error( ArgumentError )
+          end
 
-        @binding.fireable?( [:too_complex, :tax_returns] ).should == true
-        @obj.too_complex?(:tax_returns).should == true
-        stub( @machine.states[:tax_returns] ).enterable_by?( @binding ) { false }
-        @obj.too_complex?(:tax_returns).should == false
-      end
+          it "should raise an InvalidTransition if called with an invalid target state" do
+            lambda { @binding.complex_event(:orphan)      }.should raise_error( StateFu::InvalidTransition )
+          end
 
-      it "should add instance methods to the stateful instance to fire each simple event"
-      it "should not add instance methods to the binding for complex events"
-      it "should not clobber an existing method"
-    end # default - stateful object simple event methods
-  end # event methods
+          it "should return a transition to the specified state if supplied a valid state" do
+            t = @binding.complex_event( :x )
+            t.should be_kind_of( StateFu::Transition )
+            t.target.name.should == :x
+          end
+
+          it "should add any arguments / options it is called with to the transition" do
+            t = @binding.complex_event(:x,
+                                       :a, :b, :c, {'d' => 'e'})
+            t.should be_kind_of( StateFu::Transition )
+            t.args.should == [:a,:b,:c]
+            t.options.should == {:d => 'e'}
+          end
+        end # transition builder
+
+        describe "method which tests if the event is fireable?" do
+          it "should have the name of the event suffixed with ?" do
+            @binding.should respond_to(:complex_event?)
+          end
+
+          it "should require a valid state name" do
+            lambda { @binding.complex_event?(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event?(:orphan) }.should      raise_error( StateFu::InvalidTransition )
+            lambda { @binding.complex_event?(:x) }.should_not       raise_error
+          end
+
+          it "should be true when the binding says the event is fireable? " do
+            @binding.fireable?( [:complex_event, :x] ).should == true
+            @binding.complex_event?(:x).should == true
+          end
+
+          it "should be false when the binding says the event is not fireable?" do
+            mock( @binding ).fireable?( anything ) { false }
+            @binding.complex_event?(:x).should == false
+          end
+        end # fireable?
+
+        describe "bang (!) method which creates, fires and returns a transition" do
+          it "should have the name of the event suffixed with a bang (!)" do
+            @binding.should respond_to(:complex_event!)
+          end
+
+          it "should require a valid state name" do
+            lambda { @binding.complex_event!(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event!(:orphan) }.should      raise_error( StateFu::InvalidTransition )
+            lambda { @binding.complex_event!(:x) }.should_not       raise_error
+          end
+
+          it "should return a fired transition given a valid state name" do
+            t = @binding.complex_event!( :x )
+            t.should be_kind_of( StateFu::Transition )
+            t.target.should == @machine.states[:x]
+            t.should be_fired
+          end
+
+          it "should pass any arguments to the transition as args / options" do
+            t = @binding.complex_event!( :x,
+                                         :a, :b, {'c' => :d } )
+            t.should be_kind_of( StateFu::Transition )
+            t.target.should  == @machine.states[:x]
+            t.args.should    == [:a, :b ]
+            t.options.should == { :c => :d }
+          end
+        end # bang!
+      end # complex_event
+
+      # TODO move these to binding spec
+      describe "cycle and next_state methods" do
+        describe "when there is a valid transition available for cycle and next_state" do
+          before do
+            @machine = Klass.machine do
+              initial_state :groundhog_day
+
+              state(:groundhog_day) do
+                cycle
+              end
+
+              event(:end_movie, :from => :groundhog_day, :to => :happy_ending)
+            end # machine
+            @obj     = Klass.new
+            @binding = @obj.state_fu
+          end # before
+
+          describe "cycle methods:" do
+            describe "cycle" do
+              it "should return a transition for the cyclical event"
+            end
+
+            describe "cycle?" do
+            end
+
+            describe "cycle!" do
+            end
+          end # cycle
+
+          describe "next_state methods:" do
+            describe "next_state" do
+            end
+
+            describe "next_state?" do
+            end
+
+            describe "next_state!" do
+            end
+          end # next_state
+        end # with valid transitions
+
+        describe "when the machine is empty" do
+          @machine = Klass.machine() {}
+
+          @obj     = Klass.new
+          @binding = @obj.state_fu
+          describe "cycle methods:" do
+            describe "cycle" do
+              it "should return nil" do
+              end
+            end
+
+            describe "cycle?" do
+              it "should return nil"
+            end
+
+            describe "cycle!" do
+              it "should raise ..."
+            end
+          end # cycle
+
+          describe "next_state methods:" do
+            describe "next_state" do
+              it "should return nil"
+            end
+
+            describe "next_state?" do
+              it "should return nil"
+            end
+
+            describe "next_state!" do
+              it "should raise ..."
+            end
+          end # next_state
+
+        end # empty machine
+
+        describe "when there is more than one candidate event / state" do
+        end # too many candidates
+
+      end   # cycle & next_state
+    end     # defined on binding
+
+    describe "methods defined on the object" do
+    end
+
+  end       # event methods
 end
