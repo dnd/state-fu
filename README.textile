@@ -144,7 +144,7 @@ I'd also like to tip my hat at John Barnette, who's own
 (coincidentally named) Stateful set a very high standard with an
 exceptionally elegant API.
 
-H2. Getting started
+h2. Getting started
 
 First up:
 
