@@ -164,7 +164,10 @@ Now you can simply:
 <code>
  require 'state-fu'
 </code>
-And include StateFu in any class you wish to make stateful.
+and
+<code>
+ include StateFu
+</code> in any class you wish to make stateful.
 
 If you have questions, feature request or ideas, please join the "google group":http://groups.google.com/group/state-fu
 
