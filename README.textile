@@ -147,6 +147,7 @@ H2. Getting started
 
 First up:
 
+<pre>
 <code>
  sudo gem install rspec rr activesupport
  rake
@@ -155,6 +156,7 @@ First up:
  rake gem         # build the gem
  rake gem:install # install it
 </code>
+</pre>
 And have a peek in the specs folder or rdoc for usage / documentation.
 
 Now you can simply:
