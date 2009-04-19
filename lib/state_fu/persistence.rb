@@ -1,8 +1,7 @@
 module StateFu
   module Persistence
 
-    def self.active_record_column?( obj, field_name )
-      klass = obj.class
+    def self.active_record_column?( klass, field_name )
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
         klass.ancestors.include?( ::ActiveRecord::Base ) &&
@@ -10,7 +9,7 @@ module StateFu
     end
 
     def self.for( binding, field_name )
-      if active_record_column?( binding.object, field_name )
+      if active_record_column?( binding.object.class, field_name )
         self::ActiveRecord.new( binding, field_name )
       else
         self::Attribute.new( binding, field_name )

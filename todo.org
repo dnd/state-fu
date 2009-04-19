@@ -6,23 +6,32 @@
 
 # i.e., don't expect it to be up to date.
 ==================================================
-* TODOs
 
-** fire methods for complex events
-** transition constructor methods for events
-** configurable event method definitions for object / lathe
-
+* features
 ** spec / code for introspection of unmet requirements for transitions
 ** spec / code for introspection of transitionHalted exceptions during a transition
-
+** configurable event method definitions for object / lathe
 ** ensure event methods are callable before calling state_fu!
-*** use method_missing to call .state_fu! then try again / super
+*** use method_missing to call .state_fu! then try again / super?
+** more / better logging
+** test / improve integration w/ rails logger
+** automatic transitions
+*** automatic events must be simple (single target)
+*** flag events as automatic w/ options[:auto] = true
+*** automatically sorted & fired whenever ...
+    .state_fu is called? .autofire! is called?
 
-** more logging
-** update account example integration spec
+* decisions
+** should binding keep a ref to the last transition?
+
+* specs
+** better spec coverage for binding
+** rcov (waiting for 1.9)
+** example machines in specs/example_machines/
+** rewrite account example integration spec
+
+* docs
 ** write cheat / intro / examples
-** auto transitions and default arguments
-*** find permissable events and try firing them; repeat until deadlock
 
 ====================================================
 

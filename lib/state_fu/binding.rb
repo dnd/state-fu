@@ -1,5 +1,6 @@
 module StateFu
   class Binding
+    include ContextualEval
 
     attr_reader :object, :machine, :method_name, :persister, :transitions, :options
 
@@ -36,20 +37,24 @@ module StateFu
     alias_method :at,    :current_state
     alias_method :state, :current_state
 
+    def current_state_name
+      current_state.name
+    end
+
     # a list of events which can fire from the current_state
     def events
-      machine.events.select {|e| e.complete? && e.from?( current_state ) }.extend ArrayWithSymbolAccessor
+      machine.events.select {|e| e.complete? && e.from?( current_state ) }.extend EventArray
     end
     alias_method :events_from_current_state,  :events
 
     # the subset of events() whose requirements for firing are met
     def valid_events
       return [] unless current_state.exitable_by?( self )
-      events.select {|e| e.fireable_by?( self ) }.extend ArrayWithSymbolAccessor
+      events.select {|e| e.fireable_by?( self ) }.extend EventArray
     end
 
     def invalid_events
-      events - valid_events
+      (events - valid_events).extend StateArray
     end
 
     def unmet_requirements_for(event, target)
@@ -60,11 +65,11 @@ module StateFu
     # the firing of one event, taking into account event and state
     # transition requirements
     def valid_next_states
-      valid_transitions.values.flatten.uniq.extend ArrayWithSymbolAccessor
+      valid_transitions.values.flatten.uniq.extend StateArray
     end
 
     def next_states
-      raise NotImplementedError
+      events.map(&:targets).compact.flatten.uniq.extend StateArray
     end
 
     def invalid_next_states
@@ -128,26 +133,36 @@ module StateFu
     # pretty similar to transition.run_hook - evaluate a requirement
     # depending whether it's a method or proc, and its arity
     def evaluate_requirement( name )
-      if proc = machine.named_procs[name]
-        if proc.arity == 1
-          object.instance_exec( self, &proc )
-        else
-          instance_eval( &proc )
-        end
+      evaluate_named_proc_or_method( name )
+    end
+
+    def evaluate_requirement_message( name, dest )
+      msg = machine.requirement_messages[name]
+      if [String, NilClass].include?( msg.class )
+        return msg
       else
-        object.send( name )
+        if dest.is_a?( StateFu::Transition )
+          t = dest
+        else
+          raise NotImplementedError
+          event, target = parse_destination( event_or_array )
+          t = transition( event, target )
+        end
+        case msg
+        when Symbol
+          t.evaluate_named_proc_or_method( msg )
+        when Proc
+          t.evaluate &msg
+        end
       end
     end
 
-    # TODO - give better errors on failed requirements
-    def evaluate_requirement!( name )
-      evaluate_requirement( name ) || raise( RequirementError )
-    end
 
     # fire event to move to the next state, if there is only one possible state.
     # otherwise raise an error ( InvalidTransition )
-    # TODO - make a 'soft' version of this which returns a transition
+    # TODO - a 'soft' version of this which returns a transition
     # or false
+    # TODO - a query version of this which returns true / false (no raise)
     def next!( *args, &block )
       next_events = events.select {|e| e.target }
       case next_events.length
@@ -173,6 +188,7 @@ module StateFu
     # fire an event to & from the current state, or raise InvalidTransition
     # TODO - make a 'soft' version of this which returns a transition
     # or false
+    # TODO - a query version of this which returns true / false (no raise)
     def cycle!( *args, &block )
       cycle_events = events.select {|e| e.target == current_state }
       if cycle_events.length == 1

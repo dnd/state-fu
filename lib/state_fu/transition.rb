@@ -8,6 +8,7 @@ module StateFu
 
   class Transition
     include StateFu::Helper
+    include ContextualEval
     attr_reader(  :binding,
                   :machine,
                   :origin,
@@ -66,36 +67,30 @@ module StateFu
       apply!( &block ) if block_given?
     end
 
+    def requirements
+      origin.exit_requirements + target.entry_requirements + event.requirements
+    end
+
+    def unmet_requirements
+      requirements.reject do |requirement|
+        binding.evaluate_requirement( requirement )
+      end
+    end
+
+    def unmet_requirement_messages
+      unmet_requirements.map do |r|
+        binding.evaluate_requirement_message(r, self )
+      end
+    end
+
     def check_requirements!
-      #
-      # TODO - better errors with more info !!
-      #
-
-      # ensure requirements are satisfied
-      # for the state being exited
-      unless origin.exitable_by?( binding )
-        raise RequirementError
-      end
-
-      # for the state being entered
-      unless target.enterable_by?( binding )
-        raise RequirementError
-      end
-
-      # for the event being fired
-      unless event.fireable_by?( binding )
-        raise RequirementError
-      end
+      raise RequirementError unless requirements_met?
     end
 
     def requirements_met?
-      begin
-        check_requirements!
-        true
-      rescue RequirementError => e
-        false
-      end
+      unmet_requirements.empty?
     end
+    alias_method :valid?, :requirements_met?
 
     def hooks_for( element, slot )
       send(element).hooks[slot]

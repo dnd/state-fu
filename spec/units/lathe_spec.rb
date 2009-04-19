@@ -79,6 +79,7 @@ describe StateFu::Lathe do
         s.options[:nick].should == :wobble
       end
 
+      it "should return the named state"
     end # .state
 
     describe "defining multiple states with .states" do
@@ -150,9 +151,16 @@ describe StateFu::Lathe do
           names << s.name
         end
         names.should == [:warm]
-
       end
 
+      it "should return an array of states with extensions" do
+        x = @lathe.states :hot, :cold, :warm
+        x.should be_kind_of( Array )
+        x.length.should == 3
+        x.each {|e| e.should be_kind_of( StateFu::State ) }
+        x.map(&:name).should == [:hot, :cold, :warm]
+        x.except(:warm).map(&:name).should == [:hot, :cold]
+      end
     end # states
 
     describe "defining an event with .event" do
@@ -189,7 +197,6 @@ describe StateFu::Lathe do
       it "should create states mentioned in the event definition and add them to machine.states" do
         @machine = StateFu::Machine.new( :snoo )
         @lathe = StateFu::Lathe.new( @machine )
-
         @lathe.event(:wobble, :from => [:a, :b], :to => :c )
         @machine.events.should_not be_empty
         @machine.events.length.should == 1
@@ -444,6 +451,17 @@ describe StateFu::Lathe do
         @state.exit_requirements.should == [:method_name]
         @state.entry_requirements.should == [:method_name]
         @machine.named_procs[:method_name].should == block
+      end
+
+      it "should add a message to machine.requirement_messages if a string is given" do
+        class << @machine
+          attr_accessor :requirement_messages
+        end
+        @machine.requirement_messages = {}
+        @lathe.requires( :method_one, :message => "Method one says no soup for you!" )
+        @machine.should respond_to(:requirement_messages)
+        @machine.requirement_messages.keys.should == [:method_one]
+        @machine.requirement_messages.values.first.should be_kind_of( String )
       end
 
     end

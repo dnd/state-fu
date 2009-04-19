@@ -136,6 +136,19 @@ describe StateFu::Event do
               @event.from( [:initial, :start], :to => [:final, :end] )
             end
           end
+
+          describe "given @event.from :ALL, :to => :ALL" do
+            it "should set origins and targets to @machine.states" do
+              stub( @machine ).states() { [:all, :of, :them ] }
+              stub( @machine ).find_or_create_states_by_name(anything) do |x|
+                x
+              end
+              @event.from( :ALL, :to => :ALL )
+              @event.origins.should == [:all, :of, :them ]
+              @event.targets.should == [:all, :of, :them ]
+            end
+          end
+
         end
 
         describe '.to()' do

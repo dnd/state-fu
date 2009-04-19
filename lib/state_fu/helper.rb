@@ -153,4 +153,31 @@ module StateFu
     end
   end  # OrderedHash
 
+  module ContextualEval
+    module InstanceMethods
+      def evaluate( &proc )
+        if proc.arity == 1
+          object.instance_exec( self, &proc )
+        else
+          instance_eval( &proc )
+        end
+      end
+
+      def evaluate_named_proc_or_method( name )
+        if proc = machine.named_procs[ name ]
+          evaluate &proc
+        else
+          if object.method(name).arity == 1
+            object.send( name, self )
+          else
+            object.send( name )
+          end
+        end
+      end
+    end
+
+    def self.included( klass )
+      klass.send :include, InstanceMethods
+    end
+  end
 end

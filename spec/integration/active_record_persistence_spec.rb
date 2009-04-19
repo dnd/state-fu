@@ -60,27 +60,45 @@ begin
             end
           end
         end
+        @ex = ExampleRecord.new( :name => "exemplar" )
       end # before
 
-      it "should have an active_record persister with the field_name 'example_machine_state' " do
-        ex = ExampleRecord.new( :name => "exemplar" )
-        ex.state_fu
-        ex.state_fu.should be_kind_of( StateFu::Binding )
-        ex.state_fu.persister.should be_kind_of( StateFu::Persistence::ActiveRecord )
-        ex.state_fu.persister.field_name.should == :state_fu_state
+      it "should have an active_record string column 'state_fu_state' " do
+        col = ExampleRecord.columns.detect {|c| c.name == "state_fu_state" }
+        col.type.should == :string
+      end
+
+      describe "StateFu::Persistence.active_record_column?" do
+        it "should return true for ExampleRecord, :state_fu_state " do
+          StateFu::Persistence.active_record_column?( ExampleRecord, :state_fu_state ).should == true
+        end
+
+        it "should return true for ExampleRecord, :status" do
+          StateFu::Persistence.active_record_column?( ExampleRecord, :status ).should == true
+        end
+
+        it "should return false for ExampleRecord, :not_a_column" do
+          StateFu::Persistence.active_record_column?( ExampleRecord, :not_a_column ).should == false
+        end
+      end
+
+
+      it "should have an active_record persister with the default field_name 'state_fu_state' " do
+        @ex.state_fu
+        @ex.state_fu.should be_kind_of( StateFu::Binding )
+        @ex.state_fu.persister.should be_kind_of( StateFu::Persistence::ActiveRecord )
+        @ex.state_fu.persister.field_name.should == :state_fu_state
       end
 
       it "should fail to save because of a not-null constraint on state_fu_state" do
-        ex = ExampleRecord.new( :name => "exemplar" )
-        lambda { ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
-        ex.state_fu_state.should == nil
+        lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
+        @ex.state_fu_state.should == nil
       end
 
       it "should save successfully after .state_fu is called, which sets the persistence field" do
-        ex = ExampleRecord.new( :name => "exemplar" )
-        ex.state_fu
-        ex.state_fu_state.should == 'initial'
-        ex.save!
+        @ex.state_fu
+        @ex.state_fu_state.should == 'initial'
+        @ex.save!
       end
 
       describe "when state_fu! is a before_create filter" do

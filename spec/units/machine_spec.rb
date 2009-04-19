@@ -51,6 +51,9 @@ describe StateFu::Machine do
     end
   end
 
+  describe "attributes" do
+  end
+
   describe "instance methods" do
     before do
       reset!
@@ -185,7 +188,7 @@ describe StateFu::Machine do
           res.map(&:name).should == [ :a, :b ]
           @mchn.find_or_create_states_by_name( :a, :b ).should == res
         end
-      end
+      end # arr symbols
 
       describe "given an array of states" do
         it "should return the states if they're in the machine's states array" do
@@ -205,7 +208,32 @@ describe StateFu::Machine do
           @mchn.find_or_create_states_by_name( [a, b] ).should == [a, b]
           @mchn.find_or_create_states_by_name( [[a, b]] ).should == [a, b]
         end
+      end # arr states
+    end # find_or_create_states_by_name
+
+    describe "requirement_messages" do
+      it "should be a hash" do
+        @mchn.should respond_to(:requirement_messages)
+        @mchn.requirement_messages.should be_kind_of( Hash )
       end
-    end
-  end
+
+      it "should be empty by default" do
+        @mchn.requirement_messages.should be_empty
+      end
+
+    end # requirement_messages
+
+    describe "named_procs" do
+      it "should be a hash" do
+        @mchn.should respond_to(:named_procs)
+        @mchn.named_procs.should be_kind_of( Hash )
+      end
+
+      it "should be empty by default" do
+        @mchn.named_procs.should be_empty
+      end
+
+    end # named_procs
+
+  end # instance methods
 end

@@ -29,11 +29,19 @@ module StateFu
     end
 
     def origins=( *args )
-      @origins = machine.find_or_create_states_by_name( *args.flatten )
+      if [args].flatten == [:ALL]
+        @origins = machine.states
+      else
+        @origins = machine.find_or_create_states_by_name( *args.flatten ) #.extend( StateArray )
+      end
     end
 
     def targets=( *args )
-      @targets = machine.find_or_create_states_by_name( *args.flatten )
+      if [args].flatten == [:ALL]
+        @targets = machine.states
+      else
+        @targets = machine.find_or_create_states_by_name( *args.flatten ) # .extend( StateArray )
+      end
     end
 
     # complete?(:origins) # do we have an origins?

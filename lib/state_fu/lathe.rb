@@ -142,6 +142,7 @@ module StateFu
     def requires( *args, &block )
       require_sprocket( StateFu::Event, StateFu::State )
       options = args.extract_options!.symbolize_keys!
+      options.assert_valid_keys(:on, :message, :msg )
       names   = args
       if block_given? && args.length > 1
         raise ArgumentError.new("cannot supply a block for multiple requirements")
@@ -159,6 +160,11 @@ module StateFu
         end
         if block_given?
           machine.named_procs[name] = block
+        end
+        if msg = options.delete(:message) || options.delete(:msg)
+          # TODO - move this into machine
+          raise ArgumentError, msg.inspect unless [String, Symbol, Proc].include?(msg.class)
+          machine.requirement_messages[name] = msg
         end
       end
     end
@@ -213,7 +219,7 @@ module StateFu
       if args == [:ALL] || args == []
         args = machine.send("#{type}s").except( options.delete(:except) )
       end
-      args.each { |name| self.send( type, name, options.dup, &block) }
+      args.map { |name| self.send( type, name, options.dup, &block) }.extend StateArray
     end
 
     def states( *args, &block )

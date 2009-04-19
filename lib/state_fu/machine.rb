@@ -22,14 +22,15 @@ module StateFu
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options, :helpers, :named_procs
+    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages
 
     def initialize( name, options={}, &block )
       @states  = [].extend( StateArray  )
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
-      @named_procs = {}
-      @options = options
+      @named_procs          = {}
+      @requirement_messages = {}
+      @options              = options
     end
 
     # merge the commands in &block with the existing machine; returns
@@ -67,6 +68,9 @@ module StateFu
     # Transition objects for this machine. use this to define methods,
     # references or data useful to you during transitions, event
     # hooks, or in general use of StateFu.
+    #
+    # They can be supplied as a string/symbol (as per rails controller
+    # helpers), or a Module.
     #
     # To do this globally, just duck-punch StateFu::Machine /
     # StateFu::Binding.

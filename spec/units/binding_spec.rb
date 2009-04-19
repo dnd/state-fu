@@ -33,6 +33,38 @@ describe StateFu::Binding do
                                 :style  => [:robust, :fruity] )
       b.options.should == { :colour => :red, :style  => [:robust, :fruity] }
     end
+
+    describe "persister initialization" do
+      before do
+        @p = Object.new
+        class << @p
+          attr_accessor :field_name
+        end
+        @p.field_name
+      end
+
+      describe "when StateFu::Persistence.active_record_column? is true" do
+        before do
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { true }
+        end
+        it "should get an ActiveRecord persister" do
+          mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
+          b = StateFu::Binding.new( Klass.machine, @obj, :example )
+          b.persister.should == @p
+        end
+      end
+
+      describe "when StateFu::Persistence.active_record_column? is false" do
+        before do
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { false }
+        end
+        it "should get an Attribute persister" do
+          mock( StateFu::Persistence::Attribute ).new( anything, :example_field ) { @p }
+          b = StateFu::Binding.new( Klass.machine, @obj, :example )
+          b.persister.should == @p
+        end
+      end
+    end
   end
 
   describe "initialization via @obj.binding()" do
@@ -46,8 +78,7 @@ describe StateFu::Binding do
     end
   end
 
-
-  describe "For Klass.machine() with two states and an event" do
+  describe "a binding for the default machine with two states and an event" do
     before do
       reset!
       make_pristine_class('Klass')
@@ -56,41 +87,23 @@ describe StateFu::Binding do
           event :age, :to => :old
         end
         state :old
-        # initial_state :fetus
       end
       @machine   = Klass.machine()
       @object    = Klass.new()
-      @binding   = @object.stfu()
+      @binding   = @object.state_fu()
     end
 
-    it "should be sane (checking Machine for sanity)" do
-      machine = @binding.machine
-      machine.states.length.should == 2
-      machine.state_names.should == [:new, :old]
-      machine.events.length.should == 1
-      machine.events.first.origin.should_not be_nil
-      machine.events.first.target.should_not be_nil
-    end
-
-    describe "firing events" do
-      describe "fire! method" do
-
-      end
-    end
-
-    describe ".state()" do
+    describe ".state() / initial state" do
       it "should default to machine.initial_state when no initial_state is explicitly defined" do
-        @binding.respond_to?(:current_state).should == true
-        @binding.current_state.should be_kind_of( StateFu::State )
-        @binding.current_state.name.should == :new
-        @binding.machine.initial_state.name.should == :new
+        @machine.initial_state.name.should == :new
+        @binding.current_state.should == @machine.initial_state
       end
 
       it "should default to the machine's initial_state if one is set" do
-        Klass.machine() { initial_state :fetus }
-        Klass.machine.states.first.name.should   == :new
-        Klass.machine.initial_state.name.should  == :fetus
-        Klass.new().binding.current_state.name.should == :fetus
+        @machine.initial_state = :fetus
+        @machine.initial_state.name.should == :fetus
+        obj = Klass.new
+        obj.binding.current_state.should == @machine.initial_state
       end
     end
 
