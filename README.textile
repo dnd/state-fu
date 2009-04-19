@@ -133,3 +133,36 @@ State-Fu works with ruby 1.8 and 1.9.
 fn1. No disrespect intended to the authors of other similar libraries
 - some of whom I've borrowed an idea or two, and some useful criticism,
 from. They're stand-up guys, all of them. It's the truth though.
+
+I'd like to thank Ryan Daigle in particular for his Workflow library,
+which I previously forked, piled hundreds of lines of code into and renamed
+Stateful (now deprecated). Some of his ideas (for example the ability to store metadata
+easily on *everything* ) have been instrumental in State-Fu's design.
+
+I'd also like to tip my hat at John Barnette, who's own
+(coincidentally named) Stateful set a very high standard with an
+exceptionally elegant API.
+
+H2. Getting started
+
+First up:
+
+<code>
+ sudo gem install rspec rr activesupport
+ rake
+ rake spec:doc    # generate specdocs
+ rake doc         # generate rdoc
+ rake gem         # build the gem
+ rake gem:install # install it
+</code>
+And have a peek in the specs folder or rdoc for usage / documentation.
+
+Now you can simply:
+<code>
+ require 'state-fu'
+</code>
+And include StateFu in any class you wish to make stateful.
+
+If you have questions, feature request or ideas, please join the "google group":http://groups.google.com/group/state-fu
+
+Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
