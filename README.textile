@@ -37,8 +37,9 @@ libraries: State-Fu goes to great lengths to impose very few limits on
 your ability to introspect, manipulate and extend the core features.
 
 It is also delightfully elegant and easy to use for simple things:
-<pre>
-<code>
+
+<pre><code>
+
   class Document < ActiveRecord::Base
     include StateFu
 
@@ -76,8 +77,8 @@ It is also delightfully elegant and easy to use for simple things:
   my_doc.publish!                        # and try again.
   "new feed!"                            # aha - our event hook fires!
   my_doc.status.name      => :published  # and the state has been updated.
-</code>
-</pre>
+
+</code></pre>
 
 A few of the features which set State-Fu apart for more ambitious work are:
 
