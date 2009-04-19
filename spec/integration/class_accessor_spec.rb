@@ -117,6 +117,9 @@ describe "A pristine class Klass with StateFu included:" do
         Child.machine.should_not == Klass.machine
         Klass.machine.bind!( Child )
         Child.machine.should == Klass.machine
+        Klass.machine.bind!( Child, :snoo )
+        Child.machine(:snoo).should == Klass.machine
+
       end
 
     end

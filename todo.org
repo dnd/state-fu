@@ -7,10 +7,11 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 * meta
-** lighthouse tickets
+** gem release / script
+** tickets
 ** google group
 ** docs
-** wiki
+** wiki pages
 ** manual
 
 * features
