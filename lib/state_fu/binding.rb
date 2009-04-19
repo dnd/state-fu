@@ -41,7 +41,8 @@ module StateFu
     def current_state_name
       current_state.name
     end
-    alias_method :name,  :current_state_name
+    alias_method :name,   :current_state_name
+    alias_method :to_sym, :current_state_name
 
     # a list of events which can fire from the current_state
     def events
@@ -91,14 +92,12 @@ module StateFu
     end
 
     # initialize a new transition
-    def transition( event, target=nil, *args, &block )
-      StateFu::Transition.new( self, event, target, *args, &block )
-    end
-
     def transition( event_or_array, *args, &block )
       event, target = parse_destination( event_or_array )
       StateFu::Transition.new( self, event, target, *args, &block )
     end
+    alias_method :fire,    :transition
+    alias_method :trigger, :transition
 
     # sanitize args for fire! and fireable?
     def parse_destination( event_or_array )
@@ -121,6 +120,11 @@ module StateFu
       t = transition( [event, target] )
       !! t.requirements_met?
     end
+    alias_method :event?,         :fireable?
+    alias_method :trigger?,       :fireable?
+    alias_method :triggerable?,   :fireable?
+    alias_method :transition?,    :fireable?
+    alias_method :transitionable?,:fireable?
 
     # construct an event transition and fire it
     def fire!( event_or_array, *args, &block)
@@ -129,11 +133,12 @@ module StateFu
       t.fire!
       t
     end
+    alias_method :event!,    :fire!
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
-    # pretty similar to transition.run_hook - evaluate a requirement
-    # depending whether it's a method or proc, and its arity
+    # evaluate a requirement depending whether it's a method or proc,
+    # and its arity - see helper.rb (ContextualEval) for the smarts
     def evaluate_requirement( name )
       evaluate_named_proc_or_method( name )
     end
@@ -146,7 +151,6 @@ module StateFu
         if dest.is_a?( StateFu::Transition )
           t = dest
         else
-          raise NotImplementedError
           event, target = parse_destination( event_or_array )
           t = transition( event, target )
         end
@@ -159,56 +163,74 @@ module StateFu
       end
     end
 
+    # if there is one simple event, return a transition for it
+    # else return nil
+    # TODO - not convinced about the method name / aliases - but next
+    # is reserved :/
+    def next_transition( *args, &block )
+      if events.select(&:simple?).length == 1
+        transition( events.select(&:simple?)[0], *args, &block )
+      end
+    end
+    alias_method :next_state, :next_transition
+    alias_method :next_event, :next_transition
 
-    # fire event to move to the next state, if there is only one possible state.
-    # otherwise raise an error ( InvalidTransition )
-    # TODO - a 'soft' version of this which returns a transition
-    # or false
-    # TODO - a query version of this which returns true / false (no raise)
+    # if there is a next_transition, create, fire & return it
+    # otherwise raise an InvalidTransition
     def next!( *args, &block )
-      next_events = events.select {|e| e.target }
-      case next_events.length
-      when 0
-        err_msg = "There is no event for next!"
-        raise StateFu::InvalidTransition.new( self,
-                                              current_state,
-                                              nil,
-                                              err_msg )
-      when 1
-        event = next_events.first
-        fire!( event, *args, &block )
+      if t = next_transition( *args, &block )
+        t.fire!
+        t
       else
-        err_msg = "There is more than one candidate event for next!"
-        raise StateFu::InvalidTransition.new( self,
-                                              current_state,
-                                              next_events,
-                                              err_msg )
+        n = events.select(&:simple?).length
+        raise InvalidTransition.
+          new( self, current_state, events.select(&:simple?),
+               "there are #{n} candidate next events, need exactly 1")
       end
     end
     alias_method :next_state!, :next!
+    alias_method :next_event!, :next!
 
-    # fire an event to & from the current state, or raise InvalidTransition
-    # TODO - make a 'soft' version of this which returns a transition
-    # or false
-    # TODO - a query version of this which returns true / false (no raise)
-    def cycle!( *args, &block )
-      cycle_events = events.select {|e| e.target == current_state }
-      if cycle_events.length == 1
-        event = cycle_events.first
-        fire!( event, *args, &block )
-      else
-        err_msg = "Cannot cycle! unless there is exactly one event leading from the current state to itself"
-        raise StateFu::InvalidTransition.new( self,
-                                              current_state,
-                                              current_state,
-                                              err_msg )
+    # if there is a next_transition, return true / false depending on
+    # whether its requirements are met
+    # otherwise, nil
+    def next?( *args, &block )
+      if t = next_transition( *args, &block )
+        t.requirements_met?
       end
     end
-    alias_method :call!,       :fire!
-    alias_method :trigger!,    :fire!
-    alias_method :transition!, :fire!
+    alias_method :next_state?, :next?
+    alias_method :next_event?, :next?
 
-    # display sensibly
+    # if there is one possible cyclical event, return a transition there
+    def cycle( *args, &block)
+      cycle_events = events.select {|e| e.target == current_state }
+      if cycle_events.length == 1
+        transition( cycle_events[0], *args, &block )
+      end
+    end
+
+    # if there is a cycle() transition, fire and return it
+    # otherwise raise an InvalidTransition
+    def cycle!( *args, &block )
+      if t = cycle( *args, &block )
+        t.fire!
+        t
+      else
+        err_msg = "Cannot cycle! unless there is exactly one event leading from the current state to itself"
+        raise InvalidTransition.new( self, current_state, current_state, err_msg )
+      end
+    end
+
+    # if there is one possible cyclical event, evaluate its
+    # requirements (true/false), else nil
+    def cycle?
+      if t = cycle
+        t.requirements_met?
+      end
+    end
+
+    # display something sensible that doesn't take up the whole screen
     def inspect
       "#<#{self.class} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} machine=#{@machine.inspect} options=#{options.inspect}>"
     end

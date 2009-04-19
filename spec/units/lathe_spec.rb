@@ -79,7 +79,11 @@ describe StateFu::Lathe do
         s.options[:nick].should == :wobble
       end
 
-      it "should return the named state"
+      it "should return the named state" do
+        s = @lathe.state( :wibble, { :nick => :wobble } )
+        s.should be_kind_of( StateFu::State )
+        s.name.should == :wibble
+      end
     end # .state
 
     describe "defining multiple states with .states" do
@@ -478,21 +482,60 @@ describe StateFu::Lathe do
     end
 
     describe ".from" do
+      it "should create any states mentioned which do not exist" do
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @lathe.from( :a, :b )
+      end
 
-      it "should create any states mentioned which do not exist and add them to machine.states"
       it "should set the origins to the result of machine.find_or_create_states_by_name" do
         mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
         @lathe.from( :a, :b )
         @event.origins.should == [:a, :b]
-        @event.targets.should == nil
       end
-      it "should ... on successive invocations"
-      it "should set both origin and target if a hash is given" # {:o => :t }
+
+      it "should update @origins on successive invocations" do
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @lathe.from( :a, :b )
+        @event.origins.should == [:a, :b]
+        @lathe.from( :x, :y )
+        @event.origins.should == [:x, :y]
+      end
+
+      it "should set both origin and target if a hash is given" do
+        mock( @machine ).find_or_create_states_by_name(:a) { [:a] }
+        mock( @machine ).find_or_create_states_by_name(:b) { [:b] }
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @lathe.from( :a => :b )
+        @event.origin.should == :a
+        @event.target.should == :b
+        @lathe.from([:a, :b] => [:x, :y] )
+        @event.origins.should == [:a, :b]
+        @event.targets.should == [:x, :y]
+      end
     end
 
     describe ".to" do
-      it "should create any states mentioned which do not exist and add them to machine.states"
-      it "should ... on successive invocations"
+      it "should create any states mentioned which do not exist" do
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @lathe.to( :a, :b )
+      end
+
+      it "should set the targets to the result of machine.find_or_create_states_by_name" do
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @lathe.to( :a, :b )
+        @event.targets.should == [:a, :b]
+      end
+
+      it "should update @origins on successive invocations" do
+        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @lathe.to( :a, :b )
+        @event.targets.should == [:a, :b]
+        @lathe.to( :x, :y )
+        @event.targets.should == [:x, :y]
+      end
     end
 
     describe ".requires()" do

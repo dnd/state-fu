@@ -208,7 +208,13 @@ describe StateFu::MethodFactory do
 
           describe "cycle methods:" do
             describe "cycle" do
-              it "should return a transition for the cyclical event"
+              it "should return a transition for the cyclical event" do
+                t = @binding.cycle
+                t.should be_kind_of( StateFu::Transition )
+                t.origin.name.should == :groundhog_day
+                t.target.name.should == :groundhog_day
+                t.should_not be_fired
+              end
             end
 
             describe "cycle?" do
@@ -239,29 +245,40 @@ describe StateFu::MethodFactory do
           describe "cycle methods:" do
             describe "cycle" do
               it "should return nil" do
+                @binding.cycle.should == nil
               end
             end
 
             describe "cycle?" do
-              it "should return nil"
+              it "should return nil" do
+                @binding.cycle?.should == nil
+              end
             end
 
             describe "cycle!" do
-              it "should raise ..."
+              it "should raise_error( InvalidTransition )" do
+                lambda { @binding.cycle!.should == nil }.should raise_error( StateFu::InvalidTransition )
+              end
             end
           end # cycle
 
           describe "next_state methods:" do
             describe "next_state" do
-              it "should return nil"
+              it "should return nil" do
+                @binding.next_state.should == nil
+              end
             end
 
             describe "next_state?" do
-              it "should return nil"
+              it "should return nil" do
+                @binding.next_state?.should == nil
+              end
             end
 
             describe "next_state!" do
-              it "should raise ..."
+              it "should raise_error( InvalidTransition )" do
+                lambda { @binding.next_state! }.should raise_error( StateFu::InvalidTransition )
+              end
             end
           end # next_state
 

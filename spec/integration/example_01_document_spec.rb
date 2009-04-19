@@ -35,8 +35,6 @@ describe "Document" do
       @doc.status.name.should == :draft
     end
 
-    it "should have an attribute .status_field set to 'draft'"
-
     it "should have no author" do
       @doc.author.should be_nil
     end
@@ -70,8 +68,37 @@ describe "Document" do
       lambda { @doc.status.publish! }.should_not raise_error( )
     end
 
-    it "should call update_rss when publish! is called"
-    it "should have the state name :published after .publish! is called"
-    it "should have the attribute .status_field set to 'publish' after publish! is called"
+    it "should call update_rss when publish! is called" do
+      mock( @doc ).update_rss() {}
+      @doc.status.publish!
+    end
+
+    it "should have the state name :published after .publish! is called" do
+      @doc.status.publish!
+      @doc.status.current_state_name.should == :published
+    end
+  end
+
+  describe "status_field attribute" do
+    before do
+      @doc = Document.new
+      @doc.author = "Susan"
+      @doc.status
+    end
+
+    it "should be private" do
+      @doc.status.persister.field_name.should == :status_field
+      lambda { @doc.status_field }.should raise_error( NoMethodError )
+    end
+
+    it "should have an initial value of 'draft'" do
+      @doc.instance_eval { status_field }.should == "draft"
+    end
+
+    it "should be set to 'published' after publish! is called successfully" do
+      @doc.status.publish!
+      @doc.instance_eval { status_field }.should == "published"
+    end
+
   end
 end

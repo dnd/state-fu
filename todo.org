@@ -8,7 +8,7 @@
 ==================================================
 
 * features
-** spec / code for introspection of unmet requirements for transitions
+
 ** spec / code for introspection of transitionHalted exceptions during a transition
 ** configurable event method definitions for object / lathe
 ** ensure event methods are callable before calling state_fu!

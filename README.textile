@@ -26,7 +26,7 @@ things. "What's different about State-Fu?", you may ask.
 Those libraries you've played with are toys. They're made of
 plastic. State-Fu is forged from a reassuringly dense but
 unidentifiable metal which comes only from the rarest of meteorites,
-and it ticks when you hold it up to your ear.
+and it ticks when you hold it up to your ear.[1]
 
 State-Fu is elegant, powerful and transparent enough that you can use
 it to drive substantial parts of your application, and actually want

@@ -30,22 +30,20 @@ describe StateFu::Machine do
           StateFu::Machine.for_class( Klass, :moose )
         end
 
-        it "should apply the block if one is given"
-        # dont know how to spec this
+        it "should apply the block (via lathe) if one is given" do
+          @m = StateFu::Machine.for_class( Klass, :snoo ) do
+            state :porpoise
+          end
+          @m.states.map(&:name).should == [:porpoise]
+        end
       end
 
       describe "when there's a matching machine in FuSpace" do
-        before do
+        it "should retrieve the previously created machine" do
           @machine = Object.new
           mock( StateFu::FuSpace ).class_machines() { { Klass => { :moose => @machine } } }
-        end
-
-        it "should retrieve the previously created machine" do
           StateFu::Machine.for_class( Klass, :moose ).should == @machine
         end
-
-        it "should apply the block if one is given"
-        # dont know how to spec this
       end
 
     end

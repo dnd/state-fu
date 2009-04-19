@@ -752,8 +752,6 @@ describe StateFu::Transition do
         end.should raise_error( StateFu::RequirementError )
       end
 
-      it "should have useful info on the error about the failed requirement"
-
     end # no block
 
     describe "when a block is supplied for the requirement" do

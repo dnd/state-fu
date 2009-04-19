@@ -113,15 +113,6 @@ describe StateFu::Event do
                 @event.targets.should == [@final]
               end
             end
-
-            it "should merge any options passed into the method into event.options" do
-              pending # i'm not convinced this is really necessary
-              # mock( @machine ).find_or_create_states_by_name(:initial) { [@initial]}
-              # mock( @machine ).find_or_create_states_by_name(:final  ) { [@final]}
-              # @event.from :initial, :to => :final, :colour => :green
-              # @event.options[:speed].should  == :slow
-              # @event.options[:colour].should == :green
-            end
           end
 
           describe "given @event.from <Array>, :to => <Array>" do
