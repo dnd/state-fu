@@ -12,20 +12,28 @@ describe String do
       end
 
       def dirty?
-        shell.name == :dodgy
+        shell.name == :dirty
       end
 
       def clean?
-        shell.name == :ok
+        shell.name == :clean
       end
 
+      def shell_escape!
+        shell.escape!
+      end
 
-      #def escape
-      #  klone = clone
-      #end
+      def shell_escape
+        klone = clone
+        begin
+          klone.shell.escape!
+        rescue StateFu::InvalidTransition
+        end
+        klone
+      end
 
       machine (:shell) do
-        event(:escape, :from => {:dodgy => :ok}) do
+        event(:escape, :from => {:dirty => :clean}) do
           execute :sanitize_for_shell!
         end
       end
@@ -48,7 +56,7 @@ describe String do
 
   it "should raise an InvalidTransition if shell.escape! is called more than once" do
     @str.shell.escape!
-    @str.shell.state_name.should == :ok
+    @str.shell.state_name.should == :clean
 
     lambda { @str.shell.escape! }.should raise_error( StateFu::InvalidTransition )
   end
@@ -59,6 +67,23 @@ describe String do
     @str.shell.escape!
     original.should_not == @str
   end
+
+  it "should modify the string when shell.escape! is called" do
+    original             = @str.dup
+    original.should     == @str
+    @str.shell.escape!
+    original.should_not == @str
+  end
+
+  it "should not modify the original string when shell_escape() is called" do
+    original             = @str.dup
+    original.should     == @str
+    clean_copy           = @str.shell_escape()
+    clean_copy.should be_clean
+    @str.should be_dirty
+    original.should     == @str
+  end
+
 
 
 end
