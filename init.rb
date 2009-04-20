@@ -1,1 +1,1 @@
-require File.join( File.basedir( __FILE__ ), 'lib', 'state-fu' )
+require File.join( File.dirname( __FILE__ ), 'lib', 'state-fu' )
