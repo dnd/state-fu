@@ -41,8 +41,9 @@ module StateFu
     def current_state_name
       current_state.name
     end
-    alias_method :name,   :current_state_name
-    alias_method :to_sym, :current_state_name
+    alias_method :name,       :current_state_name
+    alias_method :state_name, :current_state_name
+    alias_method :to_sym,     :current_state_name
 
     # a list of events which can fire from the current_state
     def events

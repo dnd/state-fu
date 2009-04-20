@@ -943,18 +943,12 @@ describe StateFu::Transition do
           t.options.should == {:hi => :mum}
         end
         set_method_arity( @obj, :run_exec, 1)
-        # @obj.method(:run_exec).arity.should == 1
+
         trans = @obj.state_fu.transition( :run ) do
           @args    = %w/ who yo daddy? /
           @options = {:hi => :mum}
         end
         trans.fire!
-
-        trans = @obj.state_fu.transition( :run ) do |t|
-          t.args    = %w/ who yo daddy? /
-          t.options = {:hi => :mum}
-        end
-
       end
     end
 

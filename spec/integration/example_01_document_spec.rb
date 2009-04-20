@@ -80,10 +80,10 @@ describe "Document" do
 
     describe "status_field attribute" do
 
-      it "should be private in ruby 1.9" do
+      it "should be private in ruby 1.8 and 1.9" do
         @doc.status.persister.field_name.should == :status_field
         lambda { @doc.status_field }.should raise_error( NoMethodError ) if RUBY_VERSION =~ /^1\.9/
-        lambda { @doc.status_field }.should_not raise_error( NoMethodError ) if RUBY_VERSION =~ /^1\.8/
+        lambda { @doc.status_field }.should raise_error( NoMethodError ) if RUBY_VERSION =~ /^1\.8/
       end
 
       it "should have an initial value of 'draft'" do

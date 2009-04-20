@@ -50,6 +50,12 @@ module StateFu
                                                "Illegal target #{target} for #{event}" ))
       end
 
+      # ensure current_state is a valid origin for the event
+      unless event.origins.include?( binding.current_state )
+        raise( StateFu::InvalidTransition.new( binding, event, binding.current_state, target,
+                                               "Illegal event #{event.name} for current state #{binding.state_name}" ))
+      end
+
       @options    = args.extract_options!.symbolize_keys!
       @binding    = binding
       @machine    = binding.machine

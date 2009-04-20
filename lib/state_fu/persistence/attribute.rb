@@ -9,7 +9,11 @@ module StateFu
       def read_attribute
         unless object.respond_to?( field_name )
           Logger.info "Adding attr_accessor :#{field_name} for #{object.class}"
-          object.class.send( :attr_accessor, field_name )
+          _field_name = field_name
+          object.class_eval do
+            private
+            attr_accessor _field_name
+          end
         end
         string = object.send( field_name )
         Logger.info "Read attribute #{field_name}, got #{string} for #{object}"

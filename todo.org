@@ -15,6 +15,12 @@
 ** manual
 
 * features
+** ActiveRecord persistence field
+*** define attr() and attr=() methods for activerecord models
+*** define at machine definition time ( before instantiation )
+*** setter should transition to the named state IF there is only one possible event
+*** otherwise an error should be raised
+
 ** spec / code for introspection of transitionHalted exceptions during a transition
 ** configurable event method definitions for object / lathe
 ** ensure event methods are callable before calling state_fu!

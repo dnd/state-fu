@@ -94,6 +94,7 @@ describe StateFu::MethodFactory do
             event( :complex_event,
                    :from => :home,
                    :to => [ :x, :y, :z ] )
+            initial_state :home
           end # machine
           @obj     = Klass.new
           @binding = @obj.state_fu
