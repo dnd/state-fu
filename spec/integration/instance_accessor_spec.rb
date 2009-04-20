@@ -93,7 +93,7 @@ describe "An instance of Klass with StateFu included:" do
         @k.state_fu!.should be_kind_of( Array )
         @k.state_fu!.length.should == 2
         @k.state_fu!.each { |m| m.should be_kind_of( StateFu::Binding ) }
-        @k.state_fu!.map(&:method_name).should == [:state_fu, :two]
+        @k.state_fu!.map(&:method_name).sort_by(&:to_s).should == [:state_fu, :two]
       end
     end
   end
