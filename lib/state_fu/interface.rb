@@ -84,38 +84,38 @@ module StateFu
       # can see and change its state, interact with events, etc.
       #
       public
-      def binding( name=StateFu::DEFAULT_MACHINE )
+      def _binding( name=StateFu::DEFAULT_MACHINE )
         name = name.to_sym
         if mach = StateFu::FuSpace.class_machines[self.class][name]
           _state_fu[name] ||= StateFu::Binding.new( mach, self, name )
         end
       end
 
-      alias_method :fu,          :binding
-      alias_method :stfu,        :binding
-      alias_method :state_fu,    :binding
-      alias_method :stateful,    :binding
-      alias_method :workflow,    :binding
-      alias_method :engine,      :binding
-      alias_method :context,     :binding
+      alias_method :fu,          :_binding
+      alias_method :stfu,        :_binding
+      alias_method :state_fu,    :_binding
+      alias_method :stateful,    :_binding
+      alias_method :workflow,    :_binding
+      alias_method :engine,      :_binding
+      alias_method :context,     :_binding
 
 
       # Gain awareness of all bindings (state contexts) this object
       # has contemplated into being.
       # Returns a Hash of { :name => <StateFu::Binding>, ... }
-      def bindings()
+      def _bindings()
         _state_fu
       end
 
-      alias_method :fus,          :bindings
-      alias_method :stfus,        :bindings
-      alias_method :state_fus,    :bindings
-      alias_method :state_foos,   :bindings
-      alias_method :workflows,    :bindings
-      alias_method :engines,      :bindings
-      alias_method :bindings,     :bindings
-      alias_method :machines,     :binding # not strictly accurate, but makes sense sometimes
-      alias_method :contexts,     :bindings
+      alias_method :fus,          :_bindings
+      alias_method :stfus,        :_bindings
+      alias_method :state_fus,    :_bindings
+      alias_method :state_foos,   :_bindings
+      alias_method :workflows,    :_bindings
+      alias_method :engines,      :_bindings
+      alias_method :bindings,     :_bindings
+      alias_method :machines,     :_bindings # not strictly accurate, but makes sense sometimes
+      alias_method :contexts,     :_bindings
 
       # Instantiate bindings for all machines defined for this class.
       # It's useful to call this before_create w/
