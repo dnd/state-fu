@@ -135,7 +135,7 @@ fn1. No disrespect intended to the authors of other similar libraries
 - some of whom I've borrowed an idea or two, and some useful criticism,
 from. They're stand-up guys, all of them. It's the truth though.
 
-I'd like to thank Ryan Daigle in particular for his Workflow library,
+I'd like to thank Ryan Allen in particular for his Workflow library,
 which I previously forked, piled hundreds of lines of code into and renamed
 Stateful (now deprecated). Some of his ideas (for example the ability to store metadata
 easily on *everything* ) have been instrumental in State-Fu's design.
