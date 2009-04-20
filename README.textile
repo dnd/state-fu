@@ -129,7 +129,7 @@ A few of the features which set State-Fu apart for more ambitious work are:
  * fast, lightweight and useful enough to use in any ruby
    project - works with Rails but does not require it.
 
-State-Fu works with ruby 1.8 and 1.9.
+State-Fu works with any modern Ruby ( 1.8.6, 1.8.7, and 1.9.1)
 
 fn1. No disrespect intended to the authors of other similar libraries
 - some of whom I've borrowed an idea or two, and some useful criticism,

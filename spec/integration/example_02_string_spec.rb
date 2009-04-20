@@ -84,6 +84,4 @@ describe String do
     original.should     == @str
   end
 
-
-
 end
