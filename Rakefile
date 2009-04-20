@@ -1,10 +1,16 @@
 #!/usr/bin/ruby1.9
 require "spec/rake/spectask"
+#require 'cucumber/rake/task'
 require "date"
 require "fileutils"
 require "rubygems"
+# require "rake/gempackagetask"
 
 require "./lib/state_fu/version.rb"
+
+# Cucumber::Rake::Task.new(:features) do |t|
+#   t.cucumber_opts = "--format pretty" # Any valid command line option can go here.
+# end
 
 module Rakefile
   def self.windows?
@@ -29,6 +35,9 @@ state_fu_gemspec = Gem::Specification.new do |s|
   s.files             = %w(Rakefile) + Dir.glob("{lib,spec}/**/*")
 end
 
+# Rake::GemPackageTask.new(state_fu_gemspec) do |pkg|
+#   pkg.gem_spec = state_fu_gemspec
+# end
 
 namespace :gem do
   desc "Build and install as a RubyGem"
