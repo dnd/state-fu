@@ -20,7 +20,8 @@ module StateFu
           else  {}
           end.
         map { |_,name| [name, [].extend( StateFu::OrderedHash )] }
-      Hash[x].extend( StateFu::OrderedHash ).freeze
+      hash = x.inject({}) {|h, a| h[a[0]] = a[1] ; h}
+      hash.extend( StateFu::OrderedHash ).freeze
     end
 
   end

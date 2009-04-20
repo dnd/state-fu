@@ -10,7 +10,7 @@ module StateFu
         unless object.respond_to?( field_name )
           Logger.info "Adding attr_accessor :#{field_name} for #{object.class}"
           _field_name = field_name
-          object.class_eval do
+          object.class.class_eval do
             private
             attr_accessor _field_name
           end
