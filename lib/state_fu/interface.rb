@@ -125,7 +125,7 @@ module StateFu
         if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
           names = self.class.machine_names()
         end
-        names.map { |n| binding( n ) }
+        names.map { |n| _binding( n ) }
       end
       alias_method :fu!,               :state_fu!
       alias_method :stfu!,             :state_fu!

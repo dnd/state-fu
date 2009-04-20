@@ -15,7 +15,7 @@ describe "An instance of Klass with StateFu included:" do
 
   describe "when no machine is defined" do
     it "should return nil given .state_fu()" do
-      @k.binding().should be_nil
+      @k.state_fu().should be_nil
     end
 
     it "should return {} given .bindings()" do
@@ -75,8 +75,8 @@ describe "An instance of Klass with StateFu included:" do
       end
 
       it "should return the same Binding given .state_fu() and .state_fu(:state_fu)" do
-        @k.binding().should be_kind_of( StateFu::Binding )
-        @k.binding().should == @k.state_fu(:state_fu)
+        @k.state_fu().should be_kind_of( StateFu::Binding )
+        @k.state_fu().should == @k.state_fu(:state_fu)
       end
 
       it "should return a StateFu::Binding for the machine called :two given .state_fu(:two)" do
