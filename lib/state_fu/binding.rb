@@ -12,11 +12,17 @@ module StateFu
       @options       = options.symbolize_keys!
       field_name     = StateFu::FuSpace.field_names[object.class][@method_name]
       raise( ArgumentError, "No field_name" ) unless field_name
+      # ensure state field is set up (in case we created this binding
+      # manually, instead of via Machine.bind!)
+      StateFu::Persistence.prepare_field( object.class, field_name )
+      # add a persister
       @persister     = StateFu::Persistence.for( self, field_name )
       Logger.info( "Persister added: #@persister ")
 
       # define event methods on self( binding ) and @object
       StateFu::MethodFactory.new( self ).install!
+
+      # StateFu::Persistence.prepare_field( @object.class, field_name )
     end
     alias_method :o,         :object
     alias_method :obj,       :object

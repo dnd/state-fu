@@ -1,6 +1,14 @@
 module StateFu
   module Persistence
     class ActiveRecord < StateFu::Persistence::Base
+
+      def self.prepare_field( klass, field_name )
+        _field_name = field_name
+        klass.send :before_save, :state_fu!
+          # validates_presence_of _field_name
+
+      end
+
       private
 
       # We already checked that they exist, or we'd be using the

@@ -45,7 +45,8 @@ describe StateFu::Binding do
 
       describe "when StateFu::Persistence.active_record_column? is true" do
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { true }
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(2) { true }
+          mock( Klass ).before_save( :state_fu!) { }
         end
         it "should get an ActiveRecord persister" do
           mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
@@ -56,7 +57,7 @@ describe StateFu::Binding do
 
       describe "when StateFu::Persistence.active_record_column? is false" do
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { false }
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(2) { false }
         end
         it "should get an Attribute persister" do
           mock( StateFu::Persistence::Attribute ).new( anything, :example_field ) { @p }

@@ -91,6 +91,9 @@ module StateFu
           end
         end
       end
+      # prepare the persistence field
+      StateFu::Persistence.prepare_field( klass, field_name )
+      true
     end
 
     def empty?

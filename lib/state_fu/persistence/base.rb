@@ -8,6 +8,10 @@ module StateFu
 
       attr_reader :binding, :field_name, :current_state
 
+      def self.prepare_field( klass, field_name )
+        raise NotImplementedError # abstract method
+      end
+
       def initialize( binding, field_name )
         @binding       = binding
         @field_name    = field_name

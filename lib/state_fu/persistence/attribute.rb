@@ -1,20 +1,35 @@
 module StateFu
   module Persistence
     class Attribute < StateFu::Persistence::Base
+
+      def self.prepare_field( klass, field_name )
+        # ensure getter exists
+        unless klass.instance_methods.include?( field_name )
+          Logger.info "Adding attr_reader :#{field_name} for #{klass}"
+          _field_name = field_name
+          klass.class_eval do
+            private
+            attr_reader _field_name
+          end
+        end
+
+        # ensure setter exists
+        unless Klass.instance_methods.include?( "#{field_name}=" )
+          Logger.info "Adding attr_writer :#{field_name}= for #{klass}"
+          _field_name = field_name
+          klass.class_eval do
+            private
+            attr_writer _field_name
+          end
+        end
+      end
+
       private
 
       # Read / write our strings to a plain old instance variable
       # Define it if it doesn't exist the first time we go to read it
 
       def read_attribute
-        unless object.respond_to?( field_name )
-          Logger.info "Adding attr_accessor :#{field_name} for #{object.class}"
-          _field_name = field_name
-          object.class.class_eval do
-            private
-            attr_accessor _field_name
-          end
-        end
         string = object.send( field_name )
         Logger.info "Read attribute #{field_name}, got #{string} for #{object}"
         string

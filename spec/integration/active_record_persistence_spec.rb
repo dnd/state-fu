@@ -82,7 +82,6 @@ begin
         end
       end
 
-
       it "should have an active_record persister with the default field_name 'state_fu_field' " do
         @ex.state_fu
         @ex.state_fu.should be_kind_of( StateFu::Binding )
@@ -90,25 +89,28 @@ begin
         @ex.state_fu.persister.field_name.should == :state_fu_field
       end
 
-      it "should fail to save because of a not-null constraint on state_fu_field" do
-        lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
-        @ex.state_fu_field.should == nil
-      end
 
-      it "should save successfully after .state_fu is called, which sets the persistence field" do
-        @ex.state_fu
-        @ex.state_fu_field.should == 'initial'
-        @ex.save!
-      end
+      # this ensures state_fu initializes the field before create to
+      # satisfy the not null constraint
+      describe "automagic state_fu! before_save filter and validations" do
 
-      describe "when state_fu! is a before_create filter" do
-        before do
-          ExampleRecord.class_eval do
-            # this ensures state_fu initializes the field before create to
-            # satisfy the not null constraint
-            before_create :state_fu!
-          end
-        end # before
+        it "should call state_fu! before a record is created" do
+          @ex.should be_new_record
+          mock.proxy( @ex ).state_fu! { }
+          @ex.save!
+        end
+
+        it "should call state_fu! before a record is updated" do
+          @ex.should be_new_record
+          mock.proxy( @ex ).state_fu! { }
+          @ex.save!
+        end
+
+        it "should fail to save if state_fu! does not instantiate the binding before create" do
+          mock( @ex ).state_fu! { }
+          lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
+          @ex.state_fu_field.should == nil
+        end
 
         it "should create a record given only a name, with the field set to the initial state" do
           ex = ExampleRecord.new( :name => "exemplar" )

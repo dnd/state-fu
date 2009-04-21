@@ -6,6 +6,9 @@
 
 # i.e., don't expect it to be up to date.
 ==================================================
+
+* add before_create :state_fu! for active_record
+
 * meta
 ** gem release / script
 ** tickets
