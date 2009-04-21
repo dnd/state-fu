@@ -68,9 +68,9 @@ describe StateFu::Binding do
     end
   end
 
-  describe "initialization via @obj.binding()" do
+  describe "initialization via @obj.state_fu()" do
     it "should create a new StateFu::Binding with default method-name & field_name" do
-      b = @obj.binding()
+      b = @obj.state_fu()
       b.should be_kind_of( StateFu::Binding )
       b.machine.should == Klass.machine
       b.object.should == @obj
@@ -104,7 +104,7 @@ describe StateFu::Binding do
         @machine.initial_state = :fetus
         @machine.initial_state.name.should == :fetus
         obj = Klass.new
-        obj.binding.current_state.should == @machine.initial_state
+        obj.state_fu.current_state.should == @machine.initial_state
       end
     end
 
