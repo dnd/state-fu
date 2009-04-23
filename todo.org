@@ -7,7 +7,17 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 
-* add before_create :state_fu! for active_record
+* next_state & next_state! method should be able to take a hash or proc filter
+** hash filter based on .options
+** proc filter replaces block; arbitrary filtering
+** this allows you to eg define :auto => true on some states and filter just those
+
+* singleton machines & deep copy / clone
+** machines for an instance of a class
+** new hash in FuSpace
+** method bind_clone which binds a deep copy of a machine ( eg for customization on subclasses )
+** method customize_machine! which clones & replaces class binding with instance binding
+** method custom_machine is analogous to .machine but stores ref in singleton land
 
 * meta
 ** gem release / script
@@ -111,3 +121,6 @@
 ** Cucumber
 ** benchmark / tune for performance
 *** Cuc. for user-facing API; Rspec for internals?
+
+==
+* DONE add before_create :state_fu! for active_record
