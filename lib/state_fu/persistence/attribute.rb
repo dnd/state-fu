@@ -14,7 +14,7 @@ module StateFu
         end
 
         # ensure setter exists
-        unless Klass.instance_methods.include?( "#{field_name}=" )
+        unless klass.instance_methods.include?( "#{field_name}=" )
           Logger.info "Adding attr_writer :#{field_name}= for #{klass}"
           _field_name = field_name
           klass.class_eval do
