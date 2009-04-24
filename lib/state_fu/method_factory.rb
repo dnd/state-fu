@@ -10,6 +10,31 @@ module StateFu
       define_event_methods_on( @binding.object )
     end
 
+    # ensure the methods are available before calling state_fu
+    def self.prepare_class( klass )
+      return if ( klass.instance_methods + klass.private_methods + klass.protected_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
+      alias_method :method_missing_before_state_fu, :method_missing
+      klass.class_eval do
+        def method_missing( method_name, *args, &block )
+          args.unshift method_name
+          if @state_fu_initialized
+            if active_record_class?( klass )
+              send( *args )
+            else
+              method_missing_before_state_fu( *args, &block )
+            end
+          else
+            state_fu!
+            if respond_to?(method_name)
+              send( *args, &block )
+            else
+              method_missing_before_state_fu( *args, &block )
+            end
+          end
+        end # method_missing
+      end # class_eval
+    end # prepare_class
+
     def define_method_on_metaclass( object, method_name, &block )
       return false if object.respond_to?( method_name )
       metaclass   = class << object; self; end
