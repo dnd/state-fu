@@ -10,6 +10,7 @@ begin
     def self.up
       create_table :example_records do |t|
         t.string :name,           :null => false
+        t.text   :description
         t.string :state_fu_field, :null => false
         t.string :status
         t.timestamps
@@ -62,6 +63,13 @@ begin
         end
         @ex = ExampleRecord.new( :name => "exemplar" )
       end # before
+
+      it "should not clobber activerecord accessors" do
+        lambda { @ex.description }.should_not raise_error()
+        @ex.description.should be_nil
+        @ex.description= 'foo'
+        @ex.description.should == 'foo'
+      end
 
       it "should have an active_record string column 'state_fu_field' " do
         col = ExampleRecord.columns.detect {|c| c.name == "state_fu_field" }
