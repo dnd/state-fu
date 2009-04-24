@@ -3,7 +3,7 @@ module StateFu
     DEFAULT_FIELD_NAME_SUFFIX = '_field'
 
     def self.prepare_class( klass )
-      return if klass.instance_methods.include?( :method_missing_before_state_fu )
+      return if ( klass.instance_methods + klass.private_methods + klass.protected_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
       alias_method :method_missing_before_state_fu, :method_missing
       klass.class_eval do
         def method_missing( method_name, *args, &block )
