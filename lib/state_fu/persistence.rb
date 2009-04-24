@@ -7,12 +7,16 @@ module StateFu
       alias_method :method_missing_before_state_fu, :method_missing
       klass.class_eval do
         def method_missing( method_name, *args, &block )
-          state_fu!
           args.unshift method_name
-          begin
-            send( *args, &block )
-          rescue NoMethodError => e
+          if @state_fu_initialized
             method_missing_before_state_fu( *args, &block )
+          else
+            state_fu!
+            if method(method_name)
+              send( *args, &block )
+            else
+              method_missing_before_state_fu( *args, &block )
+            end
           end
         end # method_missing
       end # class_eval
