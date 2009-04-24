@@ -8,6 +8,22 @@ module StateFu
 
       attr_reader :binding, :field_name, :current_state
 
+      def self.prepare_class( klass )
+        unless klass.instance_methods.include?( :method_missing_before_state_fu )
+          alias_method :method_missing_before_state_fu, :method_missing
+          klass.class_eval do
+            def method_missing( method_name, *args, &block )
+              state_fu!
+              begin
+                send( method_name, *args, &block )
+              rescue NoMethodError => e
+                method_missing_before_state_fu( method_name, *args, &block )
+              end
+            end
+          end
+        end
+      end
+
       def self.prepare_field( klass, field_name )
         raise NotImplementedError # abstract method
       end

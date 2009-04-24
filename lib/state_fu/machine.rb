@@ -91,6 +91,10 @@ module StateFu
           end
         end
       end
+
+      # method_missing to catch NoMethodError for event methods, etc
+      StateFu::Persistence.prepare_class( klass )
+
       # prepare the persistence field
       StateFu::Persistence.prepare_field( klass, field_name )
       true

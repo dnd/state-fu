@@ -2,6 +2,23 @@ module StateFu
   module Persistence
     DEFAULT_FIELD_NAME_SUFFIX = '_field'
 
+    def self.prepare_class( klass )
+      return if klass.instance_methods.include?( :method_missing_before_state_fu )
+      alias_method :method_missing_before_state_fu, :method_missing
+      klass.class_eval do
+        def method_missing( method_name, *args, &block )
+          state_fu!
+          args.unshift method_name
+          begin
+            send( *args, &block )
+          rescue NoMethodError => e
+            method_missing_before_state_fu( *args, &block )
+          end
+        end # method_missing
+      end # class_eval
+    end # prepare_class
+
+
     def self.active_record_column?( klass, field_name )
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
@@ -15,9 +32,6 @@ module StateFu
       else
         self::Attribute.new( binding, field_name )
       end
-      # ensure state field is set up (in case we created this binding
-      # manually, instead of via Machine.bind!)
-      # prepare_field( binding.object.class, field_name )
     end
 
     def self.prepare_field( klass, field_name )

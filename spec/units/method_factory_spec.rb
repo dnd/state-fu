@@ -10,6 +10,60 @@ describe StateFu::MethodFactory do
       make_pristine_class('Klass')
     end
 
+    describe "defined on the stateful instance / object before state_fu has been called" do
+
+      before do
+          @machine = Klass.machine do
+            event( :simple_event,
+                   :from => { [:a, :b] => :targ } )
+
+          state( :a ) { cycle }
+          end # machine
+          @obj     = Klass.new
+      end
+
+      describe "when there is a method_missing already defined for the class" do
+        it "should still call the pre-defined method_missing"
+      end
+
+      describe "event creation methods" do
+        it "should call method_missing" do
+          mock( @obj ).method_missing( :simple_event! )
+          @obj.simple_event!
+        end
+
+        it "should call state_fu!" do
+          mock.proxy( StateFu::Binding ).new( Klass.machine, @obj, :state_fu )
+          @obj.simple_event!
+          # @obj.should_have_received( :state_fu! )
+        end
+
+        it "should not raise a NoMethodError" do
+          lambda { @obj.simple_event! }.should_not raise_error( NoMethodError )
+        end
+
+        it "should call binding.fire!( :simple_event ... ) with no args" do
+          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
+          t = @obj.simple_event!
+        end
+
+        it "should call binding.fire!( :simple_event ... ) with any specified args" do
+          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event), :a, :b, {:c => "d"} )
+          t = @obj.simple_event!( :a, :b, :c => "d" )
+        end
+
+        it "should fire the transition" do
+          @obj.send(:state_fu_field).should == nil
+          t = @obj.simple_event!
+          t.should be_accepted
+          @obj.send(:state_fu_field).should == 'targ'
+        end
+
+        it "should take a block and use it as per usual"
+      end
+    end
+
+
     describe "defined on the binding" do
       describe "when the event is simple (has only one possible target)" do
         before do
