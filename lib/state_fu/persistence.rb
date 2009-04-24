@@ -12,7 +12,7 @@ module StateFu
             method_missing_before_state_fu( *args, &block )
           else
             state_fu!
-            if method(method_name)
+            if respond_to?(method_name)
               send( *args, &block )
             else
               method_missing_before_state_fu( *args, &block )
