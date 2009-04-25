@@ -101,7 +101,6 @@ describe "Document" do
       it "should be private in ruby 1.8 and 1.9"
 
       it "should be defined before state_fu is called" do
-        lambda { @doc.status_field }.should_not raise_error()
         @doc.status_field.should == 'draft'
       end
 

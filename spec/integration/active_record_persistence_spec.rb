@@ -11,6 +11,7 @@ describe "an ActiveRecord model with StateFu included:" do
         create_table :example_records do |t|
           t.string :name,           :null => false
           t.string :state_fu_field, :null => false
+          t.string :description
           t.string :status
           t.timestamps
         end
@@ -68,6 +69,18 @@ describe "an ActiveRecord model with StateFu included:" do
 
       it "should return false for ExampleRecord, :not_a_column" do
         StateFu::Persistence.active_record_column?( ExampleRecord, :not_a_column ).should == false
+      end
+      it "should not clobber activerecord accessors" do
+        @ex.noodle! rescue nil
+        #        lambda { @ex.description }.should_not raise_error()
+        @ex.description.should be_nil
+        @ex.description= 'foo'
+        @ex.description.should == 'foo'
+      end
+
+      it "should have an active_record string column 'state_fu_field' " do
+        col = ExampleRecord.columns.detect {|c| c.name == "state_fu_field" }
+        col.type.should == :string
       end
     end
 

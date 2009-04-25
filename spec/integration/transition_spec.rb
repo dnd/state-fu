@@ -532,7 +532,7 @@ describe StateFu::Transition do
       end
 
       it "should update the object's state after state:entering and before event:after" do
-        @binding  = @obj.binding
+        @binding  = @obj.state_fu
         mock( @obj ).entering_b( @t ) { @binding.state.name.should == :a }
         mock( @obj ).after_go(@t)     { @binding.state.name.should == :b }
         mock( @obj ).accepted_b(@t)   { @binding.state.name.should == :b }
