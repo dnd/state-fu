@@ -175,11 +175,16 @@ module StateFu
     # TODO - not convinced about the method name / aliases - but next
     # is reserved :/
     def next_transition( *args, &block )
-      if events.select(&:simple?).length == 1
-        transition( events.select(&:simple?)[0], *args, &block )
+      next_event_candidates = valid_transitions.select {|e, s| s.length == 1 }.map(&:first)
+      if next_event_candidates.length == 1
+        transition( next_event_candidates[0], *args, &block )
       end
     end
-    alias_method :next_state, :next_transition
+
+    def next_state
+      next_transition && next_transition.target
+    end
+
     alias_method :next_event, :next_transition
 
     # if there is a next_transition, create, fire & return it

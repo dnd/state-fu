@@ -37,5 +37,9 @@ module StateFu
       end.empty?
     end
 
+    # allows @obj.state_fu.state === :new
+    def === other
+      self.to_sym === other.to_sym
+    end
   end
 end
