@@ -9,17 +9,47 @@ require 'spec'
 require 'state-fu'
 require File.join( thisdir, '..' , 'lib', 'no_stdout' )
 
-# module StateFuMatchers
-#   class HaveStatesMatcher
-#   end
-# end
-
 Spec::Runner.configure do |config|
   config.mock_with :rr
-  # config.mock_with RR::Adapters::Rspec
 end
 
 module MySpecHelper
+  include NoStdout
+
+  def prepare_active_record( options={}, &migration )
+    begin
+      require 'active_record'
+    rescue MissingSourceFile => e
+      STDERR.puts "failed to load active_record - skipping specifications!"
+      return false
+    end
+
+    options.symbolize_keys!
+    options.assert_valid_keys( :db_config, :migration_name, :hidden )
+
+    # connect ActiveRecord
+    db_config = options.delete(:db_config) || {
+      :adapter  => 'sqlite3',
+      :database => ':memory:'
+    }
+    ActiveRecord::Base.establish_connection( db_config )
+
+    return unless block_given?
+
+    # prepare the migration
+    migration_class_name =
+      options.delete(:migration_name) || 'BeforeSpecMigration'
+    make_pristine_class( migration_class_name, ActiveRecord::Migration )
+    migration_class = migration_class_name.constantize
+    migration_class.class_eval( &migration )
+
+    # run the migration without spewing crap everywhere
+    if options.delete(:hidden) != false
+      no_stdout { migration_class.migrate( :up ) }
+    else
+      migration_class.migrate( :up )
+    end
+  end
 
   def make_pristine_class(class_name, superklass=Object, reset_first = false)
     reset! if reset_first

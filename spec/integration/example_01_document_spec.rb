@@ -1,9 +1,24 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
+require 'activerecord'
+
 describe "Document" do
+  include MySpecHelper
   before do
-    class Document
+    reset!
+    prepare_active_record do
+      def self.up
+        create_table :documents do |t|
+          t.string :name
+          t.string :author
+          t.string :status_field
+        end
+      end
+    end
+    make_pristine_class('Document', ActiveRecord::Base )
+    Document.class_eval do
       include StateFu
+
       attr_accessor :author
 
       def update_rss
@@ -23,11 +38,15 @@ describe "Document" do
         event :delete, :from => :ALL, :to => :deleted do
           execute :destroy
         end
+
+        events do
+          after :save!
+        end
       end
     end
 
     @doc = Document.new
-      @doc.status
+    # @doc.status
     end
 
   describe "a new document with no attributes" do
