@@ -34,7 +34,7 @@ describe "an ActiveRecord model with StateFu included:" do
       ExampleRecord.class_eval do
         machine do
           state :initial do
-            event :change, :to => :final
+            event( :change, :to => :final ) { after :save! }
           end
         end
       end
@@ -44,6 +44,17 @@ describe "an ActiveRecord model with StateFu included:" do
     it "should have an active_record string column 'state_fu_field' " do
       col = ExampleRecord.columns.detect {|c| c.name == "state_fu_field" }
       col.type.should == :string
+    end
+
+    describe "calling :save! via an event's after hook" do
+      it "should save the record with the new state persisted via the DB" do
+        @ex.change!
+        @ex.state_fu.name.should == :final
+        @ex.state_fu_field.should == 'final'
+        @ex.reload
+        @ex.state_fu_field.should == 'final'
+        @ex.state_fu.name.should == :final
+      end
     end
 
     describe "StateFu::Persistence.active_record_column?" do

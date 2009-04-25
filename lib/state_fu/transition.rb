@@ -139,9 +139,10 @@ module StateFu
         end
         # transition complete
         @binding.persister.current_state = @target
+        @accepted                        = true
+
         @current_hook_slot               = nil
         @current_hook                    = nil
-        @accepted                        = true
       rescue TransitionHalted => e
         @errors << e
       end
