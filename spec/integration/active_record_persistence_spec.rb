@@ -1,26 +1,5 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-##
-##
-##
-#begin
-  #require 'active_record'
-  #
-  #class CreateTables < ActiveRecord::Migration
-  #  def self.up
-  #    create_table :example_records do |t|
-  #      t.string :name,           :null => false
-  #      t.string :state_fu_field, :null => false
-  #      t.string :status
-  #      t.timestamps
-  #    end
-  #  end
-  #
-  #  def self.down
-  #    raise ActiveRecord::IrreversibleMigration.new()
-  #  end
-  #end
-
 describe "an ActiveRecord model with StateFu included:" do
 
   include MySpecHelper
@@ -184,7 +163,3 @@ describe "an ActiveRecord model with StateFu included:" do
     end # second machine
   end   # with before_create filter
 end     # default machine
-
-#rescue MissingSourceFile => e
-#  STDERR.puts "ERROR - Cannot test ActiveRecord persistence (active_record and sqlite3 required): #{e}"
-#end

@@ -20,7 +20,7 @@ module MySpecHelper
     begin
       require 'active_record'
     rescue MissingSourceFile => e
-      STDERR.puts "failed to load active_record - skipping specifications!"
+      pending "skipping specifications due to load error: #{e}"
       return false
     end
 
