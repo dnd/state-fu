@@ -59,6 +59,7 @@ module StateFu
 
     # the subset of events() whose requirements for firing are met
     def valid_events
+      return nil unless current_state
       return [] unless current_state.exitable_by?( self )
       events.select {|e| e.fireable_by?( self ) }.extend EventArray
     end
@@ -90,6 +91,7 @@ module StateFu
     # requirements are met
     def valid_transitions
       h = {}
+      return nil if valid_events.nil?
       valid_events.each do |e|
         h[e] = e.targets.select do |s|
           s.enterable_by?( self )
@@ -175,6 +177,7 @@ module StateFu
     # TODO - not convinced about the method name / aliases - but next
     # is reserved :/
     def next_transition( *args, &block )
+      return nil if valid_transitions.nil?
       next_event_candidates = valid_transitions.select {|e, s| s.length == 1 }.map(&:first)
       if next_event_candidates.length == 1
         transition( next_event_candidates[0], *args, &block )

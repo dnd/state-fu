@@ -85,7 +85,7 @@ describe StateFu::Transition do
         end
 
         it "should have an empty set of hooks" do
-          @t.hooks.should == []
+          @t.hooks.map(&:last).flatten.should == []
         end
 
         it "should change the field when persistence is via an attribute" do
@@ -500,14 +500,15 @@ describe StateFu::Transition do
 
       it "should have all defined hooks in correct order of execution" do
         t = @obj.state_fu.transition( :go )
-        t.hooks.should be_kind_of( Array )
-        t.hooks.should_not be_empty
-        t.hooks.should == [ :before_go,
-                            :exiting_a,
-                            :execute_go,
-                            :entering_b,
-                            :after_go,
-                            :accepted_b ]
+        hooks = t.hooks.map(&:last).flatten
+        hooks.should be_kind_of( Array )
+        hooks.should_not be_empty
+        hooks.should == [ :before_go,
+                          :exiting_a,
+                          :execute_go,
+                          :entering_b,
+                          :after_go,
+                          :accepted_b ]
       end
     end # a transition ..
 
