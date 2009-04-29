@@ -529,7 +529,21 @@ describe StateFu::Transition do
           :accepted_b ].each do |method_name|
           set_method_arity( @obj, method_name, 1 )
         end
+      end
 
+      it "should update the object's state after state:entering and before event:after" do
+        @binding  = @obj.state_fu
+        mock( @obj ).entering_b( @t ) { @binding.state.name.should == :a }
+        mock( @obj ).after_go(@t)     { @binding.state.name.should == :b }
+        mock( @obj ).accepted_b(@t)   { @binding.state.name.should == :b }
+        @t.fire!
+      end
+
+      it "should be accepted after state:entering and before event:after" do
+        mock( @obj ).entering_b( @t ) { @t.should_not be_accepted }
+        mock( @obj ).after_go(@t)     { @t.should be_accepted }
+        mock( @obj ).accepted_b(@t)   { @t.should be_accepted }
+        @t.fire!
       end
 
       it "should call the method for each hook on @obj in order, with the transition" do
@@ -541,13 +555,6 @@ describe StateFu::Transition do
         mock( @obj ).accepted_b(@t) { @called << :accepted_b }
 
         @t.fire!()
-        @called.should == [ :before_go,
-                            :exiting_a,
-                            :execute_go,
-                            :entering_b,
-                            :after_go,
-                            :accepted_b ]
-
       end
 
       describe "adding an anonymous hook for event.hooks[:execute]" do
