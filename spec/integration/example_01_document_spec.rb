@@ -82,7 +82,7 @@ describe "Document" do
       it "should be private in ruby 1.8 and 1.9"
 
       it "should be defined before state_fu is called" do
-        @doc.status_field.should == 'draft'
+        @doc.send( :status_field ).should == 'draft'
       end
 
       it "should have an initial value of 'draft'" do

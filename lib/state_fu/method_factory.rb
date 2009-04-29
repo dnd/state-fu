@@ -13,22 +13,18 @@ module StateFu
     # ensure the methods are available before calling state_fu
     def self.prepare_class( klass )
       return if ( klass.instance_methods + klass.private_methods + klass.protected_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
-      alias_method :method_missing_before_state_fu, :method_missing
       klass.class_eval do
+        alias_method :method_missing_before_state_fu, :method_missing
+
         def method_missing( method_name, *args, &block )
-          args.unshift method_name
           if @state_fu_initialized
-            if active_record_class?( klass )
-              send( *args )
-            else
-              method_missing_before_state_fu( *args, &block )
-            end
+            method_missing_before_state_fu( method_name, *args, &block )
           else
             state_fu!
-            if respond_to?(method_name)
-              send( *args, &block )
+            if respond_to?( method_name )
+              send( method_name, *args, &block )
             else
-              method_missing_before_state_fu( *args, &block )
+              method_missing_before_state_fu( method_name, *args, &block )
             end
           end
         end # method_missing
