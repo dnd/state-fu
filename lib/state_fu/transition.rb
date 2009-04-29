@@ -103,9 +103,9 @@ module StateFu
     end
 
     def hooks()
-      StateFu::Hooks::ALL_HOOKS.map do |arr|
-        send(arr[0]).hooks[arr[1]]
-      end.flatten
+      StateFu::Hooks::ALL_HOOKS.map do |owner, slot|
+        [ [owner, slot], send( owner ).hooks[ slot ] ]
+      end
     end
 
     def current_state
@@ -129,19 +129,23 @@ module StateFu
       check_requirements!
       @fired = true
       begin
-        StateFu::Hooks::ALL_HOOKS.each do |arr|
-          @current_hook_slot = arr
-          hooks = hooks_for( *arr )
+        StateFu::Hooks::ALL_HOOKS.map do |owner, slot|
+          [ [owner, slot], send( owner ).hooks[ slot ] ]
+        end.each do |address, hooks|
+          owner,slot = *address
           hooks.each do |hook|
-            @current_hook = hook
+            @current_hook_slot = address
+            @current_hook      = hook
             run_hook( hook )
+          end
+          if slot == :entry
+            @accepted                        = true
+            @binding.persister.current_state = @target
           end
         end
         # transition complete
-        @binding.persister.current_state = @target
         @current_hook_slot               = nil
         @current_hook                    = nil
-        @accepted                        = true
       rescue TransitionHalted => e
         @errors << e
       end

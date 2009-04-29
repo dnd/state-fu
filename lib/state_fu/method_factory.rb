@@ -1,9 +1,9 @@
 module StateFu
   class MethodFactory
 
-    def initialize( binding )
-      @binding = binding
-      define_event_methods_on( binding )
+    def initialize( _binding )
+      @binding = _binding
+      define_event_methods_on( _binding )
     end
 
     def install!

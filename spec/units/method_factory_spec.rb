@@ -297,6 +297,12 @@ describe StateFu::MethodFactory do
             @obj     = Klass.new
             @binding = @obj.state_fu
           end
+
+          describe "current_state" do
+            it "should be nil" do
+              @binding.current_state.should == nil
+            end 
+          end   
           describe "cycle methods:" do
             describe "cycle" do
               it "should return nil" do

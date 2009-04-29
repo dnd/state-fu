@@ -5,7 +5,6 @@ require "date"
 require "fileutils"
 require "rubygems"
 # require "rake/gempackagetask"
-
 require "./lib/state_fu/version.rb"
 
 # Cucumber::Rake::Task.new(:features) do |t|
@@ -41,6 +40,11 @@ end
 
 namespace :gem do
   desc "Build and install as a RubyGem"
+  task :package do
+    sh %{gem build pkg/state-fu-#{StateFu::VERSION}*}
+  end
+
+  desc "Build and install as a RubyGem"
   task :install => :package do
     sh %{#{'sudo' unless Rakefile.windows?} gem install --local pkg/state-fu-#{StateFu::VERSION}*}
   end
@@ -51,9 +55,10 @@ namespace :gem do
       state_fu_gemspec.version = "#{StateFu::VERSION}.#{Time.now.strftime("%Y%m%d%H%M")}"
     end
 
-    File.open("state-fu.gemspec", "w") do |f|
-      f.puts(state_fu_gemspec.to_ruby)
-    end
+    #File.open("state-fu.gemspec", "w") do |f|
+    #  f.puts(state_fu_gemspec.to_ruby)
+    #end
+
   end
 end
 
