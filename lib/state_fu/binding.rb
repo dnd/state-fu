@@ -115,9 +115,10 @@ module StateFu
         event  = event_or_array
         target = nil
       when Array
-        event, target = event_or_array
+        event, target = *event_or_array
       end
-      raise ArgumentError.new( event_or_array.inspect ) unless
+      x = event_or_array.is_a?( Array ) ? event_or_array.map(&:class) : event_or_array
+      raise ArgumentError.new( x.inspect ) unless
         [StateFu::Event, Symbol  ].include?( event.class  ) &&
         [StateFu::State, Symbol, NilClass].include?( target.class )
       [event, target]
@@ -178,9 +179,12 @@ module StateFu
     # is reserved :/
     def next_transition( *args, &block )
       return nil if valid_transitions.nil?
-      next_event_candidates = valid_transitions.select {|e, s| s.length == 1 }.map(&:first)
-      if next_event_candidates.length == 1
-        transition( next_event_candidates[0], *args, &block )
+      next_transition_candidates = valid_transitions.select {|e, s| s.length == 1 }
+      if next_transition_candidates.length == 1
+        nt   = next_transition_candidates.first
+        evt  = nt[0]
+        targ = nt[1][0]
+        return transition( [ evt, targ], *args, &block )
       end
     end
 
@@ -197,10 +201,10 @@ module StateFu
         t.fire!
         t
       else
-        n = events.select(&:simple?).length
+        n = valid_transitions && valid_transitions.length
         raise InvalidTransition.
-          new( self, current_state, events.select(&:simple?),
-               "there are #{n} candidate next events, need exactly 1")
+          new( self, current_state, valid_transitions,
+               "there are #{n} candidate transitions, need exactly 1")
       end
     end
     alias_method :next_state!, :next!

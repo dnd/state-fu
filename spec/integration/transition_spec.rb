@@ -962,4 +962,99 @@ describe StateFu::Transition do
 
   end # args with fire!
 
+  describe "next_transition" do
+    describe "when there are multiple events but only one is fireable?" do
+      before do
+        reset!
+        make_pristine_class("Klass")
+        @machine = Klass.machine do
+          initial_state :alive do
+            event :impossibility do
+              to :afterlife
+              requires :truth_of_patent_falsehoods? do
+                false
+              end
+            end
+
+            event :inevitability do
+              to :plain_old_dead
+            end
+          end
+        end
+        @obj     = Klass.new()
+        @binding = @obj.state_fu
+        @binding.events.length.should == 2
+        @machine.events[:impossibility].fireable_by?( @binding ).should == false
+        @machine.events[:inevitability].fireable_by?( @binding ).should == true
+      end
+
+      describe "when the fireable? event has only one target" do
+        it "should return a transition for the fireable event & its target" do
+          @machine.events[:inevitability].targets.length.should == 1
+          t = @binding.next_transition
+          t.should be_kind_of( StateFu::Transition )
+          t.from.should  == @binding.current_state
+          t.to.should    == @machine.states[:plain_old_dead]
+          t.event.should == @machine.events[:inevitability]
+        end
+      end
+
+      describe "when the fireable? event has multiple targets but only one can be entered" do
+        before do
+          @machine.lathe do
+            state :cremated
+
+            state :buried do
+              requires :plot_at_cemetary? do
+                false
+              end
+            end
+
+            event :inevitability do
+              to :cremated, :buried
+            end
+          end
+          @obj     = Klass.new()
+          @binding = @obj.state_fu
+          @machine.events[:inevitability].fireable_by?( @binding ).should == true
+          @machine.states[:cremated].enterable_by?( @binding ).should == true
+          @machine.states[:buried].enterable_by?( @binding ).should == false
+          @binding.valid_events.should == [@machine.events[:inevitability]]
+          @binding.valid_transitions.values.flatten.should == [@machine.states[:cremated]]
+        end # before
+
+        it "should return a transition for the fireable event & the enterable target" do
+          t = @binding.next_transition
+          t.should be_kind_of( StateFu::Transition )
+          t.from.should  == @binding.current_state
+          t.to.should    == @machine.states[:cremated]
+          t.event.should == @machine.events[:inevitability]
+        end
+      end
+
+      describe "when the fireable? event has multiple targets and more than one can be entered" do
+        before do
+          @machine.lathe do
+            event :inevitability do
+              to :cremated, :buried
+            end
+          end
+          @machine.states[:buried].enterable_by?( @binding ).should == true
+          @machine.states[:cremated].enterable_by?( @binding ).should == true
+          @obj     = Klass.new()
+          @binding = @obj.state_fu
+        end
+
+        it "should not return a transition" do
+          t = @binding.next_transition
+          t.should be_nil
+        end
+
+        it "should raise an InvalidTransition if next! is called" do
+          lambda { @binding.next! }.should raise_error( StateFu::InvalidTransition )
+        end
+      end
+
+    end
+  end
 end

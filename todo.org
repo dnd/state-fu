@@ -6,15 +6,15 @@
 
 # i.e., don't expect it to be up to date.
 ==================================================
-* method missing for stateful classes
-** state_fu! then super
-
 * test / spec helpers for testing machines
+** helpers for developers' specs
 
 * next_state & next_state! method should be able to take a hash or proc filter
 ** hash filter based on .options
 ** proc filter replaces block; arbitrary filtering
 ** this allows you to eg define :auto => true on some states and filter just those
+
+* next_state behaviour needs better documentation
 
 * singleton machines & deep copy / clone
 ** machines for an instance of a class
