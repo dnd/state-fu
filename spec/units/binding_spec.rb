@@ -112,6 +112,34 @@ describe StateFu::Binding do
 
   describe "Instance methods" do
     before do
+      describe "fireable?" do
+        describe "when called with arguments which would return a valid transition from .transition()" do
+          it "should return true"
+        end
+
+        describe "when called with arguments which would raise an InvalidTransition from .transition()" do
+          before do
+            reset!
+            make_pristine_class("Klass")
+            @machine = Klass.machine do
+              state :snoo
+              state :wizz do
+                event :ping, :to => :pong
+              end
+            end
+            @obj = Klass.new
+          end
+
+          it "should return nil" do
+            @obj.state_fu.name.should == :snoo
+            lambda { @obj.state_fu.transition(:ping) }.should raise_error(StateFu::InvalidTransition)
+            lambda { @obj.state_fu.fireable?(:ping) }.should_not raise_error()
+            @obj.state_fu.fireable?(:ping).should == nil
+          end
+        end
+
+      end
+
 
     end
 
