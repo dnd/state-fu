@@ -200,7 +200,8 @@ describe StateFu::MethodFactory do
 
           it "should require a valid state name" do
             lambda { @binding.complex_event?(:nonexistent) }.should raise_error( ArgumentError )
-            lambda { @binding.complex_event?(:orphan) }.should      raise_error( StateFu::InvalidTransition )
+            lambda { @binding.complex_event?(:orphan) }.should_not  raise_error()
+            @binding.complex_event?(:orphan).should == nil
             lambda { @binding.complex_event?(:x) }.should_not       raise_error
           end
 
@@ -301,8 +302,8 @@ describe StateFu::MethodFactory do
           describe "current_state" do
             it "should be nil" do
               @binding.current_state.should == nil
-            end 
-          end   
+            end
+          end
           describe "cycle methods:" do
             describe "cycle" do
               it "should return nil" do

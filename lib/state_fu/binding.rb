@@ -127,8 +127,12 @@ module StateFu
     # check that the event and target are "valid" (all requirements met)
     def fireable?( event_or_array )
       event, target = parse_destination( event_or_array )
-      t = transition( [event, target] )
-      !! t.requirements_met?
+      begin
+        t = transition( [event, target] )
+        !! t.requirements_met?
+      rescue InvalidTransition => e
+        nil
+      end
     end
     alias_method :event?,         :fireable?
     alias_method :trigger?,       :fireable?
