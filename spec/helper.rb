@@ -4,11 +4,11 @@ $: << thisdir << "#{thisdir}/../lib"
 
 require 'rubygems'
 
-%w/ rr rspec /.each do |lib|
+{"rr" => "rr", "spec" => "rspec" }.each do |lib, gem_name|
   begin
     require lib
   rescue LoadError => e
-    STDERR.puts "The '#{lib}' gem is required to run StateFu's specs. Please install it by running (as root):\ngem install #{lib}\n\n"
+    STDERR.puts "The '#{gem_name}' gem is required to run StateFu's specs. Please install it by running (as root):\ngem install #{gem_name}\n\n"
     exit 1;
   end
 end
