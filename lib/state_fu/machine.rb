@@ -32,6 +32,10 @@ module StateFu
       @options              = options
     end
 
+    def deep_clone()
+      m = Machine.new()
+    end
+
     # merge the commands in &block with the existing machine; returns
     # a lathe for the machine.
     def apply!( &block )
