@@ -1,11 +1,18 @@
 #!/usr/bin/env ruby
 thisdir = File.expand_path(File.dirname(__FILE__))
 $: << thisdir << "#{thisdir}/../lib"
-# $: << thisdir << "#{thisdir}/vendor"
 
 require 'rubygems'
-require 'rr'
-require 'spec'
+
+%w/ rr rspec /.each do |lib|
+  begin
+    require lib
+  rescue LoadError => e
+    STDERR.puts "The '#{lib}' gem is required to run StateFu's specs. Please install it by running (as root):\ngem install #{lib}\n\n"
+    exit 1;
+  end
+end
+
 require 'state-fu'
 require File.join( thisdir, '..' , 'lib', 'no_stdout' )
 
