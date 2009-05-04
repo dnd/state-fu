@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 thisdir = File.expand_path(File.dirname(__FILE__))
-$: << thisdir << "#{thisdir}/../lib"
+
+# ensure we require state-fu from lib, not gems
+$LOAD_PATH.unshift( "#{thisdir}/../lib" )
+require 'state-fu'
+require 'no_stdout'
 
 require 'rubygems'
 
@@ -13,8 +17,7 @@ require 'rubygems'
   end
 end
 
-require 'state-fu'
-require File.join( thisdir, '..' , 'lib', 'no_stdout' )
+# require 'state-fu'
 
 Spec::Runner.configure do |config|
   config.mock_with :rr

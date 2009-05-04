@@ -87,7 +87,6 @@ module StateFu
 end
 
 if __FILE__ == $0
-  # run rake stuff (specs / doc )
-  # load example_machine.rb
-  # drop into irb
+  # drop into irb?
 end
+

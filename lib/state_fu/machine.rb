@@ -2,7 +2,6 @@ module StateFu
   class Machine
     include Helper
 
-
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
@@ -21,22 +20,16 @@ module StateFu
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages, :name
+    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages
 
     def initialize( name, options={}, &block )
-      # TODO - @name isn't actually used anywhere yet except
-      # in deep_clone - remove it?
-      @name    = name
+      # TODO - name isn't actually used anywhere yet - remove from constructor
       @states  = [].extend( StateArray  )
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
       @named_procs          = {}
       @requirement_messages = {}
       @options              = options
-    end
-
-    def deep_clone()
-      m = Machine.new( name, options.dup )
     end
 
     # merge the commands in &block with the existing machine; returns
@@ -148,6 +141,15 @@ module StateFu
           self.states << state
         end
         state
+      end
+    end
+
+    def deep_copy()
+      # use Marshal as a poor man's x-ray photocopier
+      duplify = lambda { |o| Marshal.load Marshal.dump( o ) }
+      returning Machine.new( nil, duplify.call( options )) do |m|
+        @states.each { |s| m.states() << duplify.call(s) }
+        @events.each { |e| m.events() << duplify.call(e) }
       end
     end
 

@@ -20,29 +20,21 @@ describe "Copying / cloning a Machine" do
       @copy = @original.clone
     end
 
-    it "should update any event in the original when it's changed in the copy" do
+    it "should update a state or event in the original when it's changed in the copy" do
       @original.events[:goto_b].should == @copy.events[:goto_b]
       @copy.lathe do
-        event :goto_b do |e|
-          e.options[:wibble] = :updated
+        event( :goto_b, :wibble => :updated ) do
+          to :bee
+        end
+        state( :b, :picture => "Bee" ) do
         end
       end
       @copy.    events[:goto_b].options[:wibble].should == :updated
       @original.events[:goto_b].options[:wibble].should == :updated
+      @copy.    states[:b].options[:picture].should == 'Bee'
+      @original.states[:b].options[:picture].should == 'Bee'
     end
 
-    it "should update any state in the original when it's changed in the copy" do
-      @original.states[:a].should == @copy.states[:a]
-      @copy.lathe do
-        state :a do |s|
-          s.options[:wibble] = :updated
-        end
-      end
-      @copy.    states[:a].options[:wibble].should == :updated
-      @original.states[:a].options[:wibble].should == :updated
-    end
-
-    it "should update the original with any changes to options"
     it "should update the original with any changes to helpers"
     it "should update the original with any changes to named_procs"
     it "should update the original with any changes to requirement_messages"
@@ -58,34 +50,26 @@ describe "Copying / cloning a Machine" do
           event :goto_b, :to => :b
         end
       end
-      @copy = @original.deep_clone
+      @copy = @original.deep_copy()
     end
 
-    it "should NOT update any event in the original when it's changed in the copy" do
-      pending
-      @original.events[:goto_b].should == @copy.events[:goto_b]
+    it "should NOT update a state or event in the original when it's changed in the copy" do
+      @copy.states.map(&:name).should == @original.states.map(&:name)
+      @copy.events.map(&:name).should == @original.events.map(&:name)
+
       @copy.lathe do
-        event :goto_b do |e|
-          e.options[:wibble] = :updated
+        event( :goto_b, :wibble => :updated ) do
+          to :bee
+        end
+        state( :b, :picture => "Bee" ) do
         end
       end
       @copy.    events[:goto_b].options[:wibble].should == :updated
       @original.events[:goto_b].options[:wibble].should == nil
+      @copy.    states[:b].options[:picture].should == 'Bee'
+      @original.states[:b].options[:picture].should == nil
     end
 
-    it "should NOT update any state in the original when it's changed in the copy" do
-      pending
-      @original.states[:a].should == @copy.states[:a]
-      @copy.lathe do
-        state :a do |s|
-          s.options[:wibble] = :updated
-        end
-      end
-      @copy.    states[:a].options[:wibble].should == :updated
-      @original.states[:a].options[:wibble].should == nil
-    end
-
-    it "should NOT update the original with any changes to options"
     it "should NOT update the original with any changes to helpers"
     it "should NOT update the original with any changes to named_procs"
     it "should NOT update the original with any changes to requirement_messages"
