@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
@@ -37,7 +37,6 @@ Gem::Specification.new do |s|
     "lib/state_fu/sprocket.rb",
     "lib/state_fu/state.rb",
     "lib/state_fu/transition.rb",
-    "lib/state_fu/version.rb",
     "spec/helper.rb",
     "spec/integration/active_record_persistence_spec.rb",
     "spec/integration/class_accessor_spec.rb",
