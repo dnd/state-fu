@@ -144,14 +144,12 @@ module StateFu
       end
     end
 
-    def deep_copy()
-      # use Marshal as a poor man's x-ray photocopier
-      duplify = lambda { |o| Marshal.load Marshal.dump( o ) }
-      returning Machine.new( nil, duplify.call( options )) do |m|
-        @states.each { |s| m.states() << duplify.call(s) }
-        @events.each { |e| m.events() << duplify.call(e) }
-      end
+    # Marshal, the poor man's X-Ray photocopier.
+    # TODO: a version which will not break its teeth on procs
+    def deep_clone
+      Marshal::load(Marshal.dump(self))
     end
+    alias_method :deep_copy, :deep_clone
 
     def inspect
       "#<#{self.class} ##{__id__} states=#{state_names.inspect} events=#{event_names.inspect} options=#{options.inspect}>"
