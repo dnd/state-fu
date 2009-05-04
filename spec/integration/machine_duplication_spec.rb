@@ -62,6 +62,7 @@ describe "Copying / cloning a Machine" do
     end
 
     it "should NOT update any event in the original when it's changed in the copy" do
+      pending
       @original.events[:goto_b].should == @copy.events[:goto_b]
       @copy.lathe do
         event :goto_b do |e|
@@ -73,6 +74,7 @@ describe "Copying / cloning a Machine" do
     end
 
     it "should NOT update any state in the original when it's changed in the copy" do
+      pending
       @original.states[:a].should == @copy.states[:a]
       @copy.lathe do
         state :a do |s|

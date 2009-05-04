@@ -21,9 +21,12 @@ module StateFu
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages
+    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages, :name
 
     def initialize( name, options={}, &block )
+      # TODO - @name isn't actually used anywhere yet except
+      # in deep_clone - remove it?
+      @name    = name
       @states  = [].extend( StateArray  )
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
@@ -33,7 +36,7 @@ module StateFu
     end
 
     def deep_clone()
-      m = Machine.new()
+      m = Machine.new( name, options.dup )
     end
 
     # merge the commands in &block with the existing machine; returns
