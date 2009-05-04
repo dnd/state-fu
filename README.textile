@@ -146,28 +146,42 @@ exceptionally elegant API.
 
 h2. Getting started
 
-First up:
+You can either clone the repository in the usual fashion (eg to
+yourapp/vendor/plugins/state-fu), or use StateFu as a gem.
+
+To install as a gem:
+
+<pre>
+<code>
+gem install davidlee-state-fu -s http://gems.github.com
+</code>
+</pre>
+
+To require it in your ruby project:
+
+<pre>
+<code>
+require 'rubygems'
+require 'state-fu'
+</code>
+</pre>
+
+To install the dependencies for running specs:
 
 <pre>
 <code>
  sudo gem install rspec rr activesupport
- rake
+ rake             # run the specs
  rake spec:doc    # generate specdocs
- rake doc         # generate rdoc
- rake gem         # build the gem
- rake gem:install # install it
+ rake doc         # generate rdocs
+ rake build       # build the gem locally
+ rake install     # install it
 </code>
 </pre>
-And have a peek in the specs folder or rdoc for usage / documentation.
 
-Now you can simply:
-<code>
- require 'state-fu'
-</code>
-and
-<code>
- include StateFu
-</code> in any class you wish to make stateful.
+Now you can simply <code>include StateFu</code> in any class you wish to make stateful.
+
+The spec folder is currently the best source of documentation.
 
 If you have questions, feature request or ideas, please join the "google group":http://groups.google.com/group/state-fu
 
