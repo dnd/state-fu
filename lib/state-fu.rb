@@ -1,4 +1,3 @@
-
 #!/usr/bin/env ruby
 #
 # State-Fu
@@ -44,7 +43,7 @@
 #  my_doc = Document.new
 #
 #  my_doc.status                          # returns a StateFu::Binding, which lets us access the 'Fu
-#  my_doc.status_state     => 'draft'     # if this wasn't already a database column or attribute, an
+#  my_doc.status.state     => 'draft'     # if this wasn't already a database column or attribute, an
 #                                         # attribute has been created to keep track of the state
 #  my_doc.status.name      => :draft      # the name of the current_state (defaults to the first defined)
 #  my_doc.status.publish!                 # raised =>  StateFu::RequirementError: [:author]
@@ -55,6 +54,7 @@
 #  "new feed!"                            # aha - our event hook fires!
 #  my_doc.status.name      => :published  # and the state has been updated.
 
+require 'rubygems'
 require 'activesupport'
 
 require 'state_fu/core_ext'

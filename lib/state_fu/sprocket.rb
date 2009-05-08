@@ -22,6 +22,10 @@ module StateFu
       StateFu::Lathe.new( machine, self, options, &block )
     end
 
+    def deep_copy
+      raise NotImeplementedError # abstract
+    end
+
   end
 end
 
