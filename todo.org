@@ -152,4 +152,6 @@
 *** Cuc. for user-facing API; Rspec for internals?
 
 ==
+DONE
 * DONE add before_create :state_fu! for active_record
+* implement simple deep cloning of
