@@ -1,6 +1,30 @@
 # +STARTUP:hidestars
 # TODO / DEVELOPMENT NOTES
 
+    class Object
+      def dclone
+        case self
+          when Fixnum,Bignum,Float,NilClass,FalseClass,
+               TrueClass,Continuation
+            klone = self
+          when Hash
+            klone = self.clone
+            self.each{|k,v| klone[k] = v.dclone}
+          when Array
+            klone = self.clone
+            klone.clear
+            self.each{|v| klone << v.dclone}
+          else
+            klone = self.clone
+        end
+        klone.instance_variables.each {|v|
+          klone.instance_variable_set(v,
+            klone.instance_variable_get(v).dclone)
+        }
+        klone
+      end
+    end
+
 # Note: most of the value of this kind of list is in the act of
 # writing it.
 
