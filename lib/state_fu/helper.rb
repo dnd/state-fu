@@ -112,10 +112,39 @@ module StateFu
 
   end
 
+  module ModuleRefArray
+    def modules
+      self.map do |h|
+        case h
+        when String, Symbol
+          Object.const_get( h.to_s.classify )
+        when Module
+          h
+        else
+          raise ArgumentError.new( h.class.inspect )
+        end
+      end
+    end # modules
+
+    def inject_into( obj )
+      metaclass = class << obj; self; end
+      mods = self.modules()
+      metaclass.class_eval do
+        mods.each do |mod|
+          include( mod )
+        end
+      end
+    end
+  end
+
   # Array extender. Used by Machine to keep a list of helpers to mix into
   # context objects.
   module HelperArray
+    include ModuleRefArray
+  end
 
+  module ToolArray
+    include ModuleRefArray
   end
 
   # Extend an Array with this. It's a fairly compact implementation,

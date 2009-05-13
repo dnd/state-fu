@@ -8,6 +8,7 @@ describe StateFu::Event do
   include MySpecHelper
   before do
     @machine = Object.new
+    stub(@machine).tools() { [].extend( StateFu::ToolArray ) }
   end
 
   describe "Instance methods" do

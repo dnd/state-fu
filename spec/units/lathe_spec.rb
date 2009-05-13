@@ -10,6 +10,7 @@ describe StateFu::Lathe do
     @state   = Object.new()
     @event   = Object.new()
 
+    stub(@machine).tools() { [].extend( StateFu::ToolArray ) }
     @lathe = StateFu::Lathe.new( @machine )
     @states = [].extend StateFu::StateArray
     stub( @machine ).states() { @states }
@@ -469,7 +470,7 @@ describe StateFu::Lathe do
       end
 
     end
-  end
+  end # a child lathe for a state
 
   describe "a child lathe for an event" do
     before do
@@ -563,5 +564,6 @@ describe StateFu::Lathe do
 
     end  # requires
 
-  end # ?
+  end # a child lathe for an event
+
 end

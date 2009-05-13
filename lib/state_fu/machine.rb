@@ -20,13 +20,14 @@ module StateFu
     ## Instance Methods
     ##
 
-    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages
+    attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages, :tools
 
     def initialize( name, options={}, &block )
       # TODO - name isn't actually used anywhere yet - remove from constructor
       @states  = [].extend( StateArray  )
       @events  = [].extend( EventArray  )
       @helpers = [].extend( HelperArray )
+      @tools   = [].extend( ToolArray   )
       @named_procs          = {}
       @requirement_messages = {}
       @options              = options
@@ -40,27 +41,15 @@ module StateFu
     alias_method :lathe, :apply!
 
     def helper_modules
-      helpers.map do |h|
-        case h
-        when String, Symbol
-          Object.const_get( h.to_s.classify )
-        when Module
-          h
-        else
-          raise ArgumentError.new( h.class.inspect )
-        end
-      end
+      helpers.modules
     end
 
     def inject_helpers_into( obj )
-      metaclass = class << obj; self; end
+      helpers.inject_into( obj )
+    end
 
-      mods = helper_modules()
-      metaclass.class_eval do
-        mods.each do |mod|
-          include( mod )
-        end
-      end
+    def inject_tools_into( obj )
+      tools.inject_into( obj )
     end
 
     # the modules listed here will be mixed into Binding and
@@ -75,6 +64,11 @@ module StateFu
     # StateFu::Binding.
     def helper *modules_to_add
       modules_to_add.each { |mod| helpers << mod }
+    end
+
+    # same deal but for extending Lathe
+    def tool *modules_to_add
+      modules_to_add.each { |mod| tools << mod }
     end
 
     # make it so a class which has included StateFu has a binding to

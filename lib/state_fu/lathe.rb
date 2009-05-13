@@ -9,6 +9,10 @@ module StateFu
       @machine  = machine
       @sprocket = sprocket
       @options  = options.symbolize_keys!
+
+      # extend ourself with any previously defined tools
+      machine.tools.inject_into( self )
+
       if sprocket
         sprocket.apply!( options )
       end
@@ -36,6 +40,10 @@ module StateFu
     # is this the toplevel lathe for a machine?
     def master?
       !child?
+    end
+
+    def master_lathe
+      machine.lathe
     end
 
     # instantiate a child lathe and apply the given block
@@ -114,6 +122,13 @@ module StateFu
     # helpers are mixed into all binding / transition contexts
     def helper( *modules )
       machine.helper *modules
+    end
+
+    # helpers are mixed into all binding / transition contexts
+    def tool( *modules )
+      machine.tool *modules
+      # inject them into self for immediate use
+      modules.flatten.extend( ToolArray ).inject_into( self )
     end
 
     #
