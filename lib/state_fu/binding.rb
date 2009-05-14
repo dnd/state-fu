@@ -21,7 +21,7 @@ module StateFu
 
       # define event methods on self( binding ) and @object
       StateFu::MethodFactory.new( self ).install!
-
+      machine.helpers.inject_into( self )
       # StateFu::Persistence.prepare_field( @object.class, field_name )
     end
     alias_method :o,         :object
