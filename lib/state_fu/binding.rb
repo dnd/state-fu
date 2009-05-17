@@ -105,8 +105,11 @@ module StateFu
       event, target = parse_destination( event_or_array )
       StateFu::Transition.new( self, event, target, *args, &block )
     end
-    alias_method :fire,    :transition
-    alias_method :trigger, :transition
+    alias_method :fire,             :transition
+    alias_method :fire_event,       :transition
+    alias_method :trigger,          :transition
+    alias_method :trigger_event,    :transition
+    alias_method :begin_transition, :transition
 
     # sanitize args for fire! and fireable?
     def parse_destination( event_or_array )
@@ -134,11 +137,18 @@ module StateFu
         nil
       end
     end
-    alias_method :event?,         :fireable?
-    alias_method :trigger?,       :fireable?
-    alias_method :triggerable?,   :fireable?
-    alias_method :transition?,    :fireable?
-    alias_method :transitionable?,:fireable?
+    alias_method :event?,             :fireable?
+    alias_method :event_fireable?,    :fireable?
+    alias_method :can_fire?,          :fireable?
+    alias_method :can_fire_event?,    :fireable?
+    alias_method :trigger?,           :fireable?
+    alias_method :triggerable?,       :fireable?
+    alias_method :can_trigger?,       :fireable?
+    alias_method :can_trigger_event?, :fireable?
+    alias_method :event_triggerable?, :fireable?
+    alias_method :transition?,        :fireable?
+    alias_method :can_transition?,    :fireable?
+    alias_method :transitionable?,    :fireable?
 
     # construct an event transition and fire it
     def fire!( event_or_array, *args, &block)
@@ -153,10 +163,13 @@ module StateFu
 
     # evaluate a requirement depending whether it's a method or proc,
     # and its arity - see helper.rb (ContextualEval) for the smarts
-    def evaluate_requirement( name )
+
+    # TODO - enable requirement block / method to know the target
+    def evaluate_requirement( name, transition = nil ) # , target
       evaluate_named_proc_or_method( name )
     end
 
+    # TODO SPECME HACKERY CRUFT
     def evaluate_requirement_message( name, dest )
       msg = machine.requirement_messages[name]
       if [String, NilClass].include?( msg.class )
@@ -255,7 +268,22 @@ module StateFu
 
     # display something sensible that doesn't take up the whole screen
     def inspect
-      "#<#{self.class} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} machine=#{@machine.inspect} options=#{options.inspect}>"
+      '|<= ' + self.class.to_s + ' ' +
+        attrs = [[:current_state, state_name.inspect],
+                 [:object_type , @object.class],
+                 [:method_name , method_name.inspect],
+                 [:field_name  , persister.field_name.inspect],
+                 [:machine     , machine.inspect],
+                 [:next_states , valid_next_states.map(&:to_sym).inspect]].
+        map {|x| x.join('=') }.join( " " ) + ' =>|'
+    end
+
+    def == other
+      if other.respond_to?(:to_sym) && current_state
+        other.to_sym == current_state.to_sym || super( other )
+      else
+        super( other )
+      end
     end
 
   end
