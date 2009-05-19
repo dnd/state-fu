@@ -5,6 +5,18 @@ module StateFu
   end
 
   class RequirementError < Exception
+    attr_reader :transition
+    DEFAULT_MESSAGE = "The transition was halted"
+
+    def initialize( transition, message=DEFAULT_MESSAGE, options={})
+      @transition = transition
+      @options    = options
+      super( message )
+    end
+
+    def inspect
+      "<StateFu::RequirementError #{message} #{@transition.origin.name}=[#{@transition.event.name}]=>#{transition.target.name}"
+    end
   end
 
   class TransitionHalted < Exception
