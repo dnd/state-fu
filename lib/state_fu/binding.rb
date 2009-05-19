@@ -255,7 +255,7 @@ module StateFu
 
     # display something sensible that doesn't take up the whole screen
     def inspect
-      "#<#{self.class} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} machine=#{@machine.inspect} options=#{options.inspect}>"
+      "[<#{self.class} @#{current_state.name unless current_state.nil?} ##{__id__} object_type=#{@object.class} method_name=#{method_name.inspect} field_name=#{persister.field_name.inspect} options=#{options.inspect} machine=#{@machine.inspect}>]"
     end
 
   end
