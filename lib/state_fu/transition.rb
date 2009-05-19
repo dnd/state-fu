@@ -79,18 +79,18 @@ module StateFu
 
     def unmet_requirements
       requirements.reject do |requirement|
-        binding.evaluate_requirement( requirement )
+        binding.evaluate_requirement( requirement, self )
       end
     end
 
     def unmet_requirement_messages
-      unmet_requirements.map do |r|
-        binding.evaluate_requirement_message(r, self )
+      unmet_requirements.map do |requirement|
+        binding.evaluate_requirement_message( requirement, self )
       end
     end
 
     def check_requirements!
-      raise RequirementError.new( unmet_requirements.inspect ) unless requirements_met?
+      raise RequirementError.new( self, unmet_requirements.inspect ) unless requirements_met?
     end
 
     def requirements_met?

@@ -4,7 +4,7 @@ module StateFu
 
       def self.prepare_field( klass, field_name )
         # ensure getter exists
-        unless klass.instance_methods.include?( field_name )
+        unless klass.instance_methods.map(&:to_sym).include?( field_name.to_sym )
           Logger.info "Adding attr_reader :#{field_name} for #{klass}"
           _field_name = field_name
           klass.class_eval do
@@ -14,7 +14,7 @@ module StateFu
         end
 
         # ensure setter exists
-        unless klass.instance_methods.include?( "#{field_name}=" )
+        unless klass.instance_methods.map(&:to_sym).include?( :"#{field_name}=" )
           Logger.info "Adding attr_writer :#{field_name}= for #{klass}"
           _field_name = field_name
           klass.class_eval do
