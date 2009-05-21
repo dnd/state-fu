@@ -55,7 +55,7 @@
 #  my_doc.status.name      => :published  # and the state has been updated.
 
 require 'rubygems'
-require 'activesupport'
+# require 'activesupport'
 
 require 'state_fu/core_ext'
 require 'state_fu/logger'
