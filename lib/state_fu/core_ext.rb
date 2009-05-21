@@ -11,15 +11,11 @@ end
 
 unless Object.const_defined?('ActiveSupport')
 
-  require 'active_support/core_ext/array'
-  require 'active_support/core_ext/blank'
-  # require 'active_support/core_ext/class'
-  # require 'active_support/core_ext/module'
-  require 'active_support/core_ext/hash/keys'
-
   as_lite_dir = File.join(File.dirname( __FILE__), 'active_support_lite' )
 
-  Dir[File.join(File.dirname( __FILE__), 'active_support_lite','**' )].each do |lib|
+  Dir[File.join(File.dirname( __FILE__), 'active_support_lite','**' )].sort.each do |lib|
+    next unless File.file?( lib )
+    puts lib
     require lib
   end
 

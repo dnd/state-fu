@@ -28,8 +28,9 @@ module MySpecHelper
 
   def prepare_active_record( options={}, &migration )
     begin
+      require 'activesupport'
       require 'active_record'
-    rescue MissingSourceFile => e
+    rescue LoadError => e
       pending "skipping specifications due to load error: #{e}"
       return false
     end
