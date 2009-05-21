@@ -170,7 +170,7 @@ To install the dependencies for running specs:
 
 <pre>
 <code>
- sudo gem install rspec rr activesupport
+ sudo gem install rspec rr
  rake             # run the specs
  rake spec:doc    # generate specdocs
  rake doc         # generate rdocs
@@ -184,5 +184,15 @@ Now you can simply <code>include StateFu</code> in any class you wish to make st
 The spec folder is currently the best source of documentation.
 
 If you have questions, feature request or ideas, please join the "google group":http://groups.google.com/group/state-fu
+
+A note about ActiveSupport:
+
+StateFu will use ActiveSupport if it is already loaded. If not, it
+will load its own (very heavily cut down) 'lite' version. This means
+that if you require StateFu *before* other libraries which require
+ActiveSupport (e.g. ActiveRecord), you may have to explicitly
+<code>require 'activesupport'</code> before loading the dependent
+libraries.
+
 
 Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
