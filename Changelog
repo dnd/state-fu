@@ -1,0 +1,3 @@
+May 21 2009
+* Added active_support_lite: bare essentials from activesupport core_ext, which
+	will be loaded if activesupport is not
