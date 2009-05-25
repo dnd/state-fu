@@ -286,7 +286,7 @@ module StateFu
     end
 
     def == other
-      if other.respond_to?(:to_sym) && current_state_name && other.respond_to?(:current_state_name) && other.current_state_name
+      if other.respond_to?(:to_sym) && current_state_name.is_a?(Symbol) 
         other.to_sym == current_state_name || super( other )
       else
         super( other )
