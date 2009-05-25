@@ -1,6 +1,10 @@
 # +STARTUP:hidestars
 # TODO / DEVELOPMENT NOTES
 
+* better feedback from unmet requirements
+* event hook for reconstituted[_at] ( eg :new )
+
+
     class Object
       def dclone
         case self
@@ -33,7 +37,7 @@
 * test / spec helpers for testing machines
 ** helpers for developers' specs
 
-* gem release / script for RubyForge; rubyforge project page
+* DONE gem release / script for RubyForge; rubyforge project page
 
 * next_state & next_state! method should be able to take a hash or proc filter
 ** hash filter based on .options
@@ -50,10 +54,7 @@
 ** method custom_machine is analogous to .machine but stores ref in singleton land
 
 * meta
-** tickets
-** google group
 ** docs
-** wiki pages
 ** manual
 
 * features

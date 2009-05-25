@@ -17,7 +17,7 @@ module StateFu
       StateFu::Persistence.prepare_field( object.class, field_name )
       # add a persister
       @persister     = StateFu::Persistence.for( self, field_name )
-      Logger.info( "Persister added: #@persister ")
+      Logger.info( "Persister (#{@persister.class}) added: #{method_name} as field #{field_name}" )
 
       # define event methods on self( binding ) and @object
       StateFu::MethodFactory.new( self ).install!
@@ -209,7 +209,9 @@ module StateFu
       next_transition && next_transition.target
     end
 
-    alias_method :next_event, :next_transition
+    def next_event
+      next_transition && next_transition.event
+    end
 
     # if there is a next_transition, create, fire & return it
     # otherwise raise an InvalidTransition

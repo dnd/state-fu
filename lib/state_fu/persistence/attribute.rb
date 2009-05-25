@@ -31,13 +31,13 @@ module StateFu
 
       def read_attribute
         string = object.send( field_name )
-        Logger.info "Read attribute #{field_name}, got #{string} for #{object}"
+        Logger.info "Read attribute #{field_name}, got #{string.inspect} for #{object.inspect}"
         string
       end
 
       def write_attribute( string_value )
         writer_method = "#{field_name}="
-        Logger.info "Writing attribute #{field_name} -> #{string_value} for #{object}"
+        Logger.info "Writing attribute #{field_name} -> #{string_value.inspect} for #{object.inspect}"
         object.send( writer_method, string_value )
       end
 

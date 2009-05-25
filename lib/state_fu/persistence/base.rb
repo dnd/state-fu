@@ -38,7 +38,7 @@ module StateFu
           Logger.info("Machine has no states: #{machine}") if machine.states.empty?
         else
           persist!
-          Logger.debug("Object resumes at #{current_state.name}: #{object}")
+          Logger.debug("Object #{object} resuming #{binding.method_name} at #{current_state.name}: #{object.inspect}")
         end
       end
 
