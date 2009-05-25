@@ -94,6 +94,11 @@ describe StateFu::Binding do
       @binding   = @object.state_fu()
     end
 
+    describe "==" do
+      it "should be == :new" do
+        @binding.should == :new
+      end
+    end
     describe ".state() / initial state" do
       it "should default to machine.initial_state when no initial_state is explicitly defined" do
         @machine.initial_state.name.should == :new
