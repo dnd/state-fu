@@ -45,7 +45,11 @@ module StateFu
     alias_method :state, :current_state
 
     def current_state_name
-      current_state.name
+      begin
+        current_state.name.to_sym
+      rescue NoMethodError
+        nil
+      end
     end
     alias_method :name,       :current_state_name
     alias_method :state_name, :current_state_name
@@ -76,7 +80,8 @@ module StateFu
     # the firing of one event, taking into account event and state
     # transition requirements
     def valid_next_states
-      valid_transitions.values.flatten.uniq.extend StateArray
+      vt = valid_transitions
+      vt && vt.values.flatten.uniq.extend( StateArray )
     end
 
     def next_states
@@ -276,13 +281,13 @@ module StateFu
                  [:method_name , method_name.inspect],
                  [:field_name  , persister.field_name.inspect],
                  [:machine     , machine.inspect],
-                 [:next_states , valid_next_states.map(&:to_sym).inspect]].
+                 [:next_states , (valid_next_states && valid_next_states.map(&:to_sym).inspect)]].
         map {|x| x.join('=') }.join( " " ) + ' =>|'
     end
 
     def == other
-      if other.respond_to?(:to_sym) && current_state
-        other.to_sym == current_state.to_sym || super( other )
+      if other.respond_to?(:to_sym) && current_state_name && other.respond_to?(:current_state_name) && other.current_state_name
+        other.to_sym == current_state_name || super( other )
       else
         super( other )
       end
