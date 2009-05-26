@@ -5,8 +5,7 @@ module StateFu
       def self.prepare_field( klass, field_name )
         _field_name = field_name
         klass.send :before_save, :state_fu!
-          # validates_presence_of _field_name
-
+        # validates_presence_of _field_name
       end
 
       private
@@ -19,6 +18,7 @@ module StateFu
       end
 
       def write_attribute( string_value )
+        # Logger.warn(" :write_attribute,#{ field_name},#{ string_value} \n=========================================================")
         object.send( :write_attribute, field_name, string_value )
       end
 
