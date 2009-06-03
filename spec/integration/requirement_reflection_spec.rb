@@ -9,15 +9,15 @@ describe "Transition requirement reflection" do
     make_pristine_class("Klass")
     @machine = Klass.machine do
       state :soviet_russia do
-        requires( :papers_in_order?,
-                  :money_for_bribe?, :on => [:entry, :exit] )
+        requires( :papers_in_order?, :on => [:entry, :exit] )
+        requires( :money_for_bribe?, :on => [:entry, :exit] )
       end
 
       state :america do
         requires( :no_turban?,
                   :us_visa?,
                   :on => :entry )
-        requires( :no_arrest_warrant, :on => [:entry,:exit] )
+        requires( :no_arrest_warrant?, :on => [:entry,:exit] )
       end
 
       state :moon do
@@ -66,17 +66,78 @@ describe "Transition requirement reflection" do
     end
   end
 
+  describe "flying from russia to america without one's affairs in order while wearing a turban" do
+    before do
+      mock( @obj ).us_visa?() { false }
+      mock( @obj ).no_turban?() { false }
+      mock( @obj ).no_arrest_warrant?() { false }
+      mock( @obj ).money_for_bribe?() { false }
+      mock( @obj ).papers_in_order?() { false }
+    end
+
+    describe "when no messages are supplied for the requirements" do
+      describe "given transition.unmet_requirements" do
+        it "should contain a list of failing requirement names as symbols" do
+          @obj.state_fu.catch_plane(:america).unmet_requirements.should == [ :papers_in_order?,
+                                                                             :money_for_bribe?,
+                                                                             :no_turban?,
+                                                                             :us_visa?,
+                                                                             :no_arrest_warrant? ]
+        end
+      end # unmet requirements
+
+      describe "given transition.unmet_requirement_messages" do
+        it "should return a list of nils" do
+          @obj.state_fu.catch_plane(:america).unmet_requirement_messages.should == [nil,nil,nil,nil,nil]
+        end
+      end # unmet_requirement_messages
+    end
+
+    describe "when a message is supplied for the money_for_bribe? entry requirement" do
+      before do
+        Klass.machine do
+          state :soviet_russia do
+            requires( :money_for_bribe?, :message => "This guard is thirsty! Do you have anything to declare?" )
+          end
+        end
+      end
+
+      describe "given transition.unmet_requirements" do
+        it "should still contain a list of failing requirement names as symbols" do
+          @obj.state_fu.catch_plane(:america).unmet_requirements.should == [ :papers_in_order?,
+                                                                             :money_for_bribe?,
+                                                                             :no_turban?,
+                                                                             :us_visa?,
+                                                                             :no_arrest_warrant? ]
+        end
+      end
+
+      describe "given transition.unmet_requirement_messages" do
+        it "should contain a list of nils plus the requirement message for money_for_bribe? as a string" do
+          @obj.state_fu.catch_plane(:america).unmet_requirement_messages.should == [ nil,
+                                                                                     "This guard is thirsty! Do you have anything to declare?",
+                                                                                     nil,
+                                                                                     nil,
+                                                                                     nil ]
+        end
+      end
+    end
+  end # flying with a turban
+
   describe "transition.unmet_requirements" do
     it "should be empty when all requirements are met" do
       @obj.state_fu.fly_spaceship(:moon).unmet_requirements.should == []
     end
 
-    it "should contain a list of failing requirements" do
-      mock( @obj ).spacesuit?() { false }
-      mock( @obj ).fuel?() { false }
-      @obj.state_fu.fly_spaceship(:moon).unmet_requirements.should == [:spacesuit?, :fuel?]
+    describe "when a message is supplied for the requirement" do
+      it "should contain a list of the requirement failure messages as strings" do
+        mock( @obj ).spacesuit?() { false }
+        mock( @obj ).fuel?() { false }
+        @obj.state_fu.fly_spaceship(:moon).unmet_requirements.should == [:spacesuit?, :fuel?]
+      end
     end
   end
+
 
   describe "transition.unmet_requirement_messages" do
     describe "when a string message is defined for one of two unmet_requirements" do
