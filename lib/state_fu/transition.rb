@@ -9,6 +9,7 @@ module StateFu
   class Transition
     include StateFu::Helper
     include ContextualEval
+
     attr_reader(  :binding,
                   :machine,
                   :origin,
@@ -24,25 +25,18 @@ module StateFu
     attr_accessor :test_only, :args, :options
 
     def initialize( binding, event, target=nil, *args, &block )
+      @binding    = binding
+      @machine    = binding.machine
+      @object     = binding.object
+      @origin     = binding.current_state
+
       # ensure event is a StateFu::Event
       if event.is_a?( Symbol ) && e = binding.machine.events[ event ]
         event = e
       end
       raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a?( StateFu::Event )
 
-      # infer target if necessary
-      case target
-      when StateFu::State # good
-      when Symbol
-        target = binding.machine.states[ target ] ||
-          raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
-      when NilClass
-        unless target = event.target
-          raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
-        end
-      else
-        raise ArgumentError.new( target.inspect )
-      end
+      target = find_event_target( event, target ) || raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
 
       # ensure target is valid for the event
       unless event.targets.include?( target )
@@ -57,10 +51,6 @@ module StateFu
       end
 
       @options    = args.extract_options!.symbolize_keys!
-      @binding    = binding
-      @machine    = binding.machine
-      @object     = binding.object
-      @origin     = binding.current_state
       @target     = target
       @event      = event
       @args       = args
@@ -79,13 +69,25 @@ module StateFu
 
     def unmet_requirements
       requirements.reject do |requirement|
-        binding.evaluate_requirement( requirement, self )
+        binding.evaluate_requirement_with_transition( requirement, self )
+      end
+    end
+
+    def evaluate_requirement_message( name )
+      msg = machine.requirement_messages[name]
+      case msg
+      when String, nil
+        msg
+      when Symbol, Proc
+        evaluate_named_proc_or_method( msg, self )
+      else
+        raise msg.class.to_s
       end
     end
 
     def unmet_requirement_messages
       unmet_requirements.map do |requirement|
-        binding.evaluate_requirement_message( requirement, self )
+        evaluate_requirement_message( requirement )
       end
     end
 
@@ -117,7 +119,7 @@ module StateFu
     end
 
     def run_hook( hook )
-      evaluate_named_proc_or_method( hook )
+      evaluate_named_proc_or_method( hook, self )
     end
 
     def halt!( message )

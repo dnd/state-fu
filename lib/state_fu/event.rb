@@ -32,7 +32,7 @@ module StateFu
       if [args].flatten == [:ALL]
         @origins = machine.states
       else
-        @origins = machine.find_or_create_states_by_name( *args.flatten ) #.extend( StateArray )
+        @origins = machine.find_or_create_states_by_name( *args.flatten ).extend( StateArray )
       end
     end
 
@@ -40,7 +40,7 @@ module StateFu
       if [args].flatten == [:ALL]
         @targets = machine.states
       else
-        @targets = machine.find_or_create_states_by_name( *args.flatten ) # .extend( StateArray )
+        @targets = machine.find_or_create_states_by_name( *args.flatten ).extend( StateArray )
       end
     end
 
@@ -88,9 +88,9 @@ module StateFu
       self.targets= *args
     end
 
-    def fireable_by?( binding )
+    def fireable_by?( binding, *args )
       requirements.reject do |r|
-        binding.evaluate_requirement( r )
+        binding.evaluate_requirement_with_args( r, *args )
       end.empty?
     end
 

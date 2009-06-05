@@ -184,29 +184,65 @@ module StateFu
 
   module ContextualEval
     module InstanceMethods
-      def evaluate( &proc )
-        if proc.arity == 1
-          object.instance_exec( self, &proc )
+
+      def limit_arguments( *args, &block )
+        puts "LIMIT: #{block.arity}"
+        case block.arity
+        when -1, 0
+          nil
+        else
+          args[0 .. (block.arity - 1) ]
+        end
+      end
+
+      def evaluate( *args, &proc )
+        if proc.arity > 0
+          args = limit_arguments( *args, &proc )
+          object.instance_exec( *args, &proc )
         else
           instance_eval( &proc )
         end
       end
 
-      def call_on_object_with_self( name )
-        # call a normal method on the object
-        # passing the transition as the argument if expected
-        if object.method(name).arity == 1
-          object.send( name, self )
+      def call_on_object_with_optional_args( name, *args )
+        if meth = object.method( name )
+          puts "CALL: #{meth.arity}"
+          puts "#{name} #{meth.arity} #{args}"
+          args = limit_arguments( *args, &meth )
+          puts "#{args.inspect}"
+          if args.nil?
+            object.send( name )
+          else
+            object.send( name, *args )
+          end
         else
-          object.send( name )
+          raise NoMethodError.new( "undefined method #{name} for #{object.inspect}" )
         end
       end
 
-      def evaluate_named_proc_or_method( name )
+      def call_on_object_with_self( name )
+        call_on_object_with_optional_args( name, self )
+      end
+
+      def evaluate_named_proc_or_method( name, *args )
         if (name.is_a?( Proc ) && proc = name) || proc = machine.named_procs[ name ]
-          evaluate &proc
+          evaluate( *args, &proc )
         else
-          call_on_object_with_self( name )
+          puts "#{name} #{args}"
+          call_on_object_with_optional_args( name, *args )
+        end
+      end
+
+      def find_event_target( evt, tgt )
+        case tgt
+        when StateFu::State
+          tgt
+        when Symbol
+          binding && binding.machine.states[ tgt ] # || raise( tgt.inspect )
+        when NilClass
+          evt.respond_to?(:target) && evt.target
+        else
+          raise ArgumentError.new( "#{tgt.class} is not a Symbol, StateFu::State or nil (#{evt})" )
         end
       end
     end

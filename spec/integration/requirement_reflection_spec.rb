@@ -223,7 +223,7 @@ describe "Transition requirement reflection" do
         it "should call the method on @obj given transition.evaluate_named_proc_or_method() with the method name" do
           @obj.method( :no_spacesuit_msg_method ).arity.should == 1
           t = @obj.state_fu.fly_spaceship(:moon)
-          x = t.evaluate_named_proc_or_method(:no_spacesuit_msg_method)
+          x = @obj.state_fu.evaluate_named_proc_or_method(:no_spacesuit_msg_method, t)
           @obj.arg.should == t
           x.should =~ /You can't go to the moon/
         end
@@ -231,7 +231,7 @@ describe "Transition requirement reflection" do
         it "should call t.evaluate_named_proc_or_method(:no_spacesuit_msg_method)" do
           t = @obj.state_fu.fly_spaceship(:moon)
           t.unmet_requirements.length.should == 2
-          mock( t ).evaluate_named_proc_or_method(:no_spacesuit_msg_method) { :my_string }
+          mock( t ).evaluate_named_proc_or_method(:no_spacesuit_msg_method, t) { :my_string }
           messages = t.unmet_requirement_messages
           messages.should include(:my_string )
         end
@@ -244,7 +244,7 @@ describe "Transition requirement reflection" do
         end
 
         it "should return the result of the method execution as the message" do
-          t = @obj.state_fu.fly_spaceship(:moon)
+          t = @obj.state_fu.fly_spaceship( :moon )
           t.unmet_requirements.length.should == 2
           messages = t.unmet_requirement_messages
           messages.length.should == 2
@@ -255,7 +255,6 @@ describe "Transition requirement reflection" do
       end # no named proc
     end   # symbol message
   end     # transition.unmet_requirement_messages
-
 end
 
 

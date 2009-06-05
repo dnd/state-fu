@@ -76,6 +76,7 @@ require 'state_fu/event'
 require 'state_fu/hooks'
 require 'state_fu/interface'
 require 'state_fu/transition'
+require 'state_fu/mock_transition'
 
 module StateFu
   DEFAULT_MACHINE    = :state_fu

@@ -62,25 +62,25 @@ module StateFu
     alias_method :events_from_current_state,  :events
 
     # the subset of events() whose requirements for firing are met
-    def valid_events
+    def valid_events( *args )
       return nil unless current_state
-      return [] unless current_state.exitable_by?( self )
-      events.select {|e| e.fireable_by?( self ) }.extend EventArray
+      return [] unless current_state.exitable_by?( self, *args )
+      events.select {|e| e.fireable_by?( self, *args ) }.extend EventArray
     end
 
-    def invalid_events
-      (events - valid_events).extend StateArray
+    def invalid_events( *args )
+      ( events - valid_events( *args ) ).extend StateArray
     end
 
-    def unmet_requirements_for(event, target)
+    def unmet_requirements_for( event, target )
       raise NotImplementedError
     end
 
     # the counterpart to valid_events - the states we can arrive at in
     # the firing of one event, taking into account event and state
     # transition requirements
-    def valid_next_states
-      vt = valid_transitions
+    def valid_next_states( *args )
+      vt = valid_transitions( *args )
       vt && vt.values.flatten.uniq.extend( StateArray )
     end
 
@@ -88,18 +88,14 @@ module StateFu
       events.map(&:targets).compact.flatten.uniq.extend StateArray
     end
 
-    def invalid_next_states
-      states - valid_states
-    end
-
     # returns a hash of { event => [states] } whose transition
     # requirements are met
-    def valid_transitions
-      h = {}
-      return nil if valid_events.nil?
-      valid_events.each do |e|
+    def valid_transitions( *args )
+      h  = {}
+      return nil unless ve = valid_events( *args )
+      ve.each do |e|
         h[e] = e.targets.select do |s|
-          s.enterable_by?( self )
+          s.enterable_by?( self, *args )
         end
       end
       h
@@ -115,6 +111,16 @@ module StateFu
     alias_method :trigger,          :transition
     alias_method :trigger_event,    :transition
     alias_method :begin_transition, :transition
+
+    def blank_mock_transition( *args, &block )
+      StateFu::MockTransition.new( self, nil, nil, *args, &block )
+    end
+
+    def mock_transition( event_or_array, *args, &block )
+      event, target = nil
+      event, target = parse_destination( event_or_array )
+      StateFu::MockTransition.new( self, event, target, *args, &block )
+    end
 
     # sanitize args for fire! and fireable?
     def parse_destination( event_or_array )
@@ -133,7 +139,7 @@ module StateFu
     end
 
     # check that the event and target are "valid" (all requirements met)
-    def fireable?( event_or_array )
+    def fireable?( event_or_array, *args )
       event, target = parse_destination( event_or_array )
       begin
         t = transition( [event, target] )
@@ -170,38 +176,52 @@ module StateFu
     # and its arity - see helper.rb (ContextualEval) for the smarts
 
     # TODO - enable requirement block / method to know the target
-    def evaluate_requirement( name, transition = nil ) # , target
-      evaluate_named_proc_or_method( name )
+    def evaluate_requirement( name )
+      puts "DEPRECATED: evaluate_requirement #{name}"
+      evaluate_requirement_with_args( name )
     end
 
-    # TODO SPECME HACKERY CRUFT
-    def evaluate_requirement_message( name, dest )
-      msg = machine.requirement_messages[name]
-      if [String, NilClass].include?( msg.class )
-        return msg
-      else
-        if dest.is_a?( StateFu::Transition )
-          t = dest
-        else
-          event, target = parse_destination( event_or_array )
-          t = transition( event, target )
-        end
-        case msg
-        when Symbol
-          t.evaluate_named_proc_or_method( msg )
-        when Proc
-          t.evaluate &msg
-        end
-      end
+    def evaluate_requirement_with_args( name, *args )
+      puts " [< #{name} #{args.inspect} >]"
+      t = blank_mock_transition( *args )
+      evaluate_named_proc_or_method( name, t )
     end
+
+    def evaluate_requirement_with_transition( name, t )
+      evaluate_named_proc_or_method( name, t )
+    end
+
+    # TODO SPECME HACKERY CRUFT FIXME THISSUCKS and needs *args
+    # def evaluate_requirement_message( name, dest )
+    #   # puts "#{name} #{dest}"
+    #   msg = machine.requirement_messages[name]
+    #   if [String, NilClass].include?( msg.class )
+    #     return msg
+    #   else
+    #     if dest.is_a?( StateFu::Transition )
+    #       t = dest
+    #     else
+    #       event, target = parse_destination( event_or_array )
+    #       t = transition( event, target )
+    #     end
+    #     case msg
+    #     when Symbol, Proc
+    #       puts t.class
+    #       evaluate_named_proc_or_method( msg, t )
+    #     # when Proc
+    #     #   t.evaluate &msg
+    #     end
+    #   end
+    # end
 
     # if there is one simple event, return a transition for it
     # else return nil
     # TODO - not convinced about the method name / aliases - but next
     # is reserved :/
     def next_transition( *args, &block )
-      return nil if valid_transitions.nil?
-      next_transition_candidates = valid_transitions.select {|e, s| s.length == 1 }
+      vts = valid_transitions( *args )
+      return nil if vts.nil?
+      next_transition_candidates = vts.select {|e, s| s.length == 1 }
       if next_transition_candidates.length == 1
         nt   = next_transition_candidates.first
         evt  = nt[0]
@@ -210,12 +230,14 @@ module StateFu
       end
     end
 
-    def next_state
-      next_transition && next_transition.target
+    def next_state( *args )
+      nt = next_transition( *args )
+      nt && nt.target
     end
 
-    def next_event
-      next_transition && next_transition.event
+    def next_event( *args )
+      nt = next_transition( *args )
+      nt && nt.event
     end
 
     # if there is a next_transition, create, fire & return it
@@ -225,10 +247,10 @@ module StateFu
         t.fire!
         t
       else
-        n = valid_transitions && valid_transitions.length
+        vts = valid_transitions( *args )
+        n = vts && vts.length
         raise InvalidTransition.
-          new( self, current_state, valid_transitions,
-               "there are #{n} candidate transitions, need exactly 1")
+          new( self, current_state, vts, "there are #{n} candidate transitions, need exactly 1")
       end
     end
     alias_method :next_state!, :next!
@@ -267,8 +289,8 @@ module StateFu
 
     # if there is one possible cyclical event, evaluate its
     # requirements (true/false), else nil
-    def cycle?
-      if t = cycle
+    def cycle?( *args )
+      if t = cycle( *args )
         t.requirements_met?
       end
     end
@@ -280,13 +302,12 @@ module StateFu
                  [:object_type , @object.class],
                  [:method_name , method_name.inspect],
                  [:field_name  , persister.field_name.inspect],
-                 [:machine     , machine.inspect],
-                 [:next_states , (valid_next_states && valid_next_states.map(&:to_sym).inspect)]].
+                 [:machine     , machine.inspect]].
         map {|x| x.join('=') }.join( " " ) + ' =>|'
     end
 
     def == other
-      if other.respond_to?(:to_sym) && current_state_name.is_a?(Symbol) 
+      if other.respond_to?(:to_sym) && current_state_name.is_a?(Symbol)
         other.to_sym == current_state_name || super( other )
       else
         super( other )

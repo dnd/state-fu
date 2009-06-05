@@ -870,12 +870,12 @@ describe StateFu::Transition do
       it "should have self as the object itself" do
         called = false
         obj    = @obj
-        Klass.class_eval do
-          define_method( :run_exec ) do |t|
-            raise "self is #{self} not #{@obj}" unless self == obj
-            called = true
-          end
-        end
+
+        Klass.send :include, ( Module.new() do
+                                 def run_exec(t)
+                                   raise "self is #{self} not #{@obj}" unless self == obj
+                                 end
+                               end )
         called.should == false
         trans = @obj.state_fu.fire!(:run)
         called.should == true
@@ -943,9 +943,8 @@ describe StateFu::Transition do
 
     describe "a block passed to binding.transition" do
       it "should execute in the context of the transition initializer after it's set up" do
-        Klass.class_eval do
-          def run_exec( a ); raise "!"; end
-        end
+        Klass.send :define_method, :run_exec, &lambda {|a| raise "!" }
+
         mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
           t.args.should == ['who','yo','daddy?']
           t.options.should == {:hi => :mum}
@@ -956,7 +955,9 @@ describe StateFu::Transition do
           @args    = %w/ who yo daddy? /
           @options = {:hi => :mum}
         end
-        trans.fire!
+        @obj.method(:run_exec).should be_kind_of(Proc)
+        @obj.method(:run_exec).arity.should == 1
+        trans.fire!()
       end
     end
 
@@ -1056,5 +1057,14 @@ describe StateFu::Transition do
       end
 
     end
+  end
+end
+
+describe "sanity" do
+  include MySpecHelper
+  it "should be sane" do
+    x = Object.new
+    set_method_arity(x, :to_s, 2 )
+    x.method( :to_s ).arity.should == 2
   end
 end
