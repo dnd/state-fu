@@ -115,7 +115,7 @@ describe "Transition requirement evaluation with dynamic conditions" do
         @obj.respond_to?(:method_which_requires_one_arg).should be_true
         meth = @obj.method(:method_which_requires_one_arg)
         meth.arity.should == 1
-        @fu.limit_arguments( t, &meth ).should == [t]
+        @fu.limit_arguments( meth, t ).should == [t]
         @fu.call_on_object_with_optional_args( :method_which_requires_one_arg, t )
       end
 

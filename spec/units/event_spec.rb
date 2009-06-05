@@ -52,23 +52,23 @@ describe StateFu::Event do
           end
 
           it "should set @origin to the result" do
-            mock( @machine ).find_or_create_states_by_name( :initial ) { :result }
+            mock( @machine ).find_or_create_states_by_name( :initial ) { [:result] }
             @event.origins= :initial
-            @event.origins.should == :result
+            @event.origins.should == [:result]
           end
 
         end
 
         describe 'targets=' do
           it "should call get_states_list_by_name with its argument" do
-            mock( @machine ).find_or_create_states_by_name( :initial ) { }
+            mock( @machine ).find_or_create_states_by_name( :initial ) { [] }
             @event.targets= :initial
           end
 
           it "should set @target to the result" do
-            mock( @machine ).find_or_create_states_by_name( :initial ) { :result }
+            mock( @machine ).find_or_create_states_by_name( :initial ) { [:result] }
             @event.targets= :initial
-            @event.targets.should == :result
+            @event.targets.should == [:result]
           end
         end
 

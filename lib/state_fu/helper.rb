@@ -185,6 +185,8 @@ module StateFu
   module ContextualEval
     module InstanceMethods
 
+      # if we use &block syntax it stuffs the arity up, so we have to
+      # pass it as a normal argument
       def limit_arguments( block, *args )
         case block.arity
         when -1, 0
@@ -205,11 +207,7 @@ module StateFu
 
       def call_on_object_with_optional_args( name, *args )
         if meth = object.method( name )
-
-          # puts "CALL: #{meth.arity} #{meth}"
-          # puts "#{name} #{meth.arity} #{args}"
           args = limit_arguments( meth, *args )
-          # puts "#{args.inspect}"
           if args.nil?
             object.send( name )
           else
