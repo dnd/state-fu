@@ -185,8 +185,7 @@ module StateFu
   module ContextualEval
     module InstanceMethods
 
-      def limit_arguments( *args, &block )
-        puts "LIMIT: #{block.arity}"
+      def limit_arguments( block, *args )
         case block.arity
         when -1, 0
           nil
@@ -197,7 +196,7 @@ module StateFu
 
       def evaluate( *args, &proc )
         if proc.arity > 0
-          args = limit_arguments( *args, &proc )
+          args = limit_arguments( proc, *args )
           object.instance_exec( *args, &proc )
         else
           instance_eval( &proc )
@@ -206,10 +205,11 @@ module StateFu
 
       def call_on_object_with_optional_args( name, *args )
         if meth = object.method( name )
-          puts "CALL: #{meth.arity}"
-          puts "#{name} #{meth.arity} #{args}"
-          args = limit_arguments( *args, &meth )
-          puts "#{args.inspect}"
+
+          # puts "CALL: #{meth.arity} #{meth}"
+          # puts "#{name} #{meth.arity} #{args}"
+          args = limit_arguments( meth, *args )
+          # puts "#{args.inspect}"
           if args.nil?
             object.send( name )
           else
@@ -228,7 +228,6 @@ module StateFu
         if (name.is_a?( Proc ) && proc = name) || proc = machine.named_procs[ name ]
           evaluate( *args, &proc )
         else
-          puts "#{name} #{args}"
           call_on_object_with_optional_args( name, *args )
         end
       end

@@ -734,7 +734,7 @@ describe StateFu::Transition do
       end
 
       it "should contain :go in @binding.valid_events if @binding.evaluate_requirement( :ok? ) is true" do
-        mock( @binding ).evaluate_requirement( :ok? ) { true }
+        mock( @binding ).evaluate_requirement_with_args( :ok? ) { true }
         @binding.current_state.should == @machine.initial_state
         @binding.events.should == @machine.events
         @binding.valid_events.should == [@event]
@@ -867,19 +867,22 @@ describe StateFu::Transition do
 
     describe "a method defined on the stateful object" do
 
-      it "should have self as the object itself" do
-        called = false
-        obj    = @obj
-
-        Klass.send :include, ( Module.new() do
-                                 def run_exec(t)
-                                   raise "self is #{self} not #{@obj}" unless self == obj
-                                 end
-                               end )
-        called.should == false
-        trans = @obj.state_fu.fire!(:run)
-        called.should == true
-      end
+     #  it "should have self as the object itself" do
+     #    called = false
+     #    Klass.class_eval do
+     #      @@obj = nil
+     #      cattr_accessor :obj
+     #
+     #      def run_exec( t )
+     #        called  = true
+     #        raise "self is #{self} not #{@@obj}" unless self == @@obj
+     #      end
+     #    end
+     #    Klass.obj = @obj
+     #    called.should == false
+     #    trans = @obj.state_fu.fire!(:run)
+     #    called.should == true
+     #  end
 
       it "should receive a transition and be able to access the binding, etc through it" do
         mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
@@ -950,7 +953,6 @@ describe StateFu::Transition do
           t.options.should == {:hi => :mum}
         end
         set_method_arity( @obj, :run_exec, 1)
-
         trans = @obj.state_fu.transition( :run ) do
           @args    = %w/ who yo daddy? /
           @options = {:hi => :mum}

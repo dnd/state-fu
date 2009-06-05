@@ -182,7 +182,6 @@ module StateFu
     end
 
     def evaluate_requirement_with_args( name, *args )
-      puts " [< #{name} #{args.inspect} >]"
       t = blank_mock_transition( *args )
       evaluate_named_proc_or_method( name, t )
     end
