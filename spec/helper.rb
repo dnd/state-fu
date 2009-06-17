@@ -30,6 +30,7 @@ module MySpecHelper
     begin
       require 'activesupport'
       require 'active_record'
+      require 'sqlite3'
     rescue LoadError => e
       pending "skipping specifications due to load error: #{e}"
       return false
