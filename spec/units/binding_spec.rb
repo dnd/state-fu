@@ -120,30 +120,38 @@ describe StateFu::Binding do
     before do
     end
     describe "fireable?" do
+      before do
+        reset!
+        make_pristine_class("Klass")
+        @machine = Klass.machine do
+          state :snoo do
+            event :am_fireable, :to => :wizz
+          end
+          state :wizz do
+            event :not_fireable, :to => :pong
+          end
+        end
+        @obj = Klass.new
+      end
+      
       describe "when called with arguments which would return a valid transition from .transition()" do
-        it "should return true"
+        it "should return true" do 
+          @obj.state_fu.fireable?(:am_fireable).should == true
+        end 
       end
 
       describe "when called with arguments which would raise an InvalidTransition from .transition()" do
-        before do
-          reset!
-          make_pristine_class("Klass")
-          @machine = Klass.machine do
-            state :snoo
-            state :wizz do
-              event :ping, :to => :pong
-            end
-          end
-          @obj = Klass.new
-        end
-
         it "should return nil" do
           @obj.state_fu.name.should == :snoo
-          lambda { @obj.state_fu.transition(:ping) }.should raise_error( StateFu::InvalidTransition )
-          lambda { @obj.state_fu.fireable?(:ping) }.should_not raise_error( StateFu::InvalidTransition )
-          @obj.state_fu.fireable?(:ping).should == nil
+          lambda { @obj.state_fu.transition(:not_fireable) }.should raise_error( StateFu::InvalidTransition )
+          lambda { @obj.state_fu.fireable?(:not_fireable) }.should_not raise_error( StateFu::InvalidTransition )
+          @obj.state_fu.fireable?(:not_fireable).should == nil
         end
       end
+      
+      describe "when called with additional arguments after the destination event/state" do
+        it "should pass the arguments to any requirements to determine transition availability"
+      end 
 
     end
 

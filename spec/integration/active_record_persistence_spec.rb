@@ -109,7 +109,6 @@ describe "an ActiveRecord model with StateFu included:" do
       end
 
       it "should fail to save if state_fu! does not instantiate the binding before create" do
-        pending "is this still relevant?"
         mock( @ex ).state_fu!.at_least( 1 ) { }
         lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
         @ex.state_fu_field.should == nil

@@ -59,7 +59,12 @@ describe StateFu::MethodFactory do
           @obj.send(:state_fu_field).should == 'targ'
         end
 
-        it "should take a block and use it as per usual"
+        it "should accept a block and pass it to the method on the binding" do 
+          block = lambda { }
+          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
+          @obj.simple_event! &block
+          pending "don't know how to mock this"
+        end   
       end
     end
 
