@@ -10,11 +10,11 @@ module StateFu
       private
 
       def read_attribute
-        #object.send( :read_attribute, field_name )
+        object.send( field_name )
       end
 
       def write_attribute( string_value )
-        #object.send( :write_attribute, field_name, string_value )
+        object.send( "#{field_name}=", string_value )
       end
 
     end
