@@ -22,6 +22,11 @@ module StateFu
       end # class_eval
     end # prepare_class
 
+    def self.relaxdb_document_property?( klass, field_name )
+      Object.const_defined?('RelaxDB') &&
+        klass.ancestors.include?( ::RelaxDB::Document ) &&
+        klass.properties.map(&:to_s).include?( field_name.to_s )
+    end
 
     def self.active_record_column?( klass, field_name )
       Object.const_defined?("ActiveRecord") &&
@@ -30,20 +35,22 @@ module StateFu
         klass.columns.map(&:name).include?( field_name.to_s )
     end
 
-    def self.for( binding, field_name )
-      if active_record_column?( binding.object.class, field_name )
-        self::ActiveRecord.new( binding, field_name )
+    def self.class_for( klass, field_name )
+      if active_record_column?( klass, field_name )
+        self::ActiveRecord
+      elsif relaxdb_document_property?( klass, field_name )
+        self::RelaxDB
       else
-        self::Attribute.new( binding, field_name )
+        self::Attribute
       end
     end
 
+    def self.for( binding, field_name )
+      class_for( binding.object.class, field_name ).new( binding, field_name )
+    end
+
     def self.prepare_field( klass, field_name )
-      if active_record_column?( klass, field_name )
-        self::ActiveRecord.prepare_field( klass, field_name )
-      else
-        self::Attribute.prepare_field( klass, field_name )
-      end
+      class_for( klass, field_name ).prepare_field( klass, field_name )
     end
 
   end

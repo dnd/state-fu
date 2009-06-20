@@ -176,15 +176,12 @@ module StateFu
     # and its arity - see helper.rb (ContextualEval) for the smarts
 
     # TODO - enable requirement block / method to know the target
-    def evaluate_requirement( name )
-      puts "DEPRECATED: evaluate_requirement #{name}"
-      evaluate_requirement_with_args( name )
-    end
-
+    
     def evaluate_requirement_with_args( name, *args )
       t = blank_mock_transition( *args )
       evaluate_named_proc_or_method( name, t )
     end
+    # alias_method :evaluate_requirement, :evaluate_requirement_with_args
 
     def evaluate_requirement_with_transition( name, t )
       evaluate_named_proc_or_method( name, t )

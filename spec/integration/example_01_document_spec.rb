@@ -84,7 +84,7 @@ describe "Document" do
     end
 
     it "should not raise an error when publish! is called" do
-      @doc.status.evaluate_requirement(:author).should == "Susan"
+      @doc.status.evaluate_requirement_with_args(:author).should == "Susan"
       lambda { @doc.status.publish! }.should_not raise_error( )
     end
 

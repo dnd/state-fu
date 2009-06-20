@@ -62,6 +62,28 @@ module MySpecHelper
       migration_class.migrate( :up )
     end
   end
+  
+  def prepare_relaxdb( options={} )
+    begin
+      require 'relaxdb'
+      RelaxDB.configure :host => "localhost", :port => 5984, :design_doc => "spec_doc"
+      RelaxDB.delete_db "relaxdb_spec" rescue "ok"
+      RelaxDB.use_db    "relaxdb_spec"
+      RelaxDB.enable_view_creation 
+    rescue LoadError => e
+      pending "skipping specifications due to load error: #{e}"
+      return false
+    end
+    begin
+      RelaxDB.replicate_db "relaxdb_spec_base", "relaxdb_spec"
+      RelaxDB.enable_view_creation
+    rescue => e
+      puts "\n===== Run rake create_base_db before the first spec run ====="
+      puts
+      exit!
+    end
+    #
+  end 
 
   def make_pristine_class(class_name, superklass=Object, reset_first = false)
     reset! if reset_first

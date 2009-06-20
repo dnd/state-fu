@@ -50,7 +50,7 @@ describe "Transition requirement reflection" do
   describe "transition.valid? / transition.requirements_met?" do
     it "should be true if all requirements are met (return truth)" do
       @obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
-      @obj.state_fu.evaluate_requirement(:spacesuit?).should == true
+      @obj.state_fu.evaluate_requirement_with_args(:spacesuit?).should == true
       @obj.fly_spaceship?(:moon).should == true
       @obj.fly_spaceship(:moon).requirements_met?.should == true
       @obj.fly_spaceship(:moon).should be_valid
@@ -59,7 +59,7 @@ describe "Transition requirement reflection" do
     it "should be false if not all requirements are met" do
       stub( @obj ).spacesuit?() { false }
       @obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
-      @obj.state_fu.evaluate_requirement(:spacesuit?).should == false
+      @obj.state_fu.evaluate_requirement_with_args(:spacesuit?).should == false
       @obj.fly_spaceship?(:moon).should == false
       @obj.fly_spaceship(:moon).requirements_met?.should == false
       @obj.fly_spaceship(:moon).should_not be_valid
