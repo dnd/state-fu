@@ -141,7 +141,7 @@ module StateFu
       if child? && sprocket.is_a?( StateFu::State ) # in state block
         targets  = options.delete(:to)
         evt      = define_event( name, options, &block )
-        evt.from sprocket unless evt.origins
+        evt.from sprocket unless sprocket.nil?
         evt.to( targets ) unless targets.nil?
         evt
       else # in master lathe

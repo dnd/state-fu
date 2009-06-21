@@ -43,8 +43,8 @@ Scenario: including StateFu into a class should define aliases for class methods
 
 Scenario: calling MyClass.machine should return a StateFu::Machine bound to MyClass
   Given I have included StateFu in a class called MyClass
-  When I call MyClass.machine
-  Then I should get a StateFu::Machine
+  When I call the class method MyClass.machine
+  Then I should receive a StateFu::Machine
   And it should be bound to MyClass with the name :state_fu
   And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
 
@@ -59,11 +59,11 @@ Scenario: calling MyClass.machine with a block should define that machine's stat
   end
   """
   And I create an instance of MyClass called @my_obj
-  Then I should get a StateFu::Machine
+  Then I should receive a StateFu::Machine
   And it should be bound to MyClass with the name :state_fu
   And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
-  And it should have a StateFu::State called :frightened
-  And it should have a StateFu::Event called :scare
+  And the machine should have a StateFu::State called :frightened
+  And the machine should have a StateFu::Event called :scare
 
 Scenario: instantiating a binding to a Machine which has an event should define event methods on the instance
   Given I have included StateFu in a class called MyClass
@@ -77,7 +77,7 @@ Scenario: instantiating a binding to a Machine which has an event should define 
   """
   And I create an instance of MyClass called @my_obj
   And I call @my_obj.state_fu
-  Then I should get a StateFu::Binding
+  Then I should receive a StateFu::Binding
   And @my_obj should respond to 'scare?'
   And @my_obj should respond to 'scare!'
   And @my_obj.scare? should be true
@@ -85,15 +85,15 @@ Scenario: instantiating a binding to a Machine which has an event should define 
 
 Scenario: calling MyClass.machines should return a list of machines for MyClass
   Given I have included StateFu in a class called MyClass
-  And I have defined the default machine for MyClass
-  When I call MyClass.machines
+  And I have defined an empty default machine for MyClass
+  When I call the class method MyClass.machines
   Then I should get a hash of StateFu::Machines and their names
   And it should contain one Machine with the default name :state_fu
 
 Scenario: calling MyClass.machine_names should return a list of machine names
   Given I have included StateFu in a class called MyClass
-  And I have defined the default machine for MyClass
-  When I call MyClass.machine_names
+  And I have defined an empty default machine for MyClass
+  When I call the class method MyClass.machine_names
   Then I should get a list of machine names for MyClass
   And it should contain only the default name :state_fu
 
@@ -108,7 +108,7 @@ Scenario: including StateFu into a class should define instance methods to acces
 Scenario: the state_fu instance method should return a StateFu::Binding
   Given I have required the StateFu library
   When I include StateFu in a class called MyClass
-  When I call MyClass.machine
+  When I call the class method MyClass.machine
   And I create an instance of MyClass called @my_obj
   And I call @my_obj.state_fu
   Then I should receive a StateFu::Binding
@@ -118,7 +118,7 @@ Scenario: the state_fu instance method should return a StateFu::Binding
 Scenario: the bindings instance method should return an empty Hash when no Bindings have been instantiated
   Given I have required the StateFu library
   And I include StateFu in a class called MyClass
-  And I call MyClass.machine
+  And I call the class method MyClass.machine
   And I create an instance of MyClass called @my_obj
   And I have not called @my_obj.state_fu
   When I call @my_obj.bindings
@@ -128,7 +128,7 @@ Scenario: the bindings instance method should return an empty Hash when no Bindi
 Scenario: the bindings instance method should return a hash of instantiated StateFu::Bindings
   Given I have required the StateFu library
   And I include StateFu in a class called MyClass
-  And I call MyClass.machine
+  And I call the class method MyClass.machine
   And I create an instance of MyClass called @my_obj
   And I call @my_obj.state_fu to instantiate a binding
   When I call @my_obj.bindings
@@ -140,7 +140,7 @@ Scenario: the bindings instance method should return a hash of instantiated Stat
 Scenario: the state_fu! instance method should instantiate all bindings
   Given I have required the StateFu library
   And I include StateFu in a class called MyClass
-  And I call MyClass.machine
+  And I call the class method MyClass.machine
   And I create an instance of MyClass called @my_obj
   And I have not called @my_obj.state_fu
   When I call @my_obj.state_fu!

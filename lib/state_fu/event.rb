@@ -28,24 +28,31 @@ module StateFu
       origin_names.include?( state.to_sym )
     end
 
-    def origins=( *args )
-      if [args].flatten == [:ALL]
-        @origins = machine.states
-      else
-        @origins = machine.find_or_create_states_by_name( *args.flatten ).extend( StateArray )
+    def update_state_collection( ivar_name, *args)
+      new_states = if [args].flatten == [:ALL]
+            machine.states
+          else
+            machine.find_or_create_states_by_name( *args.flatten )
+          end
+      unless new_states.is_a?( Array )
+        new_states = [new_states]
       end
+      existing  = instance_variable_get( ivar_name )
+      # return existing if new_states.empty?
+      new_value = ((existing || [] ) + new_states).flatten.compact.uniq.extend( StateArray )
+      instance_variable_set( ivar_name, new_value )
+    end
+
+    def origins=( *args )
+      update_state_collection( '@origins', *args )
     end
 
     def targets=( *args )
-      if [args].flatten == [:ALL]
-        @targets = machine.states
-      else
-        @targets = machine.find_or_create_states_by_name( *args.flatten ).extend( StateArray )
-      end
+      update_state_collection( '@targets', *args )
     end
 
     # complete?(:origins) # do we have an origins?
-    # complete?          # do we have an origins and targets?
+    # complete?           # do we have an origins and targets?
     def complete?( field = nil )
       ( field && [field] ||  [:origins, :targets] ).
         map{ |s| send(s) }.

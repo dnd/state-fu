@@ -1,12 +1,3 @@
-Given /^I have required the StateFu library$/ do
-  true
-end
-
-When /^I \w* ?included? StateFu in a class called (\w+)$/ do |klass|
-  make_pristine_class klass
-  Object.const_get(klass).send(:include, StateFu)
-end
-
 Then /^MyClass should have the class method '(\w+)'$/ do |meth|
   MyClass.should respond_to( meth )
 end
@@ -15,22 +6,15 @@ Then /^(\w+) should respond to '(\w+)'$/ do |klass, meth|
   Object.const_get(klass).should respond_to(meth)
 end
 
-Then /^it should be bound to MyClass with the name :state_fu$/ do
-  MyClass.machine.should be_kind_of( StateFu::Machine )
-  MyClass.machine.should == StateFu::FuSpace.class_machines[MyClass][:state_fu]
-end
-
-When /^I call (\w+)\.(\w+)$/ do |klass, meth|
-  @result = Object.const_get(klass).send(meth)
-end
-
-Then /^I should get a ([a-zA-Z:]+)$/ do |const|
-  @result.should be_kind_of( const.constantize )
-end
-
 Then /^it should return the same StateFu::Machine on subsequent invocations of MyClass.machine$/ do
   MyClass.machine.should == @result
   MyClass.machine.object_id.should == @result.object_id
+end
+
+Then /^it should be bound to (\w+) with the name :([a-z_]+)$/ do |klass, name|
+  klass = klass.constantize
+  klass.machine.should be_kind_of( StateFu::Machine )
+  klass.machine.should == StateFu::FuSpace.class_machines[klass][name.to_sym]
 end
 
 Given /^I have defined the default machine for MyClass$/ do
@@ -73,6 +57,8 @@ end
 Then /^I should receive an? ([a-zA-Z:]+)$/ do |const|
   constant = const.constantize
   @result.should be_kind_of(constant)
+  ivar = '@' + @result.class.to_s.split('::').last.downcase
+  instance_variable_set(ivar, @result)
 end
 
 Then /^it should refer to the default StateFu::Machine for MyClass$/ do
@@ -83,7 +69,6 @@ Then /^I should receive the same StateFu::Binding on successive invocations$/ do
   @result2 = @my_obj.state_fu
   @result2.object_id.should == @result.object_id
 end
-
 
 Then /^it should have one element$/ do
   @result.size.should == 1

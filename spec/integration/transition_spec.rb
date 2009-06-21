@@ -1004,7 +1004,11 @@ describe StateFu::Transition do
 
       describe "when the fireable? event has multiple targets but only one can be entered" do
         before do
-          @machine.lathe do
+          reset!
+          make_pristine_class("Klass")
+          @machine = Klass.machine do
+            initial_state :alive
+
             state :cremated
 
             state :buried do
@@ -1014,15 +1018,19 @@ describe StateFu::Transition do
             end
 
             event :inevitability do
+              from :alive
               to :cremated, :buried
             end
           end
           @obj     = Klass.new()
           @binding = @obj.state_fu
+          @machine.events[:inevitability].should be_kind_of(StateFu::Event)
           @machine.events[:inevitability].fireable_by?( @binding ).should == true
           @machine.states[:cremated].enterable_by?( @binding ).should == true
           @machine.states[:buried].enterable_by?( @binding ).should == false
+          @binding.valid_events.map(&:name).should == [@machine.events[:inevitability]].map(&:name)
           @binding.valid_events.should == [@machine.events[:inevitability]]
+          @binding.valid_transitions.values.flatten.map(&:name).should == [:cremated]
           @binding.valid_transitions.values.flatten.should == [@machine.states[:cremated]]
         end # before
 

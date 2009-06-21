@@ -380,7 +380,7 @@ describe StateFu::Lathe do
 
     describe ".event(:name)" do
       before do
-        mock( @machine ).find_or_create_states_by_name( @lathe.sprocket ) { @lathe.sprocket }
+        mock( @machine ).find_or_create_states_by_name( @lathe.sprocket ).at_least(1) { @lathe.sprocket }
       end
 
       it "should create the named event if it does not exist" do
@@ -474,12 +474,11 @@ describe StateFu::Lathe do
 
   describe "a child lathe for an event" do
     before do
-      stub( @machine ).find_or_create_states_by_name(:a) { [:a] }
-      stub( @machine ).find_or_create_states_by_name(:b) { [:b] }
-
       @master = @lathe
       @event  = @lathe.event( :go )
       @lathe  = StateFu::Lathe.new( @machine, @event )
+      stub( @machine ).find_or_create_states_by_name(:a) { [:a] }
+      stub( @machine ).find_or_create_states_by_name(:b) { [:b] }
     end
 
     describe ".from" do
@@ -494,16 +493,16 @@ describe StateFu::Lathe do
         @event.origins.should == [:a, :b]
       end
 
-      it "should update @origins on successive invocations" do
+      it "should accumulate @origins on successive invocations" do
         mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
         mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
         @lathe.from( :a, :b )
         @event.origins.should == [:a, :b]
         @lathe.from( :x, :y )
-        @event.origins.should == [:x, :y]
+        @event.origins.should == [:a, :b, :x, :y]
       end
 
-      it "should set both origin and target if a hash is given" do
+      it "should set / update both origin and target if a hash is given" do
         mock( @machine ).find_or_create_states_by_name(:a) { [:a] }
         mock( @machine ).find_or_create_states_by_name(:b) { [:b] }
         mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
@@ -511,9 +510,11 @@ describe StateFu::Lathe do
         @lathe.from( :a => :b )
         @event.origin.should == :a
         @event.target.should == :b
-        @lathe.from([:a, :b] => [:x, :y] )
+        @lathe.from( { [:a, :b] => [:x, :y] })
+        @event.origin.should == nil
+        @event.target.should == nil
         @event.origins.should == [:a, :b]
-        @event.targets.should == [:x, :y]
+        @event.targets.should == [:b, :x, :y] # accumulated total
       end
     end
 
@@ -535,7 +536,7 @@ describe StateFu::Lathe do
         @lathe.to( :a, :b )
         @event.targets.should == [:a, :b]
         @lathe.to( :x, :y )
-        @event.targets.should == [:x, :y]
+        @event.targets.should == [:a, :b, :x, :y] # accumulated targets
       end
     end
 
