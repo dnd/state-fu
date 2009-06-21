@@ -3,10 +3,12 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 describe "a RelaxDB::Document's persister" do
 
   include MySpecHelper
+  before(:all) do
+    prepare_relaxdb()
+  end
 
   before(:each) do
     reset!
-    prepare_relaxdb()
     make_pristine_class( 'ExampleDoc', RelaxDB::Document )
     # end class ExampleRecord
   end
@@ -50,11 +52,14 @@ describe "a RelaxDB::Document's persister" do
 end
 
 describe StateFu::Persistence::RelaxDB do
+  before(:all) do
+    prepare_relaxdb()
+  end
+
   include MySpecHelper
   describe "a RelaxDB::Document with a simple machine" do
     before do
       reset!
-      prepare_relaxdb()
       make_pristine_class( 'ExampleDoc', RelaxDB::Document )
       ExampleDoc.class_eval do
         property :state_fu_field
