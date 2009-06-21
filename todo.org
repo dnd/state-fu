@@ -1,50 +1,34 @@
 # +STARTUP:hidestars
 # TODO / DEVELOPMENT NOTES
-
-* better feedback from unmet requirements
-* event hook for reconstituted[_at] ( eg :new )
-
-
-    class Object
-      def dclone
-        case self
-          when Fixnum,Bignum,Float,NilClass,FalseClass,
-               TrueClass,Continuation
-            klone = self
-          when Hash
-            klone = self.clone
-            self.each{|k,v| klone[k] = v.dclone}
-          when Array
-            klone = self.clone
-            klone.clear
-            self.each{|v| klone << v.dclone}
-          else
-            klone = self.clone
-        end
-        klone.instance_variables.each {|v|
-          klone.instance_variable_set(v,
-            klone.instance_variable_get(v).dclone)
-        }
-        klone
-      end
-    end
-
 # Note: most of the value of this kind of list is in the act of
 # writing it.
 
 # i.e., don't expect it to be up to date.
 ==================================================
-* test / spec helpers for testing machines
-** helpers for developers' specs
 
-* DONE gem release / script for RubyForge; rubyforge project page
+* Documentation, documentation, documentation: cucumber.
+* specs
+** move specs into bdd folder & use cuke for API / features
+** move towards full & consistent rspec unit tests
+** rcov (waiting for 1.9) / heckle / et al
+** real-world example machines for cucumber features
+** rewrite account example integration spec(s)
+** test / spec helpers for testing machines
+*** helpers for end-user / developers' spec / test / cuke code
+** next_state behaviour in particular needs better documentation
+** document all the requirement stuff well with examples
 
-* next_state & next_state! method should be able to take a hash or proc filter
+* gem release / script for RubyForge; rubyforge project page
+
+* Deep copy / duplication / serialization
+
+* event hook for reconstituted[_at] ( eg :new )
+  huh?
+
+* next_state & next_state! method should be able to take a hash or proc a filter
 ** hash filter based on .options
 ** proc filter replaces block; arbitrary filtering
 ** this allows you to eg define :auto => true on some states and filter just those
-
-* next_state behaviour needs better documentation
 
 * singleton machines & deep copy / clone
 ** machines for an instance of a class
@@ -76,34 +60,23 @@
 *** automatically sorted & fired whenever ...
     .state_fu is called? .autofire! is called?
 
-* decisions
+* decisions to make
 ** should binding keep a ref to the last transition?
-
-* specs
-** better spec coverage for binding
-** rcov (waiting for 1.9)
-** example machines in specs/example_machines/
-** rewrite account example integration spec
-
-* docs
-** write cheat / intro / examples
 
 ====================================================
 
-* Bugs
+* Known issues / design decisions
 ** Machines are not inherited. Is this a bug?
    To make them inheritable we'd be back to needing a Binding
    or some other substantial complexity.
    I don't think it's worth it.
 ** method definitions for event firing cannot be called on the stateful object before state_fu[!] has been called (which instantiates the methods).
-
-* Decisions
 ** removed ability to have procs as origin / target states
 *** not worth the complexity, too hard to debug in real use, performance
 *** can easily add all states as potential candidates, to be screened via requirements
 
 * Wishlist
-** test storing meta-information in options for integration with eg Rails controllers, views
+** test / example: storing meta-information in options for integration with eg Rails controllers, views
 ** Rails helpers for views etc? Tie-in to controller stuff?
 ** conditionals - guards & test transitions
 *** needs / requires
@@ -122,9 +95,7 @@
 **** of the API / syntax
 **** of the behind-the-scenes action and how classes relate
 
-* requirements, etc should be orderable
-** auto-order-by :position option
-** array mixins to help move stuff around
+* requirements, etc should be (re-)orderable ?
 
 ** Machines should
 *** be deep-copyable
@@ -134,13 +105,6 @@
 *** cast to string / json / ... without looking like ass
 *** able to generate dot / graphviz
 
-** Class/object API
-*** should be interchangeable
-
-** Contexts
-*** should be extensible by the user to create a custom DSL
-**** how to work this into the DSL? Scope?
-
 * Specs pending
 
 * Code smells
@@ -148,11 +112,36 @@
 
 * Other
 ** testing w/ heckle, rcov
-** Cucumber
 ** benchmark / tune for performance
-*** Cuc. for user-facing API; Rspec for internals?
 
 ==
 DONE
+* Contexts
+** should be extensible by the user to create a custom DSL
+*** how to work this into the DSL? Scope?
 * DONE add before_create :state_fu! for active_record
-* implement simple deep cloning of
+* implement simple deep cloning
+
+    class Object
+      def dclone
+        case self
+          when Fixnum,Bignum,Float,NilClass,FalseClass,
+               TrueClass,Continuation
+            klone = self
+          when Hash
+            klone = self.clone
+            self.each{|k,v| klone[k] = v.dclone}
+          when Array
+            klone = self.clone
+            klone.clear
+            self.each{|v| klone << v.dclone}
+          else
+            klone = self.clone
+        end
+        klone.instance_variables.each {|v|
+          klone.instance_variable_set(v,
+            klone.instance_variable_get(v).dclone)
+        }
+        klone
+      end
+    end
