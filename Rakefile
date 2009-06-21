@@ -84,4 +84,13 @@ task :doc do |t|
   exec 'rdoc lib/'
 end
 
+begin
+  require 'cucumber/rake/task'
+
+  Cucumber::Rake::Task.new(:features) do |t|
+      t.cucumber_opts = "--format pretty"
+  end
+rescue LoadError => e
+end 
+
 task :default => 'spec:all'
