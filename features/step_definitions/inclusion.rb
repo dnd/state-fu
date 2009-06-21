@@ -15,7 +15,6 @@ Then /^(\w+) should respond to '(\w+)'$/ do |klass, meth|
   Object.const_get(klass).should respond_to(meth)
 end
 
-
 Then /^it should be bound to MyClass with the name :state_fu$/ do
   MyClass.machine.should be_kind_of( StateFu::Machine )
   MyClass.machine.should == StateFu::FuSpace.class_machines[MyClass][:state_fu]
@@ -25,8 +24,8 @@ When /^I call (\w+)\.(\w+)$/ do |klass, meth|
   @result = Object.const_get(klass).send(meth)
 end
 
-Then /^I should get a StateFu::Machine$/ do
-  @result.should be_kind_of( StateFu::Machine )
+Then /^I should get a ([a-zA-Z:]+)$/ do |const|
+  @result.should be_kind_of( const.constantize )
 end
 
 Then /^it should return the same StateFu::Machine on subsequent invocations of MyClass.machine$/ do
@@ -127,3 +126,14 @@ Then /^it should have a ([a-zA-Z:]+) called :([a-z_]+)$/ do |const, name|
   end[name.to_sym].should be_kind_of(const.constantize)
 end
 
+Then /^@my_obj\.scare\? should be true$/ do
+  @my_obj.scare?.should == true
+end
+
+Then /^@my_obj\.scare! should cause an event transition$/ do
+  @my_obj.state_fu.should == :frightened
+  t = @my_obj.scare!
+  t.should be_kind_of( StateFu::Transition )
+  t.should be_accepted
+  @my_obj.state_fu.should == :petrified
+end

@@ -32,11 +32,30 @@ Scenario: calling MyClass.machine with a block should define that machine's stat
     end
   end
   """
+  And I create an instance of MyClass called @my_obj
   Then I should get a StateFu::Machine
   And it should be bound to MyClass with the name :state_fu
   And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
   And it should have a StateFu::State called :frightened
   And it should have a StateFu::Event called :scare
+
+Scenario: instantiating a binding to a Machine which has an event should define event methods on the instance
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+  MyClass.machine do
+    state :frightened do
+      event :scare, :to => :petrified
+    end
+  end
+  """
+  And I create an instance of MyClass called @my_obj
+  And I call @my_obj.state_fu
+  Then I should get a StateFu::Binding
+  And @my_obj should respond to 'scare?'
+  And @my_obj should respond to 'scare!'
+  And @my_obj.scare? should be true
+  And @my_obj.scare! should cause an event transition
 
 Scenario: calling MyClass.machines should return a list of machines for MyClass
   Given I have included StateFu in a class called MyClass
@@ -103,4 +122,3 @@ Scenario: the state_fu! instance method should instantiate all bindings
   And it should have one element
   And it should contain a binding to the default StateFu::Machine for the class
   And @my_obj.bindings should not be empty
-
