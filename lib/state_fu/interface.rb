@@ -34,10 +34,9 @@ module StateFu
       alias_method :stfu,          :machine
       alias_method :state_fu,      :machine
       alias_method :workflow,      :machine
+      alias_method :stateful,      :machine
       alias_method :statefully,    :machine
       alias_method :state_machine, :machine
-      alias_method :stateful,      :machine
-      alias_method :workflow,      :machine
       alias_method :engine,        :machine
 
       # return a hash of :name => StateFu::Machine for your class.
@@ -48,17 +47,19 @@ module StateFu
           machine( *args, &block)
         end
       end
-      alias_method :machines,     :machines
-      alias_method :workflows,    :machines
-      alias_method :engines,      :machines
+      alias_method :stfus,     :machines
+      alias_method :state_fus, :machines
+      alias_method :workflows, :machines
+      alias_method :engines,   :machines
 
       # return the list of machines names for this class
       def machine_names()
         StateFu::FuSpace.class_machines[self].keys
       end
-      alias_method :machine_names,       :machine_names
-      alias_method :workflow_names,      :machine_names
-      alias_method :engine_names,        :machine_names
+      alias_method :stfu_names,     :machine_names
+      alias_method :state_fu_names, :machine_names
+      alias_method :workflow_names, :machine_names
+      alias_method :engine_names,   :machine_names
     end
 
     # These methods grant access to StateFu::Binding objects, which
