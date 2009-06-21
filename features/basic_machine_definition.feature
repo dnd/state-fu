@@ -1,7 +1,7 @@
 Feature: defining a StateFu::Machine
   As a developer
   In order to use a StateFu::Machine in my class instances
-  I want to be able to define one or more Machines for a class
+  I want to be able to define one or more simple Machines for a class
 
 Scenario: defining an empty StateFu::Machine with the default name :state_fu
   Given I have included StateFu in a class called MyClass
@@ -97,6 +97,13 @@ Scenario: adding metadata / options to a state
       state :ready, :colour => 'black'
       state :set,   :colour => 'amber'
       state :go,    :colour => 'green'
+
+      # it is also possible to modify the options by getting a direct reference
+      # to the state and using the 'options' accessor method -
+      # if you really want your key to be a string this is what you'll have to do
+      state :disqualified do |s|
+        s.options['sponsor_payment'] = false
+      end
     end
 
     MyClass.machine do
@@ -118,15 +125,23 @@ Scenario: adding metadata / options to a state
   And I can retrieve a StateFu::State by calling states[:go] on the machine
   And the state should have an option :colour with the value 'green'
   And the state should have an option :running with the value true
-
-
+  And I can retrieve a StateFu::State by calling states[:disqualified] on the machine
+  And the state should have an option "sponsor_payment" with the value false
 
 Scenario: adding simple events to a machine
   Given I have included StateFu in a class called MyClass
   When I call
   """
     MyClass.machine do
+      # note that states are created implicitly when referenced by an event.
+
+      # these are functionally equivalent syntaxes:
       event :eat, :from => :hungry, :to => :satiated
+
+      event :gorge do
+        from :hungry
+        to   :stuffed
+      end
     end
   """
   Then I should receive a StateFu::Machine
@@ -136,25 +151,36 @@ Scenario: adding simple events to a machine
   And I can retrieve a StateFu::Event by calling events[:eat] on the machine
   And the event's origin should be the StateFu::State called :hungry
   And the event's target should be the StateFu::State called :satiated
+  And the event should be simple?
 
 Scenario: adding metadata / options to an event
   Given I have included StateFu in a class called MyClass
   When I call
   """
     MyClass.machine do
-      event :porpoise, 'colour' => 'turqoise'
-    end
-
-    MyClass.machine do
-      event :porpoise, 'type' => 'animal'
+      state :normal do
+        events :cancel, :delete, :colour => 'turqoise'
+        event :cancel, :role => :user  do
+          to :cancelled
+        end
+        event :delete, :role => :system do
+          to :deleted
+        end
+      end
     end
   """
   Then I should receive a StateFu::Machine
-  And the machine should have a StateFu::Event called :porpoise
-  And I can retrieve a StateFu::Event by calling events[:porpoise] on the machine
-  And the event should have the name :porpoise
+  And the machine should have a StateFu::Event called :cancel
+  And I can retrieve a StateFu::Event by calling events[:cancel] on the machine
+  And the event should have the name :cancel
+  And the event's origin should be the StateFu::State called :normal
   And the event should have an option :colour with the value 'turqoise'
-  And the event should have an option :type with the value 'animal'
+  And the event should have an option :role with the value :user
+  And I can retrieve a StateFu::Event by calling events[:delete] on the machine
+  And the event should have the name :delete
+  And the event's origin should be the StateFu::State called :normal
+  And the event should have an option :colour with the value 'turqoise'
+  And the event should have an option :role with the value :system
 
 Scenario: adding simple events to a machine with shorthand syntax
   Given I have included StateFu in a class called MyClass
@@ -165,12 +191,23 @@ Scenario: adding simple events to a machine with shorthand syntax
     end
   """
   Then I should receive a StateFu::Machine
-  And the machine should have a StateFu::Event called :eat
-  And the machine should have a StateFu::State called :hungry
-  And the machine should have a StateFu::State called :satiated
   And I can retrieve a StateFu::Event by calling events[:eat] on the machine
   And the event's origin should be the StateFu::State called :hungry
   And the event's target should be the StateFu::State called :satiated
+
+Scenario: adding simple events to a machine with shorthand block syntax
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine do
+      event( :eat ) { from :hungry => :satiated }
+    end
+  """
+  Then I should receive a StateFu::Machine
+  And I can retrieve a StateFu::Event by calling events[:eat] on the machine
+  And the event's origin should be the StateFu::State called :hungry
+  And the event's target should be the StateFu::State called :satiated
+
 
 Scenario: adding events to a machine with multiple origins & targets
   Given I have included StateFu in a class called MyClass
@@ -181,12 +218,10 @@ Scenario: adding events to a machine with multiple origins & targets
     end
   """
   Then I should receive a StateFu::Machine
-  And the machine should have a StateFu::Event called :eat
-  And the machine should have a StateFu::State called :hungry
-  And the machine should have a StateFu::State called :satiated
   And I can retrieve a StateFu::Event by calling events[:eat] on the machine
   And the event's origin should be nil
   And the event's target should be nil
+  And the event should not be simple?
   And the event's origins should include the StateFu::State called :hungry
   And the event's targets should include the StateFu::State called :satiated
 
@@ -199,16 +234,16 @@ Scenario: adding events to a machine with multiple origins & targets with shorth
     end
   """
   Then I should receive a StateFu::Machine
-  And the machine should have a StateFu::Event called :eat
-  And the machine should have a StateFu::State called :hungry
-  And the machine should have a StateFu::State called :satiated
   And I can retrieve a StateFu::Event by calling events[:eat] on the machine
   And the event's origin should be nil
   And the event's target should be nil
   And the event's origins should include the StateFu::State called :hungry
+  And the event's origins should include the StateFu::State called :peckish
   And the event's targets should include the StateFu::State called :satiated
+  And the event's targets should include the StateFu::State called :full
+  And the event should not be simple?
 
-Scenario: adding an event inside a state block in the machine definition should add that state to the event origins
+Scenario: adding an event from inside a state block in the machine definition
   Given I have included StateFu in a class called MyClass
   When I call
   """
@@ -225,19 +260,15 @@ Scenario: adding an event inside a state block in the machine definition should 
     end
   """
   Then I should receive a StateFu::Machine
-  And the machine should have a StateFu::State called :poor
-  And the machine should have a StateFu::State called :middle_class
-  And the machine should have a StateFu::State called :rich
-  And the machine should have a StateFu::Event called :get_rich_quick
   And I can retrieve a StateFu::Event by calling events[:get_rich_quick] on the machine
+  And the event's target should be nil
+  And the event's origin should be nil
   And the event's origins should include the StateFu::State called :poor
   And the event's origins should include the StateFu::State called :middle_class
   And the event's targets should include the StateFu::State called :rich
   And the event's targets should include the StateFu::State called :filthy_rich
-  And the event's target should be nil
-  And the event's origin should be nil
 
-Scenario: multiple machines on the same class
+Scenario: multiple machines bound to the the same class
   Given I have included StateFu in a class called MyClass
   When I call
   """
@@ -257,6 +288,7 @@ Scenario: multiple machines on the same class
   And the machine should have a StateFu::State called :sleeping
   And the machine should have a StateFu::State called :zombie
   And the machine should not have any StateFu::Event
+  And the machine should not have a StateFu::State called :vampire
   And MyClass.machines(:undead_status) should return a StateFu::Machine
   And the machine should have a StateFu::State called :alive
   And the machine should have a StateFu::State called :dead

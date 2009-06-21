@@ -229,7 +229,7 @@ module StateFu
     # do something with all states / events
     #
     def each_sprocket( type, *args, &block)
-      require_no_sprocket()
+
       options = args.extract_options!.symbolize_keys!
       if args == [:ALL] || args == []
         args = machine.send("#{type}s").except( options.delete(:except) )
@@ -238,12 +238,14 @@ module StateFu
     end
 
     def states( *args, &block )
+      require_no_sprocket()
       each_sprocket( 'state', *args, &block )
     end
     alias_method :all_states, :states
     alias_method :each_state, :states
 
     def events( *args, &block )
+      require_sprocket( NilClass, StateFu::State )
       each_sprocket( 'event', *args, &block )
     end
     alias_method :all_events, :events

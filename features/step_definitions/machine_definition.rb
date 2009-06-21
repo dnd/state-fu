@@ -6,6 +6,10 @@ Then /^the ([a-z_]+) should have an option :([a-z_]+) with the value (.+)$/ do |
   instance_variable_get("@#{type}").options[key.to_sym].should == eval(val)
 end
 
+Then /^the state should have an option "([^\"]*)" with the value false$/ do |arg1|
+  @state.options[arg1].should == false
+end
+
 Then /^the machine should have a StateFu::(\w+) called :([a-z_]+)$/ do |type, name|
   @machine.send(type.downcase + 's').map(&:name).should include(name.to_sym)
 end
@@ -55,5 +59,17 @@ Then /^the two StateFu::States called :zombie should be different objects$/ do
   undead = MyClass.machine(:undead_status)
   thread.should_not == undead
   thread.object_id.should_not == undead.object_id
+end
+
+Then /^the machine should not have a StateFu::State called :vampire$/ do
+  @machine.states[:vampire].should be_nil
+end
+
+Then /^the event should (not )?be simple\?$/ do |negative|
+  if negative
+    @event.should_not be_simple
+  else
+    @event.should be_simple
+  end
 end
 
