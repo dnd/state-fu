@@ -8,9 +8,9 @@ describe "a RelaxDB::Document's persister" do
   end
 
   before(:each) do
+    skip_unless_relaxdb()
     reset!
     make_pristine_class( 'ExampleDoc', RelaxDB::Document )
-    # end class ExampleRecord
   end
 
   it "should be a subclass of RelaxDB::Document" do
@@ -59,6 +59,7 @@ describe StateFu::Persistence::RelaxDB do
   include MySpecHelper
   describe "a RelaxDB::Document with a simple machine" do
     before do
+      skip_unless_relaxdb()
       reset!
       make_pristine_class( 'ExampleDoc', RelaxDB::Document )
       ExampleDoc.class_eval do

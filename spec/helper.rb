@@ -62,16 +62,24 @@ module MySpecHelper
       migration_class.migrate( :up )
     end
   end
+
+  def skip_unless_relaxdb
+    unless Object.const_defined?( 'RelaxDB' )
+      pending('Skipping specs because you do not have the relaxdb gem (paulcarey-relaxdb) installed ...')
+    end 
+  end 
   
   def prepare_relaxdb( options={} )
     begin
       require 'relaxdb'
-      RelaxDB.configure :host => "localhost", :port => 5984, :design_doc => "spec_doc"
-      RelaxDB.delete_db "relaxdb_spec" rescue "ok"
-      RelaxDB.use_db    "relaxdb_spec"
-      RelaxDB.enable_view_creation 
+      if Object.const_defined?( "RelaxDB" )
+        RelaxDB.configure :host => "localhost", :port => 5984, :design_doc => "spec_doc"
+        RelaxDB.delete_db "relaxdb_spec" rescue "ok"
+        RelaxDB.use_db    "relaxdb_spec"
+        RelaxDB.enable_view_creation 
+      end
     rescue LoadError => e
-      pending "skipping specifications due to load error: #{e}"
+      # pending "skipping specifications due to load error: #{e}"
       return false
     end
     begin
