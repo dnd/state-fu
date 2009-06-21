@@ -65,7 +65,7 @@ module MySpecHelper
 
   def skip_unless_relaxdb
     unless Object.const_defined?( 'RelaxDB' )
-      pending('Skipping specs because you do not have the relaxdb gem installed ...')
+      pending('Skipping specs because you do not have the relaxdb gem (paulcarey-relaxdb) installed ...')
     end 
   end 
   
