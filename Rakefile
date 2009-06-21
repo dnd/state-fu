@@ -38,9 +38,6 @@ rescue LoadError
 end
 
 namespace :spec do
-  desc "Run both units and integration specs"
-  task :both => [:units, :integration]
-
   desc "Run all specs"
   Spec::Rake::SpecTask.new(:all) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
