@@ -6,9 +6,8 @@ module StateFu
 
       # TODO:
       # take option :alias => false (disable aliases) or :alias
-      # => :foo (use foo as class & instance accessor)
+      # => :foo (add :foo as class & instance accessor methods)
 
-      #
       # Given no arguments, return the default machine (:state_fu) for the
       # class, creating it if it did not exist.
       #
@@ -62,9 +61,10 @@ module StateFu
       alias_method :engine_names,        :machine_names
     end
 
-    # Give the gift of state to your objects. These methods
-    # grant access to StateFu::Binding objects, which are bundles of
-    # context linking a StateFu::Machine to an object / instance.
+    # These methods grant access to StateFu::Binding objects, which
+    # are bundles of context encapsulating a StateFu::Machine, an instance
+    # of a class, and its current state in the machine.
+
     # Again, plenty of aliases are provided so you can use whatever
     # makes sense to you.
     module InstanceMethods
@@ -73,16 +73,11 @@ module StateFu
         @_state_fu ||= {}
       end
 
-      # A StateFu::Binding comes into being, linking your object and a
-      # machine, when you first call yourobject.binding() for that
-      # machine.
+      # A StateFu::Binding comes into being when it is first referenced.
       #
-      # Like the class method .machine(), calling it without any arguments
-      # is equivalent to passing :om.
-      #
-      # Essentially, this is the accessor method through which an instance
-      # can see and change its state, interact with events, etc.
-      #
+      # This is the accessor method through which an object instance (or developer)
+      # can access a StateFu::Machine, the object's current state, the
+      # methods which trigger event transitions, etc.
       public
       def _binding( name=StateFu::DEFAULT_MACHINE )
         name = name.to_sym
@@ -97,8 +92,8 @@ module StateFu
       alias_method :stateful,    :_binding
       alias_method :workflow,    :_binding
       alias_method :engine,      :_binding
+      alias_method :machine,     :_binding # not strictly accurate
       alias_method :context,     :_binding
-
 
       # Gain awareness of all bindings (state contexts) this object
       # has contemplated into being.
@@ -114,7 +109,7 @@ module StateFu
       alias_method :workflows,    :_bindings
       alias_method :engines,      :_bindings
       alias_method :bindings,     :_bindings
-      alias_method :machines,     :_bindings # not strictly accurate, but makes sense sometimes
+      alias_method :machines,     :_bindings # not strictly accurate
       alias_method :contexts,     :_bindings
 
       # Instantiate bindings for all machines defined for this class.
