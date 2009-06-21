@@ -98,19 +98,6 @@ Then /^@my_obj\.bindings should not be empty$/ do
   @my_obj.bindings.should_not be_empty
 end
 
-When /^I call$/ do |string|
-  @result = eval(string)
-end
-
-Then /^it should have a ([a-zA-Z:]+) called :([a-z_]+)$/ do |const, name|
-  case const
-  when 'StateFu::State'
-    @result.states
-  when 'StateFu::Event'
-    @result.events
-  end[name.to_sym].should be_kind_of(const.constantize)
-end
-
 Then /^@my_obj\.scare\? should be true$/ do
   @my_obj.scare?.should == true
 end

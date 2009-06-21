@@ -22,7 +22,7 @@ Scenario: defining a simple state in the machine block
   And I can retrieve a StateFu::State by calling states[:ready] on the machine
   And the state should have the name :ready
 
-Scenario: adding events with successive blocks
+Scenario: adding states to a machine with successive machine blocks
   Given I have included StateFu in a class called MyClass
   When I call
   """
@@ -33,7 +33,6 @@ Scenario: adding events with successive blocks
     MyClass.machine do
       state :set
     end
-
   """
   Then I should receive a StateFu::Machine
   And it should have a StateFu::State called :ready
@@ -43,24 +42,84 @@ Scenario: adding events with successive blocks
   And I can retrieve a StateFu::State by calling states[:set] on the machine
   And the state should have the name :set
 
+Scenario: defining multiple states at once with the states method
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine do
+      # note that 'go' is converted to the symbol :go -
+      # state and event names are always symbols
+      states :ready, :set, 'go'
+    end
+  """
+  Then I should receive a StateFu::Machine
+  And the machine should have a StateFu::State called :ready
+  And the machine should have a StateFu::State called :set
+  And the machine should have a StateFu::State called :go
+
+Scenario: default initial state of a machine is the first state defined
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine do
+      states :ready, :set, :go
+    end
+  """
+  Then I should receive a StateFu::Machine
+  And the machine should have an initial_state called :ready
+
+Scenario: explicitly setting the initial state of a machine
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine do
+      states :ready, :set, :go
+      initial_state :before
+    end
+  """
+  Then I should receive a StateFu::Machine
+  And the machine should have a StateFu::State called :before
+  And the machine should have an initial_state called :before
+  And the machine should have a list of states with four StateFu::States
+  And the StateFu::State called :before should be last in the list
+
 Scenario: adding metadata / options to a state
   Given I have included StateFu in a class called MyClass
   When I call
   """
     MyClass.machine do
-      state :ready, 'colour' => 'green'
+      # note: option keys are converted to symbols if supplied as strings
+      states :ready, :set, :go
+
+      states :ready, :set, 'running' => false
+      state :go,           :running  => true
+
+      state :ready, :colour => 'black'
+      state :set,   :colour => 'amber'
+      state :go,    :colour => 'green'
     end
 
     MyClass.machine do
-      state :ready, 'ok' => true
+      # replace the colour 'black' with 'red' and add a stance to the options
+      state :ready, :colour => 'red', :stance => :crouch
     end
+
+    # MyClass.machine.states[:ready].options
+    # => returns the options Hash for the state called :ready
   """
   Then I should receive a StateFu::Machine
   And the machine should have a StateFu::State called :ready
   And I can retrieve a StateFu::State by calling states[:ready] on the machine
-  And the state should have the name :ready
+  And the state should have an option :colour with the value 'red'
+  And the state should have an option :running with the value false
+  And I can retrieve a StateFu::State by calling states[:set] on the machine
+  And the state should have an option :colour with the value 'amber'
+  And the state should have an option :running with the value false
+  And I can retrieve a StateFu::State by calling states[:go] on the machine
   And the state should have an option :colour with the value 'green'
-  And the state should have an option :ok with the value true
+  And the state should have an option :running with the value true
+
+
 
 Scenario: adding simple events to a machine
   Given I have included StateFu in a class called MyClass
@@ -149,11 +208,13 @@ Scenario: adding events to a machine with multiple origins & targets with shorth
   And the event's origins should include the StateFu::State called :hungry
   And the event's targets should include the StateFu::State called :satiated
 
-Scenario: adding an event inside a state block in the machine definition
+Scenario: adding an event inside a state block in the machine definition should add that state to the event origins
   Given I have included StateFu in a class called MyClass
   When I call
   """
     MyClass.machine do
+     # including the event inside a state block is equivalent to
+     # declaring that it is :from that state
       state :poor do
         event :get_rich_quick, :to => :rich
       end
@@ -161,7 +222,6 @@ Scenario: adding an event inside a state block in the machine definition
       state :middle_class do
         event :get_rich_quick, :to => :filthy_rich
       end
-
     end
   """
   Then I should receive a StateFu::Machine
@@ -176,3 +236,34 @@ Scenario: adding an event inside a state block in the machine definition
   And the event's targets should include the StateFu::State called :filthy_rich
   And the event's target should be nil
   And the event's origin should be nil
+
+Scenario: multiple machines on the same class
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine(:thread_status) do
+      states :idle, :active, :sleeping, :zombie, :colour => 'tartan'
+    end
+
+    MyClass.machine(:undead_status) do
+      states :alive, :dead, :vampire, :zombie, :colour => 'black'
+      event :decay, :from => { :zombie => :skeleton }
+    end
+  """
+  Then MyClass.machines should be of size 2
+  And MyClass.machines(:thread_status) should return a StateFu::Machine
+  And the machine should have a StateFu::State called :idle
+  And the machine should have a StateFu::State called :active
+  And the machine should have a StateFu::State called :sleeping
+  And the machine should have a StateFu::State called :zombie
+  And the machine should not have any StateFu::Event
+  And MyClass.machines(:undead_status) should return a StateFu::Machine
+  And the machine should have a StateFu::State called :alive
+  And the machine should have a StateFu::State called :dead
+  And the machine should have a StateFu::State called :vampire
+  And the machine should have a StateFu::State called :zombie
+  And the machine should have a StateFu::Event called :decay
+  And the two StateFu::States called :zombie should be different objects
+
+
+

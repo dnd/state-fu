@@ -11,10 +11,9 @@ Then /^the machine should have a StateFu::(\w+) called :([a-z_]+)$/ do |type, na
 end
 
 Then /^I can retrieve a ([a-zA-Z:]+) by calling ([a-z_]+)\[:([a-z_]+)\] on the machine$/ do |klass, meth, state_name|
-  ivar = '@' + klass.split('::').last.downcase
   value = @machine.send(meth)[state_name.to_sym]
   value.should be_kind_of(klass.constantize)
-  instance_variable_set( ivar, value )
+  store_object( value )
 end
 
 Then /^the event's ([a-z_]+) should be nil$/ do |meth|
@@ -24,3 +23,37 @@ end
 Then /^the event's ([a-z_]+) should include the StateFu::State called :([a-z_]+)$/ do |meth, state_name|
   @event.send(meth).should include(@machine.states[state_name.to_sym])
 end
+
+Then /^the machine should have an initial_state called :([a-z_]+)$/ do |state_name|
+  @machine.initial_state.name.should == state_name.to_sym
+end
+
+Then /^the machine should have a list of states with four StateFu::States$/ do
+  @list = @machine.states
+  @list.length.should == 4
+end
+
+Then /^the StateFu::State called :before should be last in the list$/ do
+  @list.map(&:name).last.should == :before
+end
+
+Then /^MyClass\.machines should be of size 2$/ do
+  MyClass.machines.size.should == 2
+end
+
+Then /^MyClass\.machines\(:([a-z_]+)\) should return a StateFu::Machine$/ do |name|
+  @machine = MyClass.machines(name.to_sym)
+  @machine.should be_kind_of( StateFu::Machine )
+end
+
+Then /^the machine should not have any StateFu::Event$/ do
+  @machine.events.should be_empty
+end
+
+Then /^the two StateFu::States called :zombie should be different objects$/ do
+  thread = MyClass.machine(:thread_status)
+  undead = MyClass.machine(:undead_status)
+  thread.should_not == undead
+  thread.object_id.should_not == undead.object_id
+end
+
