@@ -19,8 +19,24 @@ Scenario: calling MyClass.machine should return a StateFu::Machine bound to MyCl
   Given I have included StateFu in a class called MyClass
   When I call MyClass.machine
   Then I should get a StateFu::Machine
-  And It should be bound to MyClass with the name :state_fu
-  And it should return the same StateFu::Machine on subsequent invocations
+  And it should be bound to MyClass with the name :state_fu
+  And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
+
+Scenario: calling MyClass.machine with a block should define that machine's states and events
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+  MyClass.machine do
+    state :frightened do
+      event :scare, :to => :petrified
+    end
+  end
+  """
+  Then I should get a StateFu::Machine
+  And it should be bound to MyClass with the name :state_fu
+  And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
+  And it should have a StateFu::State called :frightened
+  And it should have a StateFu::Event called :scare
 
 Scenario: calling MyClass.machines should return a list of machines for MyClass
   Given I have included StateFu in a class called MyClass

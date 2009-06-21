@@ -16,7 +16,7 @@ Then /^(\w+) should respond to '(\w+)'$/ do |klass, meth|
 end
 
 
-Then /^It should be bound to MyClass with the name :state_fu$/ do
+Then /^it should be bound to MyClass with the name :state_fu$/ do
   MyClass.machine.should be_kind_of( StateFu::Machine )
   MyClass.machine.should == StateFu::FuSpace.class_machines[MyClass][:state_fu]
 end
@@ -29,7 +29,7 @@ Then /^I should get a StateFu::Machine$/ do
   @result.should be_kind_of( StateFu::Machine )
 end
 
-Then /^it should return the same StateFu::Machine on subsequent invocations$/ do
+Then /^it should return the same StateFu::Machine on subsequent invocations of MyClass.machine$/ do
   MyClass.machine.should == @result
   MyClass.machine.object_id.should == @result.object_id
 end
@@ -114,5 +114,16 @@ Then /^@my_obj\.bindings should not be empty$/ do
   @my_obj.bindings.should_not be_empty
 end
 
+When /^I call$/ do |string|
+  @result = eval(string)
+end
 
+Then /^it should have a ([a-zA-Z:]+) called :([a-z_]+)$/ do |const, name|
+  case const
+  when 'StateFu::State'
+    @result.states
+  when 'StateFu::Event'
+    @result.events
+  end[name.to_sym].should be_kind_of(const.constantize)
+end
 
