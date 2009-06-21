@@ -1,12 +1,15 @@
 Feature: methods defined on inclusion of StateFu
 
-  When StateFu is included into a class, it should define a few methods:
+  When StateFu is included into a class, it should gain a few methods:
 
-   * class methods so that we can define and access one or more
-     instances of StateFu::Machine, which contain
+   * class methods which allow us to define and access one or more
+     instances of StateFu::Machine, which defines a workflow / state
+     machine
 
    * instance methods so that we can access a StateFu::Binding, which
-     encapsulates a Machine, an object, and its current state in that Machine.
+     encapsulates a reference to a StateFu::Machine, an object, and
+     its current state in that Machine, as well as providing other
+     methods for interacting with StateFu.
 
 Scenario: including StateFu into a class should define class methods to access StateFu::Machines
   Given I have required the StateFu library
