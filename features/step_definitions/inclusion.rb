@@ -137,3 +137,13 @@ Then /^@my_obj\.scare! should cause an event transition$/ do
   t.should be_accepted
   @my_obj.state_fu.should == :petrified
 end
+
+Then /^(\w+) should respond to '([a-z_]+)' *as an alias for '([a-z_]+)'$/ do |klass, alias_name, meth|
+  klass = klass.constantize
+  klass.should respond_to(alias_name)
+  # this won't work:
+  # klass.method(alias_name).should == klass.method(meth)
+  # so just test the return value:
+  klass.send(alias_name).should == klass.send(meth)
+end
+

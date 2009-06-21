@@ -15,6 +15,29 @@ Scenario: including StateFu into a class should define class methods to access S
   And  MyClass should respond to 'machines'
   And  MyClass should respond to 'machine_names'
 
+Scenario: including StateFu into a class should define aliases for class methods
+  Given I have required the StateFu library
+  When I include StateFu in a class called MyClass
+  Then MyClass should respond to 'stfu'           as an alias for 'machine'
+  Then MyClass should respond to 'state_fu'       as an alias for 'machine'
+  Then MyClass should respond to 'workflow'       as an alias for 'machine'
+  Then MyClass should respond to 'stateful'       as an alias for 'machine'
+  Then MyClass should respond to 'statefully'     as an alias for 'machine'
+  Then MyClass should respond to 'state_machine'  as an alias for 'machine'
+  Then MyClass should respond to 'engine'         as an alias for 'machine'
+
+  Then MyClass should respond to 'stfus'          as an alias for 'machines'
+  Then MyClass should respond to 'state_fus'      as an alias for 'machines'
+  Then MyClass should respond to 'workflows'      as an alias for 'machines'
+  Then MyClass should respond to 'engines'        as an alias for 'machines'
+
+  Then MyClass should respond to 'stfu_names'     as an alias for 'machine_names'
+  Then MyClass should respond to 'state_fu_names' as an alias for 'machine_names'
+  Then MyClass should respond to 'engine_names'   as an alias for 'machine_names'
+  Then MyClass should respond to 'engine_names'   as an alias for 'machine_names'
+  Then MyClass should respond to 'workflow_names' as an alias for 'machine_names'
+
+
 Scenario: calling MyClass.machine should return a StateFu::Machine bound to MyClass
   Given I have included StateFu in a class called MyClass
   When I call MyClass.machine
