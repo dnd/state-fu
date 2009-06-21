@@ -50,34 +50,36 @@
 #                                         # the author requirement prevented the transition
 #  my_doc.status.name      => :draft      # see? still a draft.
 #  my_doc.author = "Susan"                # so let's satisfy it ...
-#  my_doc.publish!                        # and try again.
+#  my_doc.publish!                        # and try again
 #  "new feed!"                            # aha - our event hook fires!
 #  my_doc.status.name      => :published  # and the state has been updated.
 
 require 'rubygems'
 # require 'activesupport'
 
-require 'state_fu/core_ext'
-require 'state_fu/logger'
-require 'state_fu/helper'
-require 'state_fu/exceptions'
-require 'state_fu/fu_space'
-require 'state_fu/machine'
-require 'state_fu/lathe'
-require 'state_fu/method_factory'
-require 'state_fu/binding'
-require 'state_fu/persistence'
-require 'state_fu/persistence/base'
-require 'state_fu/persistence/active_record'
-require 'state_fu/persistence/attribute'
-require 'state_fu/persistence/relaxdb'
-require 'state_fu/sprocket'
-require 'state_fu/state'
-require 'state_fu/event'
-require 'state_fu/hooks'
-require 'state_fu/interface'
-require 'state_fu/transition'
-require 'state_fu/mock_transition'
+[ 'core_ext',
+  'logger',
+  'helper',
+  'exceptions',
+  'fu_space',
+  'machine',
+  'lathe',
+  'method_factory',
+  'binding',
+  'persistence',
+  'persistence/base',
+  'persistence/active_record',
+  'persistence/attribute',
+  'persistence/relaxdb',
+  'sprocket',
+  'state',
+  'event',
+  'hooks',
+  'interface',
+  'transition',
+  'mock_transition' ].each do |lib|
+  require File.expand_path( File.join( File.dirname(__FILE__), 'state_fu', lib ))
+end
 
 module StateFu
   DEFAULT_MACHINE    = :state_fu
