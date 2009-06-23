@@ -208,6 +208,25 @@ Scenario: adding simple events to a machine with shorthand block syntax
   And the event's origin should be the StateFu::State called :hungry
   And the event's target should be the StateFu::State called :satiated
 
+Scenario: adding simple states and events to a machine with dot-like syntax
+  Given I have included StateFu in a class called MyClass
+  When I call
+  """
+    MyClass.machine do
+      chain 'new -save-> saved -update-> updated -delete-> deleted saved -delete-> deleted'
+      chain 'updated    -update->     updated'
+    end
+  """
+  Then I should receive a StateFu::Machine
+  And the machine should have an initial_state called :new
+  And the machine should have a StateFu::State called :saved
+  And the machine should have a StateFu::State called :updated
+  And the machine should have a StateFu::State called :deleted
+  And the event :save   should transition from :new     to :saved
+  And the event :update should transition from :saved   to :updated
+  And the event :delete should transition from :updated to :deleted
+  And the event :update should transition from [:saved, :updated] to :updated
+  And the event :delete should transition from [:updated, :saved] to :deleted
 
 Scenario: adding events to a machine with multiple origins & targets
   Given I have included StateFu in a class called MyClass

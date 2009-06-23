@@ -73,3 +73,12 @@ Then /^the event should (not )?be simple\?$/ do |negative|
   end
 end
 
+Then /^the event :([a-z_]+) +should transition from (.*) to (.*)$/ do |e, from, to|
+  e = @machine.events[e.to_sym]
+  e.should be_kind_of( StateFu::Event )
+  rx = /[:\[\], ]/
+  from = from.split(rx).reject(&:empty?).map(&:to_sym)
+  to   = to.split(rx).reject(&:empty?).map(&:to_sym)
+  from.each { |origin| e.origins.map(&:name).should include(origin) }
+  to  .each { |target| e.targets.map(&:name).should include(target) }
+end

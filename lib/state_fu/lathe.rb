@@ -226,6 +226,33 @@ module StateFu
     end
 
     #
+    # define chained events and states succinctly
+    # usage: chain 'state1 -event1-> state2 -event2-> state3'
+    def chain (string)
+      rx_word    = /([a-zA-Z0-9_]+)/
+      rx_state   = /^#{rx_word}$/
+      rx_event   = /^-#{rx_word}->$/
+      previous   = nil
+      string.split.each do |chunk|
+        case chunk
+        when rx_state
+          current = state($1)
+          if previous.is_a?( StateFu::Event )
+            previous.to( current )
+          end
+        when rx_event
+          current = event($1)
+          if previous.is_a?( StateFu::State )
+            current.from( previous )
+          end
+        else
+          raise ArgumentError, "'#{chunk}' is not a valid token"
+        end
+        previous = current
+      end
+    end
+
+    #
     # do something with all states / events
     #
     def each_sprocket( type, *args, &block)
