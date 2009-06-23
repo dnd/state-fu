@@ -77,7 +77,8 @@ require 'rubygems'
   'hooks',
   'interface',
   'transition',
-  'mock_transition' ].each do |lib|
+  'mock_transition',
+  'plotter' ].each do |lib|
   require File.expand_path( File.join( File.dirname(__FILE__), 'state_fu', lib ))
 end
 

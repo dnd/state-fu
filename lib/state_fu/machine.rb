@@ -149,5 +149,8 @@ module StateFu
       "#<#{self.class} ##{__id__} states=#{state_names.inspect} events=#{event_names.inspect} options=#{options.inspect}>"
     end
 
+    def graphviz
+      @graphviz ||= Plotter.new(self).output
+    end
   end
 end

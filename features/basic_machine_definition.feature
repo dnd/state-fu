@@ -214,7 +214,7 @@ Scenario: adding simple states and events to a machine with dot-like syntax
   """
     MyClass.machine do
       chain 'new -save-> saved -update-> updated -delete-> deleted saved -delete-> deleted'
-      chain 'updated    -update->     updated'
+      chain 'updated -update-> updated'
     end
   """
   Then I should receive a StateFu::Machine
