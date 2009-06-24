@@ -12,7 +12,7 @@ Then /^it should have a ([a-zA-Z:]+) called :([a-z_]+)$/ do |const, name|
 end
 
 When /^I call$/ do |string|
-  @result = eval(string)
+  @result = eval( string )
 end
 
 When /^I \w* ?included? StateFu in a class called (\w+)$/ do |klass|
@@ -20,7 +20,7 @@ When /^I \w* ?included? StateFu in a class called (\w+)$/ do |klass|
   Object.const_get(klass).send(:include, StateFu)
 end
 
-When /^I call the class method (\w+)\.(\w+)$/ do |klass, meth|
+When /^I invoke the class method (\w+)\.(\w+)$/ do |klass, meth|
   @result = Object.const_get(klass).send(meth)
 end
 

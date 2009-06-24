@@ -50,9 +50,9 @@ Then /^(@\w+) should respond to '([a-z_!\?]+)'$/ do |ivar, meth|
   instance_variable_get(ivar).should respond_to(meth)
 end
 
-When /^I call (@\w+)\.([a-z_!?]+)( to .*)?$/ do |ivar, meth, reason|
-  @result = instance_variable_get(ivar).send(meth)
-end
+#When /^I call (@\w+)\.([a-z_!?]+)( to .*)?$/ do |ivar, meth, reason|
+#  @result = instance_variable_get(ivar).send(meth)
+#end
 
 Then /^I should receive an? ([a-zA-Z:]+)$/ do |const|
   constant = const.constantize

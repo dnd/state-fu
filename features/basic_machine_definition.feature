@@ -5,7 +5,7 @@ Feature: defining a StateFu::Machine
 
 Scenario: defining an empty StateFu::Machine with the default name :state_fu
   Given I have included StateFu in a class called MyClass
-  When I call the class method MyClass.machine
+  When I invoke the class method MyClass.machine
   Then I should receive a StateFu::Machine
   And it should be bound to MyClass with the name :state_fu
 

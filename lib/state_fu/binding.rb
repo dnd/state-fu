@@ -176,7 +176,7 @@ module StateFu
     # and its arity - see helper.rb (ContextualEval) for the smarts
 
     # TODO - enable requirement block / method to know the target
-    
+
     def evaluate_requirement_with_args( name, *args )
       t = blank_mock_transition( *args )
       evaluate_named_proc_or_method( name, t )
@@ -289,6 +289,10 @@ module StateFu
       if t = cycle( *args )
         t.requirements_met?
       end
+    end
+
+    def teleport!( target )
+      persister.current_state=( machine.states[target] )
     end
 
     # display something sensible that doesn't take up the whole screen

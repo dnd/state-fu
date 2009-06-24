@@ -126,6 +126,8 @@ A few of the features which set State-Fu apart for more ambitious work are:
    which means a dynamic, powerful system you can actually use without
    headaches
 
+ * magically generate diagrams of state machines / workflows with graphviz
+
  * fast, lightweight and useful enough to use in any ruby
    project - works with Rails but does not require it.
 
@@ -194,7 +196,9 @@ ActiveSupport (e.g. ActiveRecord), you may have to explicitly
 <code>require 'activesupport'</code> before loading the dependent
 libraries.
 
-
 Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
 
 And the "build monitor":http://runcoderun.com/davidlee/state-fu/
+
+And the "RDoc":http://rdoc.info/projects/davidlee/state-fu/ , which
+needs a bit of love.

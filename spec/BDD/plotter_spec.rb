@@ -15,9 +15,9 @@ describe StateFu::Plotter do
     @machine = Klass.machine(:drawme)
   end
 
-  # it "deleteme" do
-  #   @machine.graphviz.save_as('/tmp/1.dot')
-  # end
+  it "deleteme" do
+    @machine.graphviz.save_as('/tmp/1.dot')
+  end
 
   describe "example machine" do
     it "should have 3 states" do

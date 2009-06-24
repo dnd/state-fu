@@ -82,3 +82,19 @@ Then /^the event :([a-z_]+) +should transition from (.*) to (.*)$/ do |e, from, 
   from.each { |origin| e.origins.map(&:name).should include(origin) }
   to  .each { |target| e.targets.map(&:name).should include(target) }
 end
+
+Given /^I have defined this machine$/ do |string|
+  @machine = eval string
+end
+
+When /^I call (.*)$/ do |code|
+  @result = eval code
+end
+
+Then /^([^ ]+) (?:should equal|equals) (.*)$/ do |code, expect|
+  eval(code).should == eval(expect)
+end
+
+Then /^I should not have to pay my ex\-wife anything$/ do
+  # it would have thrown a NoMethodError if it was called
+end
