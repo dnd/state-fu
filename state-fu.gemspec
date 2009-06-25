@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.2.0"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
-  s.date = %q{2009-06-05}
+  s.date = %q{2009-06-26}
   s.description = %q{A rich library for state-oriented programming with state machines / workflows}
   s.email = %q{david@rubyist.net.au}
   s.extra_rdoc_files = [
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
      "lib/state_fu/active_support_lite/cattr_reader.rb",
      "lib/state_fu/active_support_lite/inheritable_attributes.rb",
      "lib/state_fu/active_support_lite/keys.rb",
+     "lib/state_fu/active_support_lite/misc.rb",
      "lib/state_fu/active_support_lite/object.rb",
      "lib/state_fu/active_support_lite/string.rb",
      "lib/state_fu/active_support_lite/symbol.rb",
@@ -48,10 +49,18 @@ Gem::Specification.new do |s|
      "lib/state_fu/persistence/active_record.rb",
      "lib/state_fu/persistence/attribute.rb",
      "lib/state_fu/persistence/base.rb",
+     "lib/state_fu/persistence/relaxdb.rb",
      "lib/state_fu/persistence/session.rb",
+     "lib/state_fu/plotter.rb",
      "lib/state_fu/sprocket.rb",
      "lib/state_fu/state.rb",
      "lib/state_fu/transition.rb",
+     "lib/vizier.rb",
+     "spec/BDD/plotter_spec.rb",
+     "spec/features/binding_and_transition_helper_mixin_spec.rb",
+     "spec/features/not_requirements_spec.rb",
+     "spec/features/state_and_array_options_accessor_spec.rb",
+     "spec/features/transition_boolean_comparison.rb",
      "spec/helper.rb",
      "spec/integration/active_record_persistence_spec.rb",
      "spec/integration/binding_extension_spec.rb",
@@ -64,10 +73,10 @@ Gem::Specification.new do |s|
      "spec/integration/instance_accessor_spec.rb",
      "spec/integration/lathe_extension_spec.rb",
      "spec/integration/machine_duplication_spec.rb",
+     "spec/integration/relaxdb_persistence_spec.rb",
      "spec/integration/requirement_reflection_spec.rb",
      "spec/integration/sanity_spec.rb",
      "spec/integration/state_definition_spec.rb",
-     "spec/integration/temp_spec.rb",
      "spec/integration/transition_spec.rb",
      "spec/spec.opts",
      "spec/units/binding_spec.rb",
@@ -84,35 +93,40 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{state-fu}
-  s.rubygems_version = %q{1.3.3}
+  s.rubygems_version = %q{1.3.4}
   s.summary = %q{A rich library for state-oriented programming with state machines / workflows}
   s.test_files = [
-    "spec/units/machine_spec.rb",
-     "spec/units/sprocket_spec.rb",
-     "spec/units/event_spec.rb",
-     "spec/units/lathe_spec.rb",
-     "spec/units/binding_spec.rb",
-     "spec/units/state_spec.rb",
-     "spec/units/method_factory_spec.rb",
-     "spec/units/exceptions_spec.rb",
-     "spec/units/fu_space_spec.rb",
+    "spec/BDD/plotter_spec.rb",
+     "spec/features/binding_and_transition_helper_mixin_spec.rb",
+     "spec/features/not_requirements_spec.rb",
+     "spec/features/state_and_array_options_accessor_spec.rb",
+     "spec/features/transition_boolean_comparison.rb",
      "spec/helper.rb",
-     "spec/integration/example_01_document_spec.rb",
-     "spec/integration/transition_spec.rb",
-     "spec/integration/class_accessor_spec.rb",
-     "spec/integration/instance_accessor_spec.rb",
-     "spec/integration/requirement_reflection_spec.rb",
+     "spec/integration/active_record_persistence_spec.rb",
      "spec/integration/binding_extension_spec.rb",
+     "spec/integration/class_accessor_spec.rb",
+     "spec/integration/dynamic_requirement_spec.rb",
+     "spec/integration/event_definition_spec.rb",
+     "spec/integration/ex_machine_for_accounts_spec.rb",
+     "spec/integration/example_01_document_spec.rb",
+     "spec/integration/example_02_string_spec.rb",
+     "spec/integration/instance_accessor_spec.rb",
      "spec/integration/lathe_extension_spec.rb",
      "spec/integration/machine_duplication_spec.rb",
-     "spec/integration/state_definition_spec.rb",
-     "spec/integration/event_definition_spec.rb",
+     "spec/integration/relaxdb_persistence_spec.rb",
+     "spec/integration/requirement_reflection_spec.rb",
      "spec/integration/sanity_spec.rb",
-     "spec/integration/active_record_persistence_spec.rb",
-     "spec/integration/example_02_string_spec.rb",
-     "spec/integration/dynamic_requirement_spec.rb",
-     "spec/integration/ex_machine_for_accounts_spec.rb",
-     "spec/integration/temp_spec.rb"
+     "spec/integration/state_definition_spec.rb",
+     "spec/integration/transition_spec.rb",
+     "spec/units/binding_spec.rb",
+     "spec/units/event_spec.rb",
+     "spec/units/exceptions_spec.rb",
+     "spec/units/fu_space_spec.rb",
+     "spec/units/lathe_spec.rb",
+     "spec/units/machine_spec.rb",
+     "spec/units/method_factory_spec.rb",
+     "spec/units/sprocket_spec.rb",
+     "spec/units/state_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
