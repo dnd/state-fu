@@ -50,18 +50,29 @@ describe "requirement objects" do
   end
 
   describe "requirements with names beginning with not_" do
-    it "should return the boolean opposite of the requirement name without not_" do
+
+    it "should return the opposite of the requirement name without not_" do
+      @binding.respond_to?(:valid_password?).should == true
+      @binding.respond_to?(:not_valid_password?).should == false
       @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
       @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == false
+    end
 
+    it "should call the method directly if one exists" do
+      mock( @binding ).not_valid_password?() { true }
+      @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
+      @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == true
+    end
+
+    it "should act as the opposite of requirement in guarding a transition" do
       @binding.account_expired?.should == false
       @binding.valid_password?.should == true
-
+      mock( @binding ).valid_password_test { false }
       t = @binding.login_success(:logged_in)
       t.requirements.should == [:not_account_expired?, :valid_password?]
+      t.unmet_requirements.should == [:valid_password?]
+      mock( @binding ).valid_password_test.times(2) { true }
       t.unmet_requirements.should == []
-      @binding.fireable?( [:login_success,:logged_in] ).should == true
-      @obj.login_success?(:logged_in).should == true
       @obj.login_success!(:logged_in).should == true
       @binding.should == :logged_in
     end
