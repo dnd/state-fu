@@ -5,11 +5,12 @@ module StateFu
   class FuSpace
     cattr_reader :named_machines, :class_machines, :field_names
 
-    # class_machines[ Class ][ method_name ] # => a StateFu::Machine
-    # class_machines[ Klass ][ nil ]         # => the Klass's default Machine
-    # field_names[ Class ][ method_name ] # => name of attribute / db field
-
     # return the default machine, or an empty hash, given a missing index.
+    #
+    # * class_machines[ Class ][ method_name ] # => a StateFu::Machine
+    # * class_machines[ Klass ][ nil ]         # => the Klass's default Machine
+    # * field_names[ Class ][ method_name ]    # => name of attribute / db field
+    #
     LAZY_HASH = lambda do |h, k|
       if k.nil?
         self[ StateFu::DEFAULT_MACHINE ]

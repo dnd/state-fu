@@ -8,7 +8,9 @@
 
 * Documentation, documentation, documentation: cucumber.
 * specs
-** move specs into bdd folder & use cuke for API / features
+** write tool for skeleton rspec unit tests
+** RDOC / code comments
+** move current specs into bdd folder & use cuke for API / features
 ** move towards full & consistent rspec unit tests
 ** rcov (waiting for 1.9) / heckle / et al
 ** real-world example machines for cucumber features
@@ -21,9 +23,6 @@
 * gem release / script for RubyForge; rubyforge project page
 
 * Deep copy / duplication / serialization
-
-* event hook for reconstituted[_at] ( eg :new )
-  huh?
 
 * next_state & next_state! method should be able to take a hash or proc a filter
 ** hash filter based on .options

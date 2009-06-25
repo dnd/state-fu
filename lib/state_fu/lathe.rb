@@ -1,10 +1,17 @@
 module StateFu
+  # A Lathe parses and a Machine definition and returns a freshly turned
+  # Machine.
+  #
+  # It provides the means to define the arrangement of StateFu objects
+  # ( eg States and Events) which comprise a workflow, process,
+  # lifecycle, circuit, syntax, etc.
   class Lathe
 
     # NOTE: Sprocket is the abstract superclass of Event and State
 
     attr_reader :machine, :sprocket, :options
 
+    # you don't need to call this directly.
     def initialize( machine, sprocket = nil, options={}, &block )
       @machine  = machine
       @sprocket = sprocket

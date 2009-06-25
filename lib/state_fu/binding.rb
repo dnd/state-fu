@@ -295,6 +295,9 @@ module StateFu
       end
     end
 
+    # change the current state of the binding without any
+    # requirements or other sanity checks, or any hooks firing.
+    # Useful for test / spec scenarios, and abusing the framework.
     def teleport!( target )
       persister.current_state=( machine.states[target] )
     end
@@ -310,9 +313,11 @@ module StateFu
         map {|x| x.join('=') }.join( " " ) + ' =>|'
     end
 
+    # let's be == the current_state_name as a symbol.
+    # a nice little convenience.
     def == other
-      if other.respond_to?(:to_sym) && current_state_name.is_a?(Symbol)
-        other.to_sym == current_state_name || super( other )
+      if other.respond_to?( :to_sym ) && current_state
+        current_state_name == other.to_sym || super( other )
       else
         super( other )
       end

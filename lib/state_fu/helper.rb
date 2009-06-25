@@ -106,10 +106,12 @@ module StateFu
     # is there exactly one possible event to fire, with a single
     # target event?
     def next?
+      raise NotImplementedError
     end
 
     # if next?, return the event
     def next
+      raise NotImplementedError
     end
 
   end
@@ -186,11 +188,14 @@ module StateFu
     end
   end  # OrderedHash
 
+  # satanic incantations we use for evaluating blocks conditionally,
+  # massaging their arguments and managing execution context.
   module ContextualEval
+    # :nodoc:
     module InstanceMethods
 
       # if we use &block syntax it stuffs the arity up, so we have to
-      # pass it as a normal argument
+      # pass it as a normal argument. Ruby bug!
       def limit_arguments( block, *args )
         case block.arity
         when -1, 0

@@ -42,6 +42,7 @@ module StateFu
       self.to_sym === other.to_sym
     end
 
+    # display nice and short
     def inspect
       s = self.to_s
       s = s[0,s.length-1]
