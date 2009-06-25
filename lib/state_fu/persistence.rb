@@ -2,32 +2,18 @@ module StateFu
   module Persistence
     DEFAULT_FIELD_NAME_SUFFIX = '_field'
 
-    def self.prepare_class( klass )
-      return if ( klass.instance_methods + klass.private_methods + klass.protected_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
-      alias_method :method_missing_before_state_fu, :method_missing
-      klass.class_eval do
-        def method_missing( method_name, *args, &block )
-          args.unshift method_name
-          if @state_fu_initialized
-            method_missing_before_state_fu( *args, &block )
-          else
-            state_fu!
-            if respond_to?(method_name)
-              send( *args, &block )
-            else
-              method_missing_before_state_fu( *args, &block )
-            end
-          end
-        end # method_missing
-      end # class_eval
-    end # prepare_class
-
+    # checks to see if the field_name for persistence is a
+    # RelaxDB attribute.
+    # Safe to use if RelaxDB is not included.
     def self.relaxdb_document_property?( klass, field_name )
       Object.const_defined?('RelaxDB') &&
         klass.ancestors.include?( ::RelaxDB::Document ) &&
         klass.properties.map(&:to_s).include?( field_name.to_s )
     end
 
+    # checks to see if the field_name for persistence is an
+    # ActiveRecord column.
+    # Safe to use if ActiveRecord is not included.
     def self.active_record_column?( klass, field_name )
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
@@ -35,6 +21,7 @@ module StateFu
         klass.columns.map(&:name).include?( field_name.to_s )
     end
 
+    # returns the appropriate persister class for the given class & field name.
     def self.class_for( klass, field_name )
       if active_record_column?( klass, field_name )
         self::ActiveRecord
@@ -45,6 +32,7 @@ module StateFu
       end
     end
 
+    # returns a persister appropriate to the given binding and field_name
     def self.for( binding, field_name )
       class_for( binding.object.class, field_name ).new( binding, field_name )
     end
