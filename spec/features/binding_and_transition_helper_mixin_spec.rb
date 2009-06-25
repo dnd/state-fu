@@ -56,7 +56,7 @@ describe "extending bindings and transitions with Lathe#helper" do
     @obj = Klass.new
     @binding       = @obj.state_fu
     @other_binding = @obj.other
-    @transition    = @obj.state_fu.next_transition
+    @transition    = @obj.state_fu.transition(:a2b)
   end # before
 
   #
@@ -80,6 +80,28 @@ describe "extending bindings and transitions with Lathe#helper" do
 
       it "should respond to other_requirement_satisfier?" do
         @binding.should respond_to( :other_requirement_satisfier?)
+      end
+
+    end
+  end
+
+  describe "transition" do
+    describe "instance methods" do
+
+      it "should respond to helper_method" do
+        @transition.should respond_to( :helper_method)
+      end
+
+      it "should respond to other_helper_method" do
+        @transition.should respond_to( :other_helper_method)
+      end
+
+      it "should respond to requirement_satisfier?" do
+        @transition.should respond_to( :requirement_satisfier?)
+      end
+
+      it "should respond to other_requirement_satisfier?" do
+        @transition.should respond_to( :other_requirement_satisfier?)
       end
 
     end
