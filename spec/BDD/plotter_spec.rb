@@ -102,7 +102,6 @@ describe StateFu::Plotter do
 
         it "should return a string" do
           @plotter.generate_dot!.should be_kind_of(String)
-          puts @plotter.dot
         end
 
         it "should extend the string to respond_to save_as" do

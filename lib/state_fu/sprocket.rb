@@ -30,6 +30,14 @@ module StateFu
       "#<#{self.class}::#{self.object_id} @name=#{name.inspect}>"
     end
 
+    def []v
+      options[v]
+    end
+
+    def []=v,k
+      options[v]=k
+    end
+
   end
 end
 

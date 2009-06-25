@@ -69,6 +69,21 @@ namespace :spec do
     exec 'autospec'
   end
 
+    def find_last_modified_spec
+    require 'find'
+    specs = []
+    Find.find( File.expand_path(File.join(File.dirname(__FILE__),'spec'))) do |f|
+      next unless f !~ /\.#/ && f =~ /_spec.rb$/
+      specs << f
+    end
+    spec = specs.sort_by { |spec| File.stat( spec ).mtime }.last
+  end
+
+  desc "runs the last modified spec, without mucking about"
+  Spec::Rake::SpecTask.new(:last) do |t|
+    t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
+    t.spec_files = FileList[find_last_modified_spec]
+  end
 end
 
 desc 'Runs irb in this project\'s context'
@@ -88,6 +103,6 @@ begin
       t.cucumber_opts = "--format pretty"
   end
 rescue LoadError => e
-end 
+end
 
 task :default => 'spec:all'
