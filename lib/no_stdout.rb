@@ -3,7 +3,7 @@ require 'stringio'
 # a module for suppressing or capturing STDOUT or STDERR.
 # useful when shelling out to "noisy" applications or to suppress
 # output during tests.
-module NoStdout
+module NoStdout # :nodoc:all
   module InstanceMethods
 
     # Suppresses or redirects STDOUT inside the given block.

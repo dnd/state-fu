@@ -1,4 +1,4 @@
-module ActiveSupport #:nodoc:
+module ActiveSupport #:nodoc:all
   module CoreExtensions #:nodoc:
     module Array #:nodoc:
       # Makes it easier to access parts of an array.
@@ -12,7 +12,7 @@ module ActiveSupport #:nodoc:
         def from(position)
           self[position..-1]
         end
-        
+
         # Returns the beginning of the array up to +position+.
         #
         #   %w( a b c d ).to(0)  # => %w( a )

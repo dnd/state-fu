@@ -1,4 +1,4 @@
-class Object
+class Object # :nodoc:all
   # Returns +value+ after yielding +value+ to the block. This simplifies the
   # process of constructing an object, performing work on the object, and then
   # returning the object from a method. It is a Ruby-ized realization of the K
@@ -25,7 +25,7 @@ class Object
   #  end
   #
   #  foo # => ['bar', 'baz']
-  #  
+  #
   #  # returning with a block argument
   #  def foo
   #    returning [] do |values|
@@ -33,7 +33,7 @@ class Object
   #      values << 'baz'
   #    end
   #  end
-  #  
+  #
   #  foo # => ['bar', 'baz']
   def returning(value)
     yield(value)

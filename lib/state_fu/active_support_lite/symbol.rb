@@ -1,4 +1,4 @@
-unless :to_proc.respond_to?(:to_proc)
+unless :to_proc.respond_to?(:to_proc) # :nodoc:all
   class Symbol
     # Turns the symbol into a simple proc, which is especially useful for enumerations. Examples:
     #

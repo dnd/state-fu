@@ -6,7 +6,7 @@
 #  end
 #
 #  Person.hair_colors = [:brown, :black, :blonde, :red]
-class Class
+class Class # :nodoc:all
   def cattr_reader(*syms)
     syms.flatten.each do |sym|
       next if sym.is_a?(Hash)

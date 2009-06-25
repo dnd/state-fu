@@ -1,4 +1,4 @@
-module ActiveSupport #:nodoc:
+module ActiveSupport #:nodoc:all:
   module CoreExtensions #:nodoc:
     module Hash #:nodoc:
       module Keys
