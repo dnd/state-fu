@@ -6,6 +6,8 @@ $LOAD_PATH.unshift( "#{thisdir}/../lib" )
 require 'state-fu'
 require 'no_stdout'
 
+StateFu::Logger.suppress!
+
 require 'rubygems'
 
 {"rr" => "rr", "spec" => "rspec" }.each do |lib, gem_name|
@@ -66,9 +68,9 @@ module MySpecHelper
   def skip_unless_relaxdb
     unless Object.const_defined?( 'RelaxDB' )
       pending('Skipping specs because you do not have the relaxdb gem (paulcarey-relaxdb) installed ...')
-    end 
-  end 
-  
+    end
+  end
+
   def prepare_relaxdb( options={} )
     begin
       require 'relaxdb'
@@ -76,7 +78,7 @@ module MySpecHelper
         RelaxDB.configure :host => "localhost", :port => 5984, :design_doc => "spec_doc"
         RelaxDB.delete_db "relaxdb_spec" rescue "ok"
         RelaxDB.use_db    "relaxdb_spec"
-        RelaxDB.enable_view_creation 
+        RelaxDB.enable_view_creation
       end
     rescue LoadError => e
       # pending "skipping specifications due to load error: #{e}"
@@ -91,7 +93,7 @@ module MySpecHelper
       exit!
     end
     #
-  end 
+  end
 
   def make_pristine_class(class_name, superklass=Object, reset_first = false)
     reset! if reset_first

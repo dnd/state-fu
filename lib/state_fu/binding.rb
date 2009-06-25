@@ -17,7 +17,7 @@ module StateFu
       StateFu::Persistence.prepare_field( object.class, field_name )
       # add a persister
       @persister     = StateFu::Persistence.for( self, field_name )
-      Logger.info( "Persister (#{@persister.class}) added: #{method_name} as field #{field_name}" )
+      Logger.debug( "Persister (#{@persister.class}) added: #{method_name} as field #{field_name}" )
 
       # define event methods on self( binding ) and @object
       StateFu::MethodFactory.new( self ).install!

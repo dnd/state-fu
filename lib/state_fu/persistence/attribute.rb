@@ -5,7 +5,7 @@ module StateFu
       def self.prepare_field( klass, field_name )
         # ensure getter exists
         unless klass.instance_methods.map(&:to_sym).include?( field_name.to_sym )
-          Logger.info "Adding attr_reader :#{field_name} for #{klass}"
+          Logger.debug "Adding attr_reader :#{field_name} for #{klass}"
           _field_name = field_name
           klass.class_eval do
             private
@@ -15,7 +15,7 @@ module StateFu
 
         # ensure setter exists
         unless klass.instance_methods.map(&:to_sym).include?( :"#{field_name}=" )
-          Logger.info "Adding attr_writer :#{field_name}= for #{klass}"
+          Logger.debug "Adding attr_writer :#{field_name}= for #{klass}"
           _field_name = field_name
           klass.class_eval do
             private
@@ -31,13 +31,13 @@ module StateFu
 
       def read_attribute
         string = object.send( field_name )
-        Logger.info "Read attribute #{field_name}, got #{string.inspect} for #{object.inspect}"
+        Logger.debug "Read attribute #{field_name}, got #{string.inspect} for #{object.inspect}"
         string
       end
 
       def write_attribute( string_value )
         writer_method = "#{field_name}="
-        Logger.info "Writing attribute #{field_name} -> #{string_value.inspect} for #{object.inspect}"
+        Logger.debug "Writing attribute #{field_name} -> #{string_value.inspect} for #{object.inspect}"
         object.send( writer_method, string_value )
       end
 

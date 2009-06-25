@@ -34,11 +34,11 @@ module StateFu
         @current_state = find_current_state()
 
         if current_state.nil?
-          Logger.info("Object has an undefined state: #{object}")
-          Logger.info("Machine has no states: #{machine}") if machine.states.empty?
+          Logger.warn("undefined state for binding #{binding} on #{object} with field_name #{field_name.inspect}")
+          Logger.warn("Machine for #{object} has no states: #{machine}") if machine.states.empty?
         else
           persist!
-          # Logger.debug("Object #{object} resuming #{binding.method_name} at #{current_state.name}: #{object.inspect}")
+          Logger.debug("#{object} resumes #{binding.method_name} at #{current_state.name}")
         end
       end
 
