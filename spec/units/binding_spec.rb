@@ -3,6 +3,27 @@ require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 describe StateFu::Binding do
   include MySpecHelper
 
+  describe "instance methods" do
+  end
+
+  #
+  # class methods
+  #
+
+  describe "class methods" do
+  end
+
+
+  #
+  #
+  #
+
+
+
+  #
+  #
+  #
+
   before do
     reset!
     make_pristine_class('Klass')
@@ -100,7 +121,7 @@ describe StateFu::Binding do
       end
     end
 
-    describe ".state() / initial state" do
+    describe ".state and .initial_state" do
       it "should default to machine.initial_state when no initial_state is explicitly defined" do
         @machine.initial_state.name.should == :new
         @binding.current_state.should == @machine.initial_state
@@ -133,11 +154,11 @@ describe StateFu::Binding do
         end
         @obj = Klass.new
       end
-      
+
       describe "when called with arguments which would return a valid transition from .transition()" do
-        it "should return true" do 
+        it "should return true" do
           @obj.state_fu.fireable?(:am_fireable).should == true
-        end 
+        end
       end
 
       describe "when called with arguments which would raise an InvalidTransition from .transition()" do
@@ -148,10 +169,10 @@ describe StateFu::Binding do
           @obj.state_fu.fireable?(:not_fireable).should == nil
         end
       end
-      
+
       describe "when called with additional arguments after the destination event/state" do
         it "should pass the arguments to any requirements to determine transition availability"
-      end 
+      end
 
     end
 

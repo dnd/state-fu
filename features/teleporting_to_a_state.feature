@@ -25,6 +25,8 @@ Scenario: calling #teleport to avoid event conditions and behaviuors
   MyClass.machine(:marital_status) do
     state :married do
       event :divorce, :to => :single
+      requires :paperwork
+      requires :lawyer
       on_exit :lose_half_of_everything!
     end
   end

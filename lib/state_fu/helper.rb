@@ -117,7 +117,9 @@ module StateFu
       self.map do |h|
         case h
         when String, Symbol
-          Object.const_get( h.to_s.classify )
+          mod_name = h.to_s.split('/').inject(Object) do |mod, part|
+            mod = mod.const_get( part.camelize )
+          end
         when Module
           h
         else
@@ -225,7 +227,14 @@ module StateFu
       def evaluate_named_proc_or_method( name, *args )
         if (name.is_a?( Proc ) && proc = name) || proc = machine.named_procs[ name ]
           evaluate( *args, &proc )
-        else
+        elsif self.respond_to?( name )
+          if method(name).arity == 0
+            send(name)
+          else
+            send(name, *args )
+          end
+          # evaluate( *args, &method(name) )
+        elsif object.respond_to?( name )
           call_on_object_with_optional_args( name, *args )
         end
       end

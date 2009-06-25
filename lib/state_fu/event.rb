@@ -101,5 +101,9 @@ module StateFu
       end.empty?
     end
 
+    def requires( *args, &block )
+      lathe.requires( *args, &block )
+    end
+
   end
 end
