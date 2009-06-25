@@ -8,6 +8,11 @@ module StateFu
     attr_reader :transition
     DEFAULT_MESSAGE = "The transition was halted"
 
+    # SPECME
+    def unmet_requirements
+      transition.unmet_requirements
+    end
+
     def initialize( transition, message=DEFAULT_MESSAGE, options={})
       @transition = transition
       @options    = options

@@ -79,10 +79,12 @@ module StateFu
     # is there exactly one possible event to fire, with a single
     # target event?
     def next?
+      raise NotImplementedError
     end
 
     # if next?, return the state
     def next
+      raise NotImplementedError
     end
 
   end

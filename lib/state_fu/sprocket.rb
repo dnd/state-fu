@@ -26,6 +26,10 @@ module StateFu
       raise NotImeplementedError # abstract
     end
 
+    def to_s
+      "#<#{self.class}::#{self.object_id} @name=#{name.inspect}>"
+    end
+
   end
 end
 

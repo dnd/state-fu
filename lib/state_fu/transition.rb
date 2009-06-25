@@ -211,6 +211,9 @@ module StateFu
     alias_method :pretend?,       :testing?
     alias_method :dry_run?,       :testing?
 
+    # an accepted transition == true
+    # an unaccepted transition == false
+    # same for === (for case equality)
     def == other
       case other
       when true
