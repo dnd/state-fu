@@ -50,20 +50,16 @@ module StateFu
         display_hooks.delete(k) if v.empty?
       end
       unless display_hooks.empty?
-        s << "hooks=#{display_hooks.inspect} "
+        s << " hooks=#{display_hooks.inspect}"
       end
       unless entry_requirements.empty?
-        s << "entry_requirements=#{entry_requirements.inspect} "
+        s << " entry_requirements=#{entry_requirements.inspect}"
       end
       unless exit_requirements.empty?
-        s << "exit_requirements=#{exit_requirements.inspect}"
+        s << " exit_requirements=#{exit_requirements.inspect}"
       end
       s << ">"
       s
-    end
-
-    def to_s
-      "#<#{self.class}::#{self.object_id} @name=#{name.inspect}>"
     end
 
   end
