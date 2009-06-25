@@ -4,24 +4,34 @@ h2. What is it?
 
 State-Fu is:
 
- * an unique toolkit for state-oriented programming
+ * a generalized, extensible framework for state-oriented,
+   event-driven programming in Ruby.
 
- * a rich DSL for describing workflows, rules engines and behaviour
+ * a rich DSL for describing workflows, rules engines, behaviours and
+   processes
 
- * something you've probably wanted for a long time but didn't know it
+ * useful both as a Rails plugin, and in standalone ruby programs
+   without any additional dependencies.
 
 It lets you describe:
 
  * series of discrete states
 
- * events which can change the current state
+ * events which allow transitions to occur between states
 
- * rules about when these events can occur
+ * rules (requirements) about when these transitions can occur
 
  * behaviours which occur when they do
 
+Which adds up to a surprisingly useful way to skin a lot of
+problems
+
 Other libraries exist for ruby which do some or all of these
 things. "What's different about State-Fu?", you may ask.
+
+h2. Why StateFu is not your grandmother's state machine
+
+h3. Flippant answer:
 
 Those libraries you've played with are toys. They're made of
 plastic. State-Fu is forged from a reassuringly dense but
@@ -80,18 +90,17 @@ It is also delightfully elegant and easy to use for simple things:
 
 </code></pre>
 
+h3. Feature Comparison and Detailed Answer
+
 A few of the features which set State-Fu apart for more ambitious work are:
 
- * a lovely, simple and flexible API gives you plenty of choices
+ * a lovely, simple and flexible API gives you plenty of choices about
+   how to describe your problem domain.
 
- * use an ActiveRecord field for state persistence, or just an
-   attribute - or use both, on the same class, for different workflows
-
- * customising the persistence mechanism (eg to use a Rails session,
-   or a text file) is as easy as defining a getter and setter method
-
- * define any number of workflows on the same object / model, or re-use
-   them across multiple classes
+ * define any number of workflows on the same object / model;
+   workflows (Machines) can be entirely separate, or interact with
+   each other. Re-use machines across multiple classes, serialize them
+   to a database, or build them on the fly.
 
  * events can transition from / to any number of states
 
@@ -101,8 +110,8 @@ A few of the features which set State-Fu apart for more ambitious work are:
    state machine itself
 
  * requirements determine at runtime whether a particular state
-   transition can occur, and if not, can tell a user what they must do
-   to satisfy the requirements.
+   transition can occur, and if not, can tell a user (or developer)
+   what they must do to satisfy the requirements.
 
  * requirement failure messages can be generated at runtime, making
    use of whatever application and state-machine context they need
@@ -111,22 +120,50 @@ A few of the features which set State-Fu apart for more ambitious work are:
    determine why, and where from
 
  * in every event hook, requirement filter, and other method calls,
-   you have complete and tidy access to your classes, the state
-   machine, and the transition context. Use real ruby code anywhere,
-   without breathing through a straw!
+   you have complete and consistent access to your classes, its
+   StateFu::Machines, and any Transition context. Use real ruby code
+   anywhere, without breathing through a straw!
 
- * extend State-Fu with helper modules, or raw blocks of ruby code, to
-   model your problem domain - globally, per state machine / workflow,
-   or for an individual event transition
+ * extend State-Fu (with Lathe#helper) Binding and Transition
+   instances for your Machine to define your a DSL customized for your
+   problem domain, and to keep your class definitions clean. Helper
+   methods have easy access to all the context associated with your
+   object instance, its StateFu::Machines and any Transition in
+   progress.
+
+ * extend a State-Fu Lathe (with Lathe#tool) to keep your Machine
+   definitions DRY
 
  * store arbitrary meta-data on any component of State-Fu - a simple
-   but extremely powerful tool for integration
+   but extremely powerful tool for integration with almost anything.
 
  * designed for transparency, introspection and ease of debugging,
    which means a dynamic, powerful system you can actually use without
-   headaches
+   headaches.
+
+ * flexible and helpful logging out of the box - will use the Rails
+   logger if you're in a Rails project, or standalone logging to
+   STDOUT or a file. Configurable loglevel and message prefixes help
+   StateFu be a good citizen in a shared application log.
 
  * magically generate diagrams of state machines / workflows with graphviz
+
+ * "magically" use an ActiveRecord field for state persistence, or just an
+   attribute - or use both, on the same class, for different
+   workflows. If an ActiveRecord field exists for a machine's
+   field_name (by default, the machine's name suffixed with '_field';
+   the default machine name is 'state_fu', so if you don't explicitly
+   name a machine it will look for 'state_fu_field' in your
+   ActiveRecord columns (if ActiveRecord is included) and use
+   that. Otherwise, an attr_accessor will be used (and created, if
+   necessary).
+
+ * customising the persistence mechanism (eg to use a Rails session,
+   or a text file, or your choice of ORM) is usually as easy as
+   defining a getter and setter method for the persistence field, and
+   a rule about when to use it. If you want to use StateFu with a
+   persistence mechanism which is not yet supported, I'd like to hear
+   about it.
 
  * fast, lightweight and useful enough to use in any ruby
    project - works with Rails but does not require it.
@@ -183,22 +220,33 @@ To install the dependencies for running specs:
 
 Now you can simply <code>include StateFu</code> in any class you wish to make stateful.
 
-The spec folder is currently the best source of documentation.
+The spec/ and features/ folders are currently one of the best source
+of documentation. The documentation is gradually evolving to catch up
+with the features, but if you have any questions I'm happy to help you
+get started.
 
-If you have questions, feature request or ideas, please join the "google group":http://groups.google.com/group/state-fu
+If you have questions, feature request or ideas, please join the
+"google group":http://groups.google.com/group/state-fu or send me a
+message on GitHub.
 
-A note about ActiveSupport:
+h3. A note about ActiveSupport
 
 StateFu will use ActiveSupport if it is already loaded. If not, it
-will load its own (very heavily cut down) 'lite' version. This means
-that if you require StateFu *before* other libraries which require
-ActiveSupport (e.g. ActiveRecord), you may have to explicitly
-<code>require 'activesupport'</code> before loading the dependent
-libraries.
+will load its own (heavily trimmed) 'lite' version.
+
+In most projects this will behave transparently, but it does mean that
+if you require StateFu *before* other libraries which
+require ActiveSupport (e.g. ActiveRecord), you may have to
+explicitly <code>require 'activesupport'</code> before loading the
+dependent libraries.
+
+So if you plan to use ActiveSupport in a stand-alone project with
+StateFu, you should require it before StateFu.
+
+h3. Addditional Resources
 
 Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
 
 And the "build monitor":http://runcoderun.com/davidlee/state-fu/
 
-And the "RDoc":http://rdoc.info/projects/davidlee/state-fu/ , which
-needs a bit of love.
+And the "RDoc":http://rdoc.info/projects/davidlee/state-fu/
