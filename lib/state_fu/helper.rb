@@ -238,6 +238,12 @@ module StateFu
           # evaluate( *args, &method(name) )
         elsif object.respond_to?( name )
           call_on_object_with_optional_args( name, *args )
+        else # method is not defined
+          if name.to_s =~ /^not_(.*)$/
+            !evaluate_named_proc_or_method( $1, *args )
+          else
+            raise NoMethodError.new("#{name} is not defined on #{object} or #{self} or as a named proc in #{machine}")
+          end
         end
       end
 

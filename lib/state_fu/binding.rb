@@ -183,9 +183,7 @@ module StateFu
     end
     # alias_method :evaluate_requirement, :evaluate_requirement_with_args
 
-    def evaluate_requirement_with_transition( name, t )
-      evaluate_named_proc_or_method( name, t )
-    end
+    alias_method :evaluate_requirement_with_transition, :evaluate_named_proc_or_method
 
     # TODO SPECME HACKERY CRUFT FIXME THISSUCKS and needs *args
     # def evaluate_requirement_message( name, dest )

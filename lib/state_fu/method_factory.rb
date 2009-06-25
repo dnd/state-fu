@@ -78,14 +78,14 @@ module StateFu
         # obj.event_name?( target )
         # true if the event is fireable? (ie, requirements met)
         method_name = "#{event.name}?"
-        define_method_on_metaclass( obj, method_name ) do |target|
-          _binding.fireable?( [event, target] )
+        define_method_on_metaclass( obj, method_name ) do |target, *args|
+          _binding.fireable?( [event, target], *args )
         end
 
         # obj.event_name!( target, *args )
         # creates, fires and returns a transition
         method_name = "#{event.name}!"
-        define_method_on_metaclass( obj, method_name ) do |target,*args|
+        define_method_on_metaclass( obj, method_name ) do |target, *args|
           _binding.fire!( [event, target], *args )
         end
 
