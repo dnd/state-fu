@@ -211,5 +211,15 @@ module StateFu
     alias_method :pretend?,       :testing?
     alias_method :dry_run?,       :testing?
 
+    def == other
+      case other
+      when true
+        accepted?
+      when false
+        !accepted?
+      else
+        super( other )
+      end
+    end
   end
 end
