@@ -41,6 +41,19 @@ module StateFu
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
 
+    def object=( reference )
+      raise ArgumentError.new( reference ) unless object == reference
+      @object = reference
+    end
+
+    def reload()
+      if persister.is_a?( Persistence::ActiveRecord )
+        object.reload
+      end
+      persister.reload
+      self
+    end
+
     # the perister's field_name (a symbol)
     def field_name
       persister.field_name

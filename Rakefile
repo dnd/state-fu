@@ -5,6 +5,8 @@ require "date"
 require "fileutils"
 require "rubygems"
 
+load File.join( File.dirname(__FILE__),"/lib/tasks/state_fu.rake" )
+
 module Rakefile
   def self.windows?
     /djgpp|(cyg|ms|bcc)win|mingw/ =~ RUBY_PLATFORM
@@ -69,7 +71,7 @@ namespace :spec do
     exec 'autospec'
   end
 
-    def find_last_modified_spec
+  def find_last_modified_spec
     require 'find'
     specs = []
     Find.find( File.expand_path(File.join(File.dirname(__FILE__),'spec'))) do |f|

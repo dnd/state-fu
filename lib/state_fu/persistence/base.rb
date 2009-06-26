@@ -52,6 +52,11 @@ module StateFu
         end
       end
 
+       
+      def reload
+        @current_state = find_current_state()
+      end
+    
       def machine
         binding.machine
       end
@@ -63,10 +68,6 @@ module StateFu
       def klass
         object.class
       end
-
-#      def method_name
-#        binding.method_name
-#      end
 
       def current_state=( state )
         raise(ArgumentError, state.inspect) unless state.is_a?(StateFu::State)
