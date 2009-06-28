@@ -10,25 +10,32 @@ module StateFu
       define_event_methods_on( @binding.object )
     end
 
-    # ensure the methods are available before calling state_fu
-    def self.prepare_class( klass )
-      return if ( klass.instance_methods + klass.private_methods + klass.protected_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
+    def self.define_once_only_method_missing( klass )
+      return if ( klass.instance_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
       klass.class_eval do
         alias_method :method_missing_before_state_fu, :method_missing
-
         def method_missing( method_name, *args, &block )
-          if @state_fu_initialized
-            method_missing_before_state_fu( method_name, *args, &block )
+          # invoke state_fu! to define methods
+          state_fu!
+          # reset method_missing for this instance
+          # more for tidy stack traces than anything else
+          metaclass = class << self; self; end
+          metaclass.instance_eval do
+            alias_method :method_missing, :method_missing_before_state_fu
+          end
+          # call the newly defined method or the original method_missing
+          if respond_to?( method_name )
+            send( method_name, *args, &block )
           else
-            state_fu!
-            if respond_to?( method_name )
-              send( method_name, *args, &block )
-            else
-              method_missing_before_state_fu( method_name, *args, &block )
-            end
+            method_missing_before_state_fu( method_name, *args, &block )
           end
         end # method_missing
       end # class_eval
+    end
+
+    # ensure the methods are available before calling state_fu
+    def self.prepare_class( klass )
+      self.define_once_only_method_missing( klass )
     end # prepare_class
 
     def define_method_on_metaclass( object, method_name, &block )
