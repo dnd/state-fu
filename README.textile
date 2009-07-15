@@ -190,6 +190,32 @@ I'd also like to tip my hat at John Barnette, who's own
 (coincidentally named) Stateful set a very high standard with an
 exceptionally elegant API.
 
+h3. StateFu is not a complete BPM (Business Process Management) platform
+
+It's worth noting that StateFu is at it's core a state machine, which
+strives to be powerful enough to be able to drive many kinds of
+application behaviour.
+
+It is not, however, a "proper" workflow engine on par with Ruote. In
+StateFu the basic units with which "workflows" are built are states
+and events; Ruote takes a higher level view, dealing with processes
+and participants. As a result, it's capable of directly implementing
+these design patterns:
+
+http://openwferu.rubyforge.org/patterns.html
+
+Whereas StateFu cannot, for example, readily model forking / merging
+of processes (nor does it handles scheduling, process management, etc.
+
+The author of Ruote, the Ruby Workflow Engine, outlines the difference
+pretty clearly here:
+
+http://jmettraux.wordpress.com/2009/07/03/state-machine-workflow-engine/
+
+If your application can be described with StateFu, you'll likely find
+it simpler to get running and work with; if not, you may find Ruote,
+or a combination of the two, suits your needs perfectly.
+
 h2. Getting started
 
 You can either clone the repository in the usual fashion (eg to
@@ -257,3 +283,12 @@ Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
 And the "build monitor":http://runcoderun.com/davidlee/state-fu/
 
 And the "RDoc":http://rdoc.info/projects/davidlee/state-fu/
+
+h3. Thanks
+
+ * dsturnbull, for helping w/ a patch to stop an error being raised
+   when an activerecord model has no database table
+
+ * lachie for proofreading the README code
+
+ * Ryan Allen for his original Workflow library
