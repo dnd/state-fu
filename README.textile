@@ -71,6 +71,13 @@ It is also delightfully elegant and easy to use for simple things:
       event :delete, :from => :ALL, :to => :deleted do
         execute :destroy
       end
+
+      # save all states once transition is complete.
+      # this wants to be last, as it iterates over each state which is
+      # already defined.
+      states do
+        accepted { object.save! }
+      end
     end
   end
 

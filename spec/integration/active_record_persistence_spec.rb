@@ -30,11 +30,25 @@ describe "an ActiveRecord model with StateFu included:" do
     ExampleRecord.superclass.should == ActiveRecord::Base
   end
 
+  describe "when the ActiveRecord model has no table yet (eg before migrations)" do
+    before do
+      make_pristine_class('TableMissingClass', ActiveRecord::Base )
+      TableMissingClass.class_eval do
+        machine() { }
+      end
+    end
+
+    it "should not raise an error when the persister is instantiated" do
+      lambda { TableMissingClass.columns }.should raise_error
+      lambda { TableMissingClass.machine }.should_not raise_error
+    end
+
+  end
   describe "when the default machine is defined with no field_name specified" do
     before do
       ExampleRecord.class_eval do
         machine do
-          state :initial do
+                              state :initial do
             event( :change, :to => :final ) { after :save! }
           end
         end

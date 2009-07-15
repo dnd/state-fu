@@ -18,6 +18,7 @@ module StateFu
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
         klass.ancestors.include?( ::ActiveRecord::Base ) &&
+        klass.table_exists? &&
         klass.columns.map(&:name).include?( field_name.to_s )
     end
 
