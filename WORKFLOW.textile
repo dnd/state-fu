@@ -51,17 +51,21 @@ On first inspection, the following would appear to be roughly
 equivalent:
 
 Ruote (ruby)
-<code><pre>
+<code>
+<pre>
 sequence do
   alpha
   bravo
 End
-</pre></code>
+</pre>
+</code>
 
 StateFu
-<code><pre>
+<code>
+<pre>
 event :change, :from =>  { :alpha => :bravo }
-</pre></code>
+</pre>
+</code>
 
 But, in Ruote, alpha and bravo are not states; they are participants ...
 <hr />
@@ -73,18 +77,22 @@ http://workflowpatterns.com/patterns/control/basic/wcp2.php
 which execute concurrently."
 
 Ruote
-<code><pre>
+<code>
+<pre>
 concurrence do
  alpha
  bravo
 end
-</pre></code>
+</pre>
+</code>
 
 StateFu (state branching)
 
-<code><pre>
+<code>
+<pre>
 event :fork, :from => :alpha, :to => [:bravo, :charlie]
-</pre></code>
+</pre>
+</code>
 
 The StateFu example above creates an event with two possible
 destinations - but exactly one must be chosen. To represent
@@ -117,17 +125,20 @@ h2. Exclusive Choice ( OR )
 
 Ruote
 
-<code><pre>
+<code>
+<pre>
 _if do
   equals :field_value => :x, :other-value => "y"
    participant :theodor # then
    participant :emma    # else
 end
-</pre></code>
+</pre>
+</code>
 
 StateFu
 
-<code><pre>
+<code>
+<pre>
 state( :pending_delivery) do
  event :deliver_to_folder, :to => :project_folder do
     requires :auto_sort_rule?
@@ -136,7 +147,8 @@ state( :pending_delivery) do
     requires :no_auto_sort_rule?   # evaluates to !auto_sort_rule?
   end
 end
-</pre></code>
+</pre>
+</code>
 
 The examples are obviously not equivalent, but I believe the answer is
 yes. Syntactic sugar is easy to add if this is a frequently recurring
