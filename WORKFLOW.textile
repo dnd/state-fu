@@ -120,10 +120,8 @@ Ruote
 <code><pre>
 _if do
   equals :field_value => :x, :other-value => "y"
-   # then
-   participant :theodor
-   # else
-   participant :emma
+   participant :theodor # then
+   participant :emma    # else
 end
 </code></pre>
 
