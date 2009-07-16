@@ -11,35 +11,36 @@ namespace :state_fu do
     FileUtils.cd pwd
   end
 
-  def graph_name( klass, workflow, doc_path = false )
-    parts = ["#{klass}_#{workflow}"]
+  def graph_name( klass, machine, doc_path = false )
+    parts = ["#{klass}_#{machine}"]
     if doc_path
       folder = parts.unshift( File.join( STATE_FU_APP_PATH, "doc/") )
-      FileUtils.mkdir( folder )
+      FileUtils.mkdir_p( folder )
       parts.push( '.png' )
     end
     parts.join
   end
 
-  def graph( klass, workflow )
-    name = graph_name( klass, workflow )
-    graphviz = `which dot` # '/opt/local/bin/dot'
+  def graph( klass, machine )
+    name = graph_name( klass, machine )
+    graphviz = `which dot`.strip || raise("Graphviz not installed? Can't find dot executable!")
+    puts graphviz
     tmp_dot  = "/tmp/#{name}.dot"
-    klass.workflow( workflow.to_sym ).graphviz.save_as( tmp_dot )
+    klass.machine( machine.to_sym ).graphviz.save_as( tmp_dot )
     tmp_png = tmp_dot + '.png'
-    doc_png = graph_name( klass, workflow, true )
+    doc_png = graph_name( klass, machine, true )
     puts( "#{graphviz} -Tpng -O #{tmp_dot}" )
     system( "#{graphviz} -Tpng -O #{tmp_dot}" )
-    # puts $?.inspect
-    # puts "#{ tmp_png}, #{doc_png}"
     FileUtils.cp tmp_png, doc_png
     doc_png
   end
 
   task :graph => :environment do |t|
-    StateFu::FuSpace.each do |klass, machines|
-      machines.each do |machine|
-        doc_png = graph( klass, machine )
+    StateFu::FuSpace.class_machines.each do |klass, machines|
+      machines.each do |machine_name, machine|
+        STDERR.puts "#{klass} -> #{machine_name.inspect}"
+        doc_png = graph( klass, machine_name )
+
         # yield doc_png if block_given?
       end
     end
