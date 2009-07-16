@@ -51,21 +51,23 @@ On first inspection, the following would appear to be roughly
 equivalent:
 
 Ruote (ruby)
-<code>
+
 <pre>
+<code>
 sequence do
   alpha
   bravo
 End
-</pre>
 </code>
+</pre>
 
 StateFu
-<code>
 <pre>
+<code>
 event :change, :from =>  { :alpha => :bravo }
-</pre>
 </code>
+</pre>
+
 
 But, in Ruote, alpha and bravo are not states; they are participants ...
 <hr />
@@ -77,22 +79,24 @@ http://workflowpatterns.com/patterns/control/basic/wcp2.php
 which execute concurrently."
 
 Ruote
-<code>
+
 <pre>
+<code>
 concurrence do
  alpha
  bravo
 end
-</pre>
 </code>
+</pre>
+
 
 StateFu (state branching)
 
-<code>
 <pre>
+<code>
 event :fork, :from => :alpha, :to => [:bravo, :charlie]
-</pre>
 </code>
+</pre>
 
 The StateFu example above creates an event with two possible
 destinations - but exactly one must be chosen. To represent
