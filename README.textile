@@ -282,13 +282,13 @@ Also see the "issue tracker":http://github.com/davidlee/state-fu/issues
 
 And the "build monitor":http://runcoderun.com/davidlee/state-fu/
 
-And the "RDoc":http://rdoc.info/projects/davidlee/state-fu/
+And the "RDoc":http://rdoc.info/projects/davidlee/state-fu
 
 h3. Thanks
 
  * dsturnbull, for helping w/ a patch to stop an error being raised
    when an activerecord model has no database table
 
- * lachie for proofreading the README code
+ * lachie, benkimball for pointing out README bugs / typos
 
  * Ryan Allen for his original Workflow library
