@@ -1,6 +1,7 @@
 http://openwferu.rubyforge.org/patterns.html
 
-So could StateFu model the workflow patterns presented here?
+h1. Could StateFu model the workflow patterns presented here (as Ruote
+does)?
 
 The short answer is: it could probably be used to model them in some
 way, as parts of a larger whole, but cannot (currently) express all of
@@ -26,17 +27,18 @@ suspect it's best avoided for simplicity's sake:
 
 http://www.opensourcery.co.za/2009/07/06/driving-business-processes-in-ruby/
 
-  "Workflow engines are business process operating systems."
+bq.  "Workflow engines are business process operating systems."
 
-  "Glad you like it, but be careful. As wonderful as the BPM/WFE world
+bq. "Glad you like it, but be careful. As wonderful as the BPM/WFE world
   sounds, it is a serious leap to take. First off all make sure that
   your situation necessitates a workflow engine. I’ve pointed a lot of
   people to a simpler daemon-kit + AMQP combination for their needs when
   asking about ruote. In the majority of simple automated tasks a state
   machine with worker processes will suffice. ruote is all about
   business processes and automating those processes."
-________________________________________________________________________
-1. Sequence
+
+<hr />
+h2. Sequence
 
 http://workflowpatterns.com/patterns/control/basic/wcp1.php
 
@@ -48,32 +50,41 @@ associated with it."
 On first inspection, the following would appear to be roughly
 equivalent:
 
-# Ruote (ruby)
+Ruote (ruby)
+<code><pre>
 sequence do
   alpha
   bravo
 End
+</code></pre>
 
-# StateFu
+StateFu
+<code><pre>
 event :change, :from =>  { :alpha => :bravo }
+</code></pre>
 
 But, in Ruote, alpha and bravo are not states; they are participants ...
-________________________________________________________________________
-2. Parallel Split / Concurrence / Fork
+<hr />
+h2. Parallel Split / Concurrence / Fork
 
 http://workflowpatterns.com/patterns/control/basic/wcp2.php
 
 "The divergence of a branch into two or more parallel branches each of
 which execute concurrently."
 
-# Ruote
+Ruote
+<code><pre>
 concurrence do
  alpha
  bravo
 end
+</code></pre>
 
-# StateFu (state branching)
+StateFu (state branching)
+
+<code><pre>
 event :fork, :from => :alpha, :to => [:bravo, :charlie]
+</code></pre>
 
 The StateFu example above creates an event with two possible
 destinations - but exactly one must be chosen. To represent
@@ -95,14 +106,18 @@ concise, unified way, it would need some additional features. As to
 whether either approach would be appropriate to [ some project ], I can't
 say without more solid requirements and some time to think / discuss.
 
-________________________________________________________________________
-3. Synchronization( AND-join, rendezvous, synchronizer )
+<hr />
+
+h2. Synchronization ( AND-join, rendezvous, synchronizer )
 
 I think the discussion above pretty much covers it.
-________________________________________________________________________
-4. Exclusive Choice ( OR )
+<hr />
 
-# Ruote
+h2. Exclusive Choice ( OR )
+
+Ruote
+
+<code><pre>
 _if do
   equals :field_value => :x, :other-value => "y"
    # then
@@ -110,8 +125,11 @@ _if do
    # else
    participant :emma
 end
+</code></pre>
 
-# StateFu
+StateFu
+
+<code><pre>
 state( :pending_delivery) do
  event :deliver_to_folder, :to => :project_folder do
     requires :auto_sort_rule?
@@ -120,23 +138,26 @@ state( :pending_delivery) do
     requires :no_auto_sort_rule?   # evaluates to !auto_sort_rule?
   end
 end
+</code></pre>
 
 The examples are obviously not equivalent, but I believe the answer is
 yes. Syntactic sugar is easy to add if this is a frequently recurring
 pattern.
 
-________________________________________________________________________
-5. Simple merge (XOR-join, exclusive OR-join, asynchronous join,
-merge)
+<hr />
+
+h2. Simple merge (XOR-join, exclusive OR-join, asynchronous join, merge)
 
 "After the case-payment or provide-credit tasks, initiate the
 product-receipt task."
 
 Ruote:
+
 "The ‘simple merge’ is implicitly supported by the ‘if’ and ‘case’
 expressions."
 
 StateFu:
+
 As per #2 & #3: yes for states, no for concurrent processes.
 
 In summary, Ruote and BPMs in general operate at a higher level of
