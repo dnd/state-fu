@@ -1,3 +1,4 @@
+require 'fileutils'
 namespace :state_fu do
 
   STATE_FU_APP_PATH      = Object.const_defined?('RAILS_ROOT') ? RAILS_ROOT : File.join( File.dirname(__FILE__), '/../..')
@@ -35,6 +36,7 @@ namespace :state_fu do
     doc_png
   end
 
+  desc "Graph workflows with dot"
   task :graph => :environment do |t|
     StateFu::FuSpace.class_machines.each do |klass, machines|
       machines.each do |machine_name, machine|
