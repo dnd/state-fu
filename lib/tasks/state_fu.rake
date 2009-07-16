@@ -1,8 +1,14 @@
 require 'fileutils'
-namespace :state_fu do
 
-  STATE_FU_APP_PATH      = Object.const_defined?('RAILS_ROOT') ? RAILS_ROOT : File.join( File.dirname(__FILE__), '/../..')
-  STATE_FU_PLUGIN_PATH   = Object.const_defined?('RAILS_ROOT') ? File.join( RAILS_ROOT, '/vendor/plugins/state-fu' ) : STATE_FU_APP_PATH
+unless Object.const_defined?('STATE_FU_APP_PATH')
+  STATE_FU_APP_PATH = Object.const_defined?('RAILS_ROOT') ? RAILS_ROOT : File.join( File.dirname(__FILE__), '/../..')
+end
+
+unless Object.const_defined?('STATE_FU_PLUGIN_PATH')
+  STATE_FU_PLUGIN_PATH = Object.const_defined?('RAILS_ROOT') ? File.join( RAILS_ROOT, '/vendor/plugins/state-fu' ) : STATE_FU_APP_PATH
+end
+
+namespace :state_fu do
 
   task :update do
     path = STATE_FU_PLUGIN_PATH
