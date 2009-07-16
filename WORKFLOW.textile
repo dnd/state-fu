@@ -129,20 +129,21 @@ h2. Exclusive Choice ( OR )
 
 Ruote
 
-<code>
 <pre>
+<code>
 _if do
   equals :field_value => :x, :other-value => "y"
    participant :theodor # then
    participant :emma    # else
 end
-</pre>
 </code>
+</pre>
 
 StateFu
 
-<code>
+
 <pre>
+<code>
 state( :pending_delivery) do
  event :deliver_to_folder, :to => :project_folder do
     requires :auto_sort_rule?
@@ -151,8 +152,8 @@ state( :pending_delivery) do
     requires :no_auto_sort_rule?   # evaluates to !auto_sort_rule?
   end
 end
-</pre>
 </code>
+</pre>
 
 The examples are obviously not equivalent, but I believe the answer is
 yes. Syntactic sugar is easy to add if this is a frequently recurring
