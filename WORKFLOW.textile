@@ -56,12 +56,12 @@ sequence do
   alpha
   bravo
 End
-</code></pre>
+</pre></code>
 
 StateFu
 <code><pre>
 event :change, :from =>  { :alpha => :bravo }
-</code></pre>
+</pre></code>
 
 But, in Ruote, alpha and bravo are not states; they are participants ...
 <hr />
@@ -78,13 +78,13 @@ concurrence do
  alpha
  bravo
 end
-</code></pre>
+</pre></code>
 
 StateFu (state branching)
 
 <code><pre>
 event :fork, :from => :alpha, :to => [:bravo, :charlie]
-</code></pre>
+</pre></code>
 
 The StateFu example above creates an event with two possible
 destinations - but exactly one must be chosen. To represent
@@ -123,7 +123,7 @@ _if do
    participant :theodor # then
    participant :emma    # else
 end
-</code></pre>
+</pre></code>
 
 StateFu
 
@@ -136,7 +136,7 @@ state( :pending_delivery) do
     requires :no_auto_sort_rule?   # evaluates to !auto_sort_rule?
   end
 end
-</code></pre>
+</pre></code>
 
 The examples are obviously not equivalent, but I believe the answer is
 yes. Syntactic sugar is easy to add if this is a frequently recurring
