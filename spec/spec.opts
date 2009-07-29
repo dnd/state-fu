@@ -4,7 +4,6 @@ CustomFormatter
 --loadby
 mtime
 --reverse
---backtrace
 --debugger
 --require 
 spec/custom_formatter.rb

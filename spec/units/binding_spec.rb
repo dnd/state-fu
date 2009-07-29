@@ -144,9 +144,14 @@ describe StateFu::Binding do
       before do
         reset!
         make_pristine_class("Klass")
+        Klass.class_eval do
+          def tissue?(*args); true; end
+        end
         @machine = Klass.machine do
           state :snoo do
-            event :am_fireable, :to => :wizz
+            event :am_fireable, :to => :wizz do
+              requires :tissue?
+            end
           end
           state :wizz do
             event :not_fireable, :to => :pong
@@ -171,7 +176,11 @@ describe StateFu::Binding do
       end
 
       describe "when called with additional arguments after the destination event/state" do
-        it "should pass the arguments to any requirements to determine transition availability"
+        it "should pass the arguments to any requirements to determine transition availability" do          
+          set_method_arity( @obj, :tissue?, needed_arity = 1 )
+          mock(@obj).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }
+          @obj.state_fu.fireable?(:am_fireable, :a, :b)
+        end 
       end
 
     end

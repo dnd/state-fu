@@ -45,19 +45,19 @@ end
 namespace :spec do
 
   desc "Run specs"
-  Spec::Rake::SpecTask.new(:run) do |t|
+  Spec::Rake::SpecTask.new(:all) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts = ["--options", "spec/spec.opts"]
   end
 
-  task :set_env_run_all do
-    ENV['RUN_SLOW_SPECS'] = 'true'
+  task :skip_slow do
+    ENV['SKIP_SLOW_SPECS'] = 'true'
   end
 
-  desc "Run all specs, even slow ones"
-  task :all => [:set_env_run_all, :run]
+  desc "Run all specs, except especially slow ones"
+  task :run => [:skip_slow, :all]
 
-  desc "Run all specs with profiling" 
+  desc "Run all specs with profiling & backtrace" 
   Spec::Rake::SpecTask.new(:prof) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts = ['-c','-b','-u','-f','profile','-R','-L','mtime']
@@ -66,13 +66,14 @@ namespace :spec do
   desc "Print Specdoc for all specs (eaxcluding plugin specs)"
   Spec::Rake::SpecTask.new(:doc) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
-    t.spec_opts  = ["--format", "nested","--backtrace","--color"]
+    t.spec_opts  = ["--format", "nested","--color"]
   end
 
   desc "Run autotest"
   task :auto do |t|
     exec 'autospec'
   end
+
 end
 
 desc 'Runs irb in this project\'s context'
@@ -95,3 +96,4 @@ rescue LoadError => e
 end
 
 task :default => 'spec:run'
+task :all     => 'spec:all'

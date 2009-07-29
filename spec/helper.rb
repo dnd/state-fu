@@ -70,11 +70,11 @@ module MySpecHelper
   end
 
   def skip_slow_specs?
-    ENV['RUN_SLOW_SPECS'].nil?
+    !!ENV['SKIP_SLOW_SPECS']
   end
 
   def skip_slow_specs
-    pending('Skipping slow specs - set ENV["RUN_SLOW_SPECS"] if you want them run')
+    pending('Skipping slow specs - run $ rake all if you want them')
   end
 
   def skip_unless_relaxdb

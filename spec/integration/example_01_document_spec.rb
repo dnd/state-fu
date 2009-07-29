@@ -99,7 +99,12 @@ describe "Document" do
     end
 
     describe "status_field attribute" do
-      it "should be private in ruby 1.8 and 1.9"
+
+      # need to think about this
+      #
+      # it "should be private in ruby 1.8 and 1.9" do
+      #   lambda { @doc.status_field }.should raise_error()
+      # end
 
       it "should be defined before state_fu is called" do
         @doc.send( :status_field ).should == 'draft'

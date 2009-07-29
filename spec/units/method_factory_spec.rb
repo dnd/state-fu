@@ -23,7 +23,21 @@ describe StateFu::MethodFactory do
       end
 
       describe "when there is a method_missing already defined for the class" do
-        it "should still call the pre-defined method_missing"
+        before do
+          reset!
+          make_pristine_class('Klass')
+          Klass.class_eval do
+            def method_missing method_name, *args
+              callme
+            end 
+          end
+          Klass.machine(){}
+        end 
+        it "should call the original method_missing on an unexpected method call" do 
+          @k = Klass.new
+          mock(@k).callme 
+          @k.whut?
+        end
       end
 
       describe "event creation methods" do
@@ -63,7 +77,7 @@ describe StateFu::MethodFactory do
           block = lambda { }
           mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
           @obj.simple_event! &block
-          pending "don't know how to mock this"
+          pending "don't know how to mock this, or the ideal behaviour to implement ..."
         end   
       end
     end
