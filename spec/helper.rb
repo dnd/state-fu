@@ -29,6 +29,10 @@ module MySpecHelper
   include NoStdout
 
   def prepare_active_record( options={}, &migration )
+    if skip_slow_specs? 
+      skip_slow_specs and return false
+    end
+
     begin
       require 'activesupport'
       require 'active_record'
@@ -65,6 +69,14 @@ module MySpecHelper
     end
   end
 
+  def skip_slow_specs?
+    ENV['RUN_SLOW_SPECS'].nil?
+  end
+
+  def skip_slow_specs
+    pending('Skipping slow specs - set ENV["RUN_SLOW_SPECS"] if you want them run')
+  end
+
   def skip_unless_relaxdb
     unless Object.const_defined?( 'RelaxDB' )
       pending('Skipping specs because you do not have the relaxdb gem (paulcarey-relaxdb) installed ...')
@@ -72,6 +84,9 @@ module MySpecHelper
   end
 
   def prepare_relaxdb( options={} )
+    if skip_slow_specs? 
+      return false
+    end
     begin
       require 'relaxdb'
       if Object.const_defined?( "RelaxDB" )

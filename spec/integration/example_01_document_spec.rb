@@ -40,8 +40,8 @@ describe "Document" do
           execute :destroy
         end
 
-        events do
-          after :save!
+        states do
+          accepted :save!
         end
       end
     end

@@ -43,25 +43,25 @@ rescue LoadError
 end
 
 namespace :spec do
-  desc "Run all specs"
-  Spec::Rake::SpecTask.new(:all) do |t|
+
+  desc "Run specs"
+  Spec::Rake::SpecTask.new(:run) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts = ["--options", "spec/spec.opts"]
   end
 
-  desc "Run unit specs"
-  Spec::Rake::SpecTask.new(:units) do |t|
-    t.spec_files = FileList["spec/units/*_spec.rb"]
-    t.spec_opts = ["--options", "spec/spec.opts"]
+  task :set_env_run_all do
+    ENV['RUN_SLOW_SPECS'] = 'true'
   end
-  task :unit => :units
 
-  desc "Run integration specs"
-  Spec::Rake::SpecTask.new(:integration) do |t|
-    t.spec_files = FileList["spec/integration/*_spec.rb"]
-    t.spec_opts = ["--options", "spec/spec.opts"]
+  desc "Run all specs, even slow ones"
+  task :all => [:set_env_run_all, :run]
+
+  desc "Run all specs with profiling" 
+  Spec::Rake::SpecTask.new(:prof) do |t|
+    t.spec_files = FileList["spec/**/*_spec.rb"]
+    t.spec_opts = ['-c','-b','-u','-f','profile','-R','-L','mtime']
   end
-  task :system => :integration
 
   desc "Print Specdoc for all specs (eaxcluding plugin specs)"
   Spec::Rake::SpecTask.new(:doc) do |t|
@@ -94,4 +94,4 @@ begin
 rescue LoadError => e
 end
 
-task :default => 'spec:all'
+task :default => 'spec:run'

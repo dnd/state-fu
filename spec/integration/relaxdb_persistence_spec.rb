@@ -8,6 +8,9 @@ describe "a RelaxDB::Document's persister" do
   end
 
   before(:each) do
+    if skip_slow_specs? 
+      skip_slow_specs and return false
+    end
     skip_unless_relaxdb()
     reset!
     make_pristine_class( 'ExampleDoc', RelaxDB::Document )
