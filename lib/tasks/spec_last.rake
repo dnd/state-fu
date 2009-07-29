@@ -19,9 +19,28 @@ namespace :spec do
     spec = specs.sort_by { |spec| File.stat( spec ).mtime }.last
   end
 
-  desc "runs the last modified spec, without mucking about"
+  desc "runs the last modified spec; L=n runs only that line"
   Spec::Rake::SpecTask.new(:last) do |t|
-    t.spec_opts = ['--options', "\"#{STATE_FU_APP_PATH}/spec/spec.opts\""]
-    t.spec_files = FileList[find_last_modified_spec]
+    specfile = find_last_modified_spec || return
+    t.verbose = true
+    t.spec_opts = ["-c","-b","-u"]
+    if ENV['L']
+      t.spec_opts += ["-l", ENV["L"],"-f", "specdoc"] 
+    else
+      t.spec_opts += ["-f", "profile"] 
+    end
+    t.spec_files = FileList[specfile]
   end
+  
+  desc "runs the last modified spec; L=n runs only that line"
+  Spec::Rake::SpecTask.new(:faily) do |t|
+    specfile    = find_last_modified_spec || return    
+    faily       = 'spec.fail'
+    t.verbose   = true
+    t.spec_opts = ["-f","failing_examples:#{faily}", "-f","n","-c","-b","-u"]
+    if File.exists?(faily) && File.read(faily).split("\n")[0] != ""
+      t.spec_opts << ["-e",faily]
+    end
+  end
+  
 end
