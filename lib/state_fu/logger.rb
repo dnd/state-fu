@@ -1,3 +1,4 @@
+
 require 'logger'
 module StateFu
   class Logger
@@ -15,7 +16,7 @@ module StateFu
     DEFAULT_LEVEL = INFO
 
     DEFAULT_PREFIX    = nil
-    SHARED_LOG_PREFIX = 'StateFu: '
+    SHARED_LOG_PREFIX = '[StateFu] '
 
     @@prefix   = DEFAULT_PREFIX
     @@logger   = nil
@@ -54,17 +55,17 @@ module StateFu
 
     def self.get_logger( log = $stdout )
       if Object.const_defined?( "RAILS_DEFAULT_LOGGER" )
-        logger         = RAILS_DEFAULT_LOGGER
-        prefix         = SHARED_LOG_PREFIX
+        @@logger         = RAILS_DEFAULT_LOGGER
+        @@prefix         = SHARED_LOG_PREFIX
       else
         if Object.const_defined?( 'ActiveSupport' ) && ActiveSupport.const_defined?('BufferedLogger')
-          logger       = ActiveSupport::BufferedLogger.new( log )
+          @@logger       = ActiveSupport::BufferedLogger.new( log )
         else
-          logger       = ::Logger.new( log )
-          logger.level = state_fu_log_level()
+          @@logger       = ::Logger.new( log )
+          @@logger.level = state_fu_log_level()
         end
       end
-      logger
+      @@logger
     end
 
     def self.suppress!
