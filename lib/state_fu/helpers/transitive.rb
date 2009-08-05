@@ -1,7 +1,13 @@
 module StateFu    
+  # a home for methods / behaviour shared by Transition and MockTransition.
+
   module Transitive
     module InstanceMethods
-
+      
+      # resolve the target for the given event as a StateFu::State either from
+      # the given target if it's already a State, or it's name, or the
+      # (single, simple) target of the given event.
+      
       def find_event_target( evt, tgt )
         case tgt
         when StateFu::State

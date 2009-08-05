@@ -6,6 +6,12 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 
+#
+# DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
+#
+
+
+
 * Documentation, documentation, documentation: cucumber.
 * specs
 ** review RDOC / code comments
