@@ -59,7 +59,11 @@ require 'rubygems'
 
 [ 'core_ext',
   'logger',
-  'helper',
+  'helpers/applicable',
+  'helpers/contextual_eval',
+  'helpers/transitive',  
+  'helpers/arrays',
+  'context',
   'exceptions',
   'fu_space',
   'machine',

@@ -55,7 +55,7 @@ namespace :spec do
   end
 
   desc "Run all specs, except especially slow ones"
-  task :run => [:skip_slow, :all]
+  task :quick => [:skip_slow, :all]
 
   desc "Run all specs with profiling & backtrace" 
   Spec::Rake::SpecTask.new(:prof) do |t|
@@ -95,5 +95,5 @@ begin
 rescue LoadError => e
 end
 
-task :default => 'spec:run'
+task :default => 'spec:all'
 task :all     => 'spec:all'

@@ -42,7 +42,7 @@ module StateFu
       # return a hash of :name => StateFu::Machine for your class.
       def machines( *args, &block )
         if args.empty? && !block_given?
-          StateFu::FuSpace.class_machines[self]
+          StateFu::FuSpace.machines[self]
         else
           machine( *args, &block)
         end
@@ -54,7 +54,7 @@ module StateFu
 
       # return the list of machines names for this class
       def machine_names()
-        StateFu::FuSpace.class_machines[self].keys
+        StateFu::FuSpace.machines[self].keys
       end
       alias_method :stfu_names,     :machine_names
       alias_method :state_fu_names, :machine_names
@@ -82,7 +82,7 @@ module StateFu
       public
       def _binding( name=StateFu::DEFAULT_MACHINE )
         name = name.to_sym
-        if mach = StateFu::FuSpace.class_machines[self.class][name]
+        if mach = StateFu::FuSpace.machines[self.class][name]
           _state_fu[name] ||= StateFu::Binding.new( mach, self, name )
         end
       end

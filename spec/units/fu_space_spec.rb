@@ -15,9 +15,9 @@ describe StateFu::FuSpace do
   end
 
   describe "Before any Machine is defined" do
-    it "should return {} given StateFu::FuSpace.class_machines()" do
-      StateFu::FuSpace.should respond_to(:class_machines)
-      StateFu::FuSpace.class_machines.should == {}
+    it "should return {} given StateFu::FuSpace.machines()" do
+      StateFu::FuSpace.should respond_to(:machines)
+      StateFu::FuSpace.machines.should == {}
     end
   end
 
@@ -28,16 +28,16 @@ describe StateFu::FuSpace do
       StateFu::DEFAULT_MACHINE.should == :state_fu
     end
 
-    it "should return { Klass => { ... } } given StateFu::FuSpace.class_machines()" do
-      StateFu::FuSpace.should respond_to(:class_machines)
-      machines = StateFu::FuSpace.class_machines()
+    it "should return { Klass => { ... } } given StateFu::FuSpace.machines()" do
+      StateFu::FuSpace.should respond_to(:machines)
+      machines = StateFu::FuSpace.machines()
       machines.keys.should == [Klass]
       machines.values.first.should be_kind_of( Hash )
     end
 
-    it "should return { :state_fu => <StateFu::Machine> } given StateFu::FuSpace.class_machines[Klass]" do
-      StateFu::FuSpace.should respond_to(:class_machines)
-      machines = StateFu::FuSpace.class_machines[Klass]
+    it "should return { :state_fu => <StateFu::Machine> } given StateFu::FuSpace.machines[Klass]" do
+      StateFu::FuSpace.should respond_to(:machines)
+      machines = StateFu::FuSpace.machines[Klass]
       machines.should be_kind_of(Hash)
       machines.should_not be_empty
       machines.length.should == 1
@@ -69,9 +69,9 @@ describe StateFu::FuSpace do
         end
       end
 
-      it "should return { :state_fu => <StateFu::Machine>, :two => <StateFu::Machine> } given StateFu::FuSpace.class_machines()" do
-        StateFu::FuSpace.should respond_to(:class_machines)
-        machines = StateFu::FuSpace.class_machines[Klass]
+      it "should return { :state_fu => <StateFu::Machine>, :two => <StateFu::Machine> } given StateFu::FuSpace.machines()" do
+        StateFu::FuSpace.should respond_to(:machines)
+        machines = StateFu::FuSpace.machines[Klass]
         machines.should be_kind_of(Hash)
         machines.should_not be_empty
         machines.length.should == 2
@@ -83,9 +83,9 @@ describe StateFu::FuSpace do
         before(:each) do
           StateFu::FuSpace.reset!
         end
-        it "should return {} given StateFu::FuSpace.class_machines()" do
-          StateFu::FuSpace.should respond_to(:class_machines)
-          StateFu::FuSpace.class_machines.should == {}
+        it "should return {} given StateFu::FuSpace.machines()" do
+          StateFu::FuSpace.should respond_to(:machines)
+          StateFu::FuSpace.machines.should == {}
         end
       end
 

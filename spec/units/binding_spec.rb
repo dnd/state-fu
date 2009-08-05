@@ -33,7 +33,7 @@ describe StateFu::Binding do
 
   describe "constructor" do
     before do
-      mock( StateFu::FuSpace ).field_names() do
+      mock( StateFu::FuSpace ).field_names.at_most(1) do
         {
           Klass => { :example => :example_field }
         }
@@ -66,8 +66,8 @@ describe StateFu::Binding do
 
       describe "when StateFu::Persistence.active_record_column? is true" do
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(2) { true }
-          mock( Klass ).before_save( :state_fu!) { }
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(1) { true }
+          mock( Klass ).before_create( :state_fu!) { }          
         end
         it "should get an ActiveRecord persister" do
           mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
@@ -78,7 +78,7 @@ describe StateFu::Binding do
 
       describe "when StateFu::Persistence.active_record_column? is false" do
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(2) { false }
+          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { false }
         end
         it "should get an Attribute persister" do
           mock( StateFu::Persistence::Attribute ).new( anything, :example_field ) { @p }
@@ -176,6 +176,8 @@ describe StateFu::Binding do
       end
 
       describe "when called with additional arguments after the destination event/state" do
+
+        # This would make very little sense to someone trying to understand how to use the library.
         it "should pass the arguments to any requirements to determine transition availability" do          
           set_method_arity( @obj, :tissue?, needed_arity = 1 )
           mock(@obj).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }

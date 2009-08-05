@@ -1,6 +1,8 @@
 module StateFu
-  class Sprocket # Abstract Superclass of State & Event
-    include StateFu::Helper # define apply!
+  # the abstract superclass of State & Event
+  # defines behaviours shared by both classes
+  class Sprocket 
+    include Applicable # define apply!
 
     attr_reader :machine, :name, :options, :hooks
 
@@ -18,6 +20,7 @@ module StateFu
       @hooks[slot.to_sym] << [name.to_sym, value]
     end
 
+    # yields a lathe for self; useful for updating machine definitions on the fly
     def lathe(options={}, &block)
       StateFu::Lathe.new( machine, self, options, &block )
     end
@@ -38,6 +41,25 @@ module StateFu
       options[v]=k
     end
 
+    # allows state == <name> || event == <name> to return true
+    def == other
+      if other.is_a?(Symbol) 
+        self.name == other
+      else
+        super other
+      end
+    end 
+
+    # allows case equality tests against the state/event's name
+    # eg
+    # case state
+    # when :new
+    #   ...
+    # end
+    def === other
+      self.to_sym === other.to_sym || super(other)
+    end
+    
   end
 end
 

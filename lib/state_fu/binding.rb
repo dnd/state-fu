@@ -1,8 +1,8 @@
 module StateFu
-  class Binding
-    include ContextualEval
+  class Binding < Context
 
-    attr_reader :object, :machine, :method_name, :persister, :transitions, :options
+    attr_reader :object, :machine, :method_name, :field_name, :persister, :transitions, :options, :target
+    
 
     # the constructor should not be called manually; a binding is
     # returned when an instance of a class with a StateFu::Machine
@@ -18,19 +18,13 @@ module StateFu
       @method_name   = method_name
       @transitions   = []
       @options       = options.symbolize_keys!
-      field_name     = StateFu::FuSpace.field_names[object.class][@method_name]
-      raise( ArgumentError, "No field_name" ) unless field_name
-      # ensure state field is set up (in case we created this binding
-      # manually, instead of via Machine.bind!)
-      StateFu::Persistence.prepare_field( object.class, field_name )
-      # add a persister
-      @persister     = StateFu::Persistence.for( self, field_name )
-      Logger.debug( "Persister (#{@persister.class}) added: #{method_name} as field #{field_name}" )
-
-      # define event methods on self( binding ) and @object
+      @target        = object.class
+      @field_name    = options[:field_name] || StateFu::FuSpace.field_names[@target][method_name]
+      @persister     = StateFu::Persistence.for( self )
+      
+      # define event methods on this binding and its @object
       StateFu::MethodFactory.new( self ).install!
-      machine.helpers.inject_into( self )
-      # StateFu::Persistence.prepare_field( @object.class, field_name )
+      @machine.helpers.inject_into( self )
     end
     alias_method :o,         :object
     alias_method :obj,       :object
@@ -41,10 +35,10 @@ module StateFu
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
 
-    def object=( reference )
-      raise ArgumentError.new( reference ) unless object == reference
-      @object = reference
-    end
+    # def object=( reference )
+    #   raise ArgumentError.new( reference ) unless object == reference
+    #   @object = reference
+    # end
 
     def reload()
       if persister.is_a?( Persistence::ActiveRecord )
@@ -52,11 +46,6 @@ module StateFu
       end
       persister.reload
       self
-    end
-
-    # the perister's field_name (a symbol)
-    def field_name
-      persister.field_name
     end
 
     # the current_state, as maintained by the persister.

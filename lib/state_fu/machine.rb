@@ -1,12 +1,13 @@
 module StateFu
   class Machine
-    include Helper
+    include StateFu::Applicable
 
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      unless machine = StateFu::FuSpace.class_machines[ klass ][ name ]
+      
+      unless machine = StateFu::FuSpace.machines[ klass ][ name ]
         machine = new( name, options, &block )
         machine.bind!( klass, name, options[:field_name] )
       end
@@ -66,32 +67,17 @@ module StateFu
       modules_to_add.each { |mod| helpers << mod }
     end
 
-    # same deal but for extending Lathe
+    # same as helper, but for extending Lathes rather than the Bindings / Transitions.
+    # use this to extend the Lathe DSL to suit your problem domain.
     def tool *modules_to_add
       modules_to_add.each { |mod| tools << mod }
     end
 
     # make it so a class which has included StateFu has a binding to
     # this machine
-    def bind!( klass, name=StateFu::DEFAULT_MACHINE, field_name = nil )
-      field_name ||= name.to_s.underscore.tr(' ', '_') + StateFu::Persistence::DEFAULT_FIELD_NAME_SUFFIX
-      field_name   = field_name.to_sym
-      StateFu::FuSpace.insert!( klass, self, name, field_name )
-      # define an accessor method with the given name
-      unless name == StateFu::DEFAULT_MACHINE
-        klass.class_eval do
-          define_method name do
-            state_fu( name )
-          end
-        end
-      end
-
-      # method_missing to catch NoMethodError for event methods, etc
-      StateFu::MethodFactory.prepare_class( klass )
-
-      # prepare the persistence field
-      StateFu::Persistence.prepare_field( klass, field_name )
-      true
+    def bind!( owner, name=StateFu::DEFAULT_MACHINE, field_name = nil )
+      field_name ||= "#{name.to_s.underscore.tr(' ','_')}#{StateFu::Persistence::DEFAULT_SUFFIX}"
+      StateFu::FuSpace.bind!(self, owner, name, field_name)
     end
 
     def empty?

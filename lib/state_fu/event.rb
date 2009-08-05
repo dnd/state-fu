@@ -29,25 +29,6 @@ module StateFu
       origin_names.include?( state.to_sym )
     end
 
-    # internal method which accumulates states into an instance
-    # variable with successive invocations.
-    # ensures that calling #from multiple times adds to, rather than
-    # clobbering, the list of origins / targets.
-    def update_state_collection( ivar_name, *args)
-      new_states = if [args].flatten == [:ALL]
-            machine.states
-          else
-            machine.find_or_create_states_by_name( *args.flatten )
-          end
-      unless new_states.is_a?( Array )
-        new_states = [new_states]
-      end
-      existing  = instance_variable_get( ivar_name )
-      # return existing if new_states.empty?
-      new_value = ((existing || [] ) + new_states).flatten.compact.uniq.extend( StateArray )
-      instance_variable_set( ivar_name, new_value )
-    end
-
     # *adds to* the origin states given a list of symbols / States
     def origins=( *args )
       update_state_collection( '@origins', *args )
@@ -56,17 +37,6 @@ module StateFu
     # *adds to* the target states given a list of symbols / States
     def targets=( *args )
       update_state_collection( '@targets', *args )
-    end
-
-
-    # used internally
-    #
-    # <tt>complete?(:origins) # do we have origins?<tt>
-    # <tt>complete?           # do we have origins and targets?<tt>
-    def complete?( field = nil )
-      ( field && [field] ||  [:origins, :targets] ).
-        map{ |s| send(s) }.
-        all?{ |f| !(f.nil? || f.empty?) }
     end
 
     # if there is a single state in #origins, returns it
@@ -84,6 +54,32 @@ module StateFu
     # supplying a target name - ie, <tt>go!<tt> vs <tt>go!(:home)<tt>
     def simple?
       !! ( origins && target )
+    end
+
+    # is the event legal for the given binding, with the given
+    # (optional) arguments?
+    def fireable_by?( binding, *args )
+      requirements.reject do |r|
+        binding.evaluate_requirement_with_args( r, *args )
+      end.empty?
+    end
+
+    # <tt>complete?(:origins) # do we have origins?<tt>
+    # <tt>complete?           # do we have origins and targets?<tt>
+    def complete?( field = nil )
+      ( field && [field] ||  [:origins, :targets] ).
+        map{ |s| send(s) }.
+        all?{ |f| !(f.nil? || f.empty?) }
+    end
+
+    #
+    # Lathe methods
+    #
+
+    # adds an event requirement.
+    # TODO MOREDOC
+    def requires( *args, &block )
+      lathe.requires( *args, &block )
     end
 
     # generally called from a Lathe. Sets the origin(s) and optionally
@@ -115,19 +111,26 @@ module StateFu
       self.targets= *args
     end
 
-    # is the event legal for the given binding, with the given
-    # (optional) arguments?
-    def fireable_by?( binding, *args )
-      requirements.reject do |r|
-        binding.evaluate_requirement_with_args( r, *args )
-      end.empty?
-    end
-
-    # adds an event requirement.
-    # TODO MOREDOC
-    def requires( *args, &block )
-      lathe.requires( *args, &block )
-    end
+    private
+        
+    # internal method which accumulates states into an instance
+    # variable with successive invocations.
+    # ensures that calling #from multiple times adds to, rather than
+    # clobbering, the list of origins / targets.
+    def update_state_collection( ivar_name, *args)
+      new_states = if [args].flatten == [:ALL]
+            machine.states
+          else
+            machine.find_or_create_states_by_name( *args.flatten )
+          end
+      unless new_states.is_a?( Array )
+        new_states = [new_states]
+      end
+      existing  = instance_variable_get( ivar_name )
+      # return existing if new_states.empty?
+      new_value = ((existing || [] ) + new_states).flatten.compact.uniq.extend( StateArray )
+      instance_variable_set( ivar_name, new_value )
+    end    
 
   end
 end

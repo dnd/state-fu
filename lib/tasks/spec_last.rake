@@ -25,16 +25,16 @@ namespace :spec do
     t.verbose = true
     t.spec_opts = ["-c","-b","-u"]
     if ENV['L']
-      t.spec_opts += ["-l", ENV["L"],"-f", "specdoc"] 
+      t.spec_opts += ["-l", ENV["L"],"-f", "specdoc"]
     else
-      t.spec_opts += ["-f", "profile"] 
+      t.spec_opts += ["-f", "profile"]
     end
     t.spec_files = FileList[specfile]
   end
-  
-  desc "runs the last modified spec; L=n runs only that line"
+
+  desc "runs all specs, or those which last failed"
   Spec::Rake::SpecTask.new(:faily) do |t|
-    specfile    = find_last_modified_spec || return    
+    specfile    = find_last_modified_spec || return
     faily       = 'spec.fail'
     t.verbose   = true
     t.spec_opts = ["-f","failing_examples:#{faily}", "-f","n","-c","-b","-u"]
@@ -42,5 +42,5 @@ namespace :spec do
       t.spec_opts << ["-e",faily]
     end
   end
-  
+
 end

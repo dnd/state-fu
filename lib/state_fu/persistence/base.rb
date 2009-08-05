@@ -24,8 +24,9 @@ module StateFu
         end
       end
 
+      # define this method in subclasses to do any preparation
       def self.prepare_field( klass, field_name )
-        raise NotImplementedError # abstract method
+        Logger.warn("Abstract method in #{self}.prepare_field called. Override me!")
       end
 
       def initialize( binding, field_name )

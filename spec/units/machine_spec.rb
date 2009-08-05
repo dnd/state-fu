@@ -20,7 +20,7 @@ describe StateFu::Machine do
         before do
           reset!
           make_pristine_class 'Klass'
-          mock( StateFu::FuSpace ).class_machines() { { Klass => {} } }
+          mock( StateFu::FuSpace ).machines() { { Klass => {} } }
         end
 
         it "should create a new machine and bind! it" do
@@ -41,7 +41,7 @@ describe StateFu::Machine do
       describe "when there's a matching machine in FuSpace" do
         it "should retrieve the previously created machine" do
           @machine = Object.new
-          mock( StateFu::FuSpace ).class_machines() { { Klass => { :moose => @machine } } }
+          mock( StateFu::FuSpace ).machines() { { Klass => { :moose => @machine } } }
           StateFu::Machine.for_class( Klass, :moose ).should == @machine
         end
       end
@@ -92,7 +92,7 @@ describe StateFu::Machine do
         klass      = Klass
         name       = :StinkJuice
         field_name = 'stink_juice_field'
-        mock( StateFu::FuSpace ).insert!( Klass, @mchn, name, field_name.to_sym ) {}
+        mock( StateFu::FuSpace ).insert!( Klass, @mchn, name, field_name ) {}
         @mchn.bind!( Klass, name )
       end
     end

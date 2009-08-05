@@ -11,7 +11,7 @@ module StateFu
     end
 
     def self.define_once_only_method_missing( klass )
-      return if ( klass.instance_methods ).map(&:to_sym).include?( :method_missing_before_state_fu )
+      return if klass.instance_methods.map(&:to_sym).include? :method_missing_before_state_fu 
       klass.class_eval do
         alias_method :method_missing_before_state_fu, :method_missing
         def method_missing( method_name, *args, &block )
@@ -19,12 +19,13 @@ module StateFu
           state_fu!
           # reset method_missing for this instance
           # more for tidy stack traces than anything else
+          # TODO - benchmark with presence / absence of this reset
           metaclass = class << self; self; end
           metaclass.instance_eval do
             alias_method :method_missing, :method_missing_before_state_fu
-          end
-          # call the newly defined method or the original method_missing
-          if respond_to?( method_name )
+          end                  
+          # call the newly defined method, or the original method_missing
+          if respond_to?( method_name ) # it was defined by calling state_fu!
             send( method_name, *args, &block )
           else
             method_missing_before_state_fu( method_name, *args, &block )
@@ -35,6 +36,9 @@ module StateFu
 
     # ensure the methods are available before calling state_fu
     def self.prepare_class( klass )
+      unless klass.is_a?(Class)
+        raise NotImplementedError.new("singleton machines are not yet supported")
+      end 
       self.define_once_only_method_missing( klass )
     end # prepare_class
 

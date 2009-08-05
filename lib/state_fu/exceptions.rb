@@ -20,7 +20,7 @@ module StateFu
     end
 
     def inspect
-      "<StateFu::RequirementError #{message} #{@transition.origin.name}=[#{@transition.event.name}]=>#{transition.target.name}"
+      "<StateFu::RequirementError #{message} #{@transition.origin.name}=[#{@transition.event.name}]=>#{transition.target.name}>"
     end
   end
 

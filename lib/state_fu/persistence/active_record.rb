@@ -5,7 +5,12 @@ module StateFu
       def self.prepare_field( klass, field_name )
         _field_name = field_name
         Logger.debug("Preparing ActiveRecord field #{klass}.#{field_name}")
-        klass.send :before_save, :state_fu!
+
+        # this adds a before_save hook to ensure that the field is initialized 
+        # (and the initial state set) before create.
+        klass.send :before_create, :state_fu!
+                
+        # it's usually a good idea to do this:
         # validates_presence_of _field_name
       end
 

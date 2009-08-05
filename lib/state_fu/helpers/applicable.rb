@@ -1,11 +1,6 @@
-module StateFu
-      
-  # Utilities and snippets
-  module Helper
-
-    # Instance methods mixed in on inclusion of StateFu::Helper
+module StateFu    
+  module Applicable
     module InstanceMethods
-
       # if given a hash of options (or a splatted arglist containing
       # one), merge them into @options. If given a block, eval it
       # (yielding self if the block expects it)
@@ -24,10 +19,8 @@ module StateFu
         self
       end
       alias_method :update!, :apply!
-
     end
-
-    # Class methods mixed in on inclusion of StateFu::Helper
+    
     module ClassMethods
     end
 
@@ -35,7 +28,5 @@ module StateFu
       mod.send( :include, InstanceMethods )
       mod.extend( ClassMethods )
     end
-
   end
-
 end

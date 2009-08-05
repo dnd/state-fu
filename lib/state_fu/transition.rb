@@ -6,10 +6,10 @@ module StateFu
   # This is what gets yielded to event hooks; it also gets attached
   # to any TransitionHalted exceptions raised.
 
-  class Transition
-    include StateFu::Helper
-    include ContextualEval
-
+  class Transition < Context
+    include Applicable # define apply!
+    include Transitive 
+    
     attr_reader(  :binding,
                   :machine,
                   :origin,

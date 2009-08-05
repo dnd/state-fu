@@ -8,3 +8,6 @@
 *.gz
 pkg
 doc
+.rake_tasks
+*.fail
+tmtags

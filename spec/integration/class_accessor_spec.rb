@@ -116,10 +116,14 @@ describe "A pristine class Klass with StateFu included:" do
       it "should know the Machine after calling Klass.machine.bind!( Child )" do
         Child.machine.should_not == Klass.machine
         Klass.machine.bind!( Child )
+        StateFu::FuSpace.machines[Child].should == {:state_fu => Klass.machine}
         Child.machine.should == Klass.machine
         Klass.machine.bind!( Child, :snoo )
+        StateFu::FuSpace.machines[Child].should == {
+          :state_fu => Klass.machine,
+          :snoo => Klass.machine
+        }
         Child.machine(:snoo).should == Klass.machine
-
       end
 
     end

@@ -1,7 +1,9 @@
 module StateFu
-  class MockTransition
-    include StateFu::Helper
-    include ContextualEval
+  # a fake transition which cannot be fired; useful for specs and for testing
+  # requirements
+  class MockTransition < Context
+    include Applicable
+    include Transitive
 
     attr_reader(  :binding,
                   :machine,

@@ -1,4 +1,5 @@
 require 'rubygems'
+
 # ruby1.9 style symbol comparability for ruby1.8
 class Symbol  # :nodoc:
   unless instance_methods.include?(:'<=>')
@@ -19,5 +20,4 @@ unless Object.const_defined?('ActiveSupport') # :nodoc:
   class Hash #:nodoc:
     include ActiveSupport::CoreExtensions::Hash::Keys
   end
-
 end

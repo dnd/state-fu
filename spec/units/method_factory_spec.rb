@@ -16,8 +16,7 @@ describe StateFu::MethodFactory do
           @machine = Klass.machine do
             event( :simple_event,
                    :from => { [:a, :b] => :targ } )
-
-          state( :a ) { cycle }
+            state( :a ) { cycle }
           end # machine
           @obj     = Klass.new
       end
@@ -48,7 +47,13 @@ describe StateFu::MethodFactory do
 
         it "should call state_fu!" do
           mock.proxy( StateFu::Binding ).new( Klass.machine, @obj, :state_fu )
+          @obj
+          @obj.private_methods.map(&:to_sym).should include(:state_fu_field)
+          #@obj.should respond_to :state_fu_field
+          @obj.state_fu.machine.events.should_not be_empty
+
           @obj.simple_event!
+
           # @obj.should_have_received( :state_fu! )
         end
 
