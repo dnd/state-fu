@@ -61,7 +61,7 @@ require 'rubygems'
   'logger',
   'helpers/applicable',
   'helpers/contextual_eval',
-  'helpers/transitive',  
+  'helpers/transitive',
   'helpers/arrays',
   'context',
   'exceptions',
@@ -92,6 +92,7 @@ module StateFu
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )
     klass.send( :include, Interface::InstanceMethods )
+    klass.extend(         Interface::Aliases )
   end
 end
 

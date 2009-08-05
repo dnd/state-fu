@@ -180,7 +180,7 @@ describe StateFu::Binding do
         # This would make very little sense to someone trying to understand how to use the library.
         it "should pass the arguments to any requirements to determine transition availability" do          
           set_method_arity( @obj, :tissue?, needed_arity = 1 )
-          mock(@obj).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }
+          mock(@obj.state_fu).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }
           @obj.state_fu.fireable?(:am_fireable, :a, :b)
         end 
       end

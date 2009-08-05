@@ -10,7 +10,12 @@
 # DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
 #
 
+* class bindings: bind all instances of a class to a specific shared binding
+  this is the equivalent of class methods vs instance methods
+** define binding methods on the class, not the metaclass
 
+
+* ensure options are merged / updated in subsequenct  machine blocks
 
 * Documentation, documentation, documentation: cucumber.
 * specs

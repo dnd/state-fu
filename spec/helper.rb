@@ -29,7 +29,7 @@ module MySpecHelper
   include NoStdout
 
   def prepare_active_record( options={}, &migration )
-    if skip_slow_specs? 
+    if skip_slow_specs?
       skip_slow_specs and return false
     end
 
@@ -84,7 +84,7 @@ module MySpecHelper
   end
 
   def prepare_relaxdb( options={} )
-    if skip_slow_specs? 
+    if skip_slow_specs?
       return false
     end
     begin
