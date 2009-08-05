@@ -35,6 +35,7 @@ class Object # :nodoc:all
   #  end
   #
   #  foo # => ['bar', 'baz']
+  # :nodoc:
   def returning(value)
     yield(value)
     value
@@ -50,6 +51,7 @@ class Object # :nodoc:all
   #     tap    { |x| puts "evens: #{x.inspect}" }.
   #     map    { |x| x*x }.
   #     tap    { |x| puts "squares: #{x.inspect}" }
+  # :nodoc:
   def tap
     yield self
     self
