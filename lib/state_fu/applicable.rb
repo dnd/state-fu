@@ -1,26 +1,27 @@
-module StateFu    
+module StateFu
   module Applicable
     module InstanceMethods
+
       # if given a hash of options (or a splatted arglist containing
       # one), merge them into @options. If given a block, eval it
       # (yielding self if the block expects it)
-      def apply!( options={}, &block )
-        options.respond_to?(:keys) || options = options.extract_options!
-        @options.merge!( options.symbolize_keys! )
+
+      def apply!( opts={}, &block )
+        opts = opts.extract_options! unless opts.respond_to?(:keys)
+        opts.symbolize_keys!
         return self unless block_given?
-        case block.arity
-        when 1     # lambda{ |state| ... }
-          yield self
-        when -1, 0 # lambda{ } ( -1 in ruby 1.8.x but 0 in 1.9.x )
+        case block.arity.abs
+        when 1, -1
+          instance_exec self, &block
+        when 0
           instance_eval &block
         else
-          raise ArgumentError, "unexpected block arity: #{block.arity}"
+          raise ArgumentError, "block wants too many arguments!"
         end
         self
       end
-      alias_method :update!, :apply!
     end
-    
+
     module ClassMethods
     end
 

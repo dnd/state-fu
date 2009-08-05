@@ -1,14 +1,54 @@
 module StateFu
   class Event < StateFu::Sprocket
 
-    attr_reader :origins, :targets, :requirements
+    attr_reader :origins, :targets, :requirements, :sequence
 
     # called by Lathe when a new event is constructed
     def initialize(machine, name, options={})
-      @requirements = [].extend ArrayWithSymbolAccessor
+      @requirements = [].extend ArrayWithSymbolAccessor    
+      @sequence     = {}
       super( machine, name, options )
     end
 
+    # 
+    # build a hash of target => [origins]
+    #
+    def add_to_sequence origin_states, target_state
+      origin_states = [origin_states].flatten
+      existing = origin_states.select {|s| target_for_origin(s) }
+      raise ArgumentError.new unless existing.empty? && !targets       
+      @sequence[target_state] ||= []
+      [origin_states].flatten.each do |o|
+        @sequence[target_state] << o
+      end
+      @sequence
+    end
+    
+    def target_for_origin origin_state
+      raise ArgumentError.new if origin_state.nil?
+      name = sequence.detect do |k,v| 
+        v.include?(origin_state.to_sym)
+      end[0] rescue nil
+      machine.states[name] if name
+      # if t
+      #   puts t.inspect + " <============================" if t
+      #   puts "======================"
+      #   puts origin_state.class
+      #   puts origin_state.name rescue origin_state.inspect
+      # end
+      # machine.states[t.first] if t
+    end
+    
+    def can_transition_from?(origin_state) 
+      ( origins && origins.include?(origin_state.to_sym) && !targets.blank?) ||
+        target_for_origin(origin_state)
+    end
+    
+    def sequence?
+      !sequence.empty?
+    end
+    
+    
     # the names of all possible origin states
     def origin_names
       origins ? origins.map(&:to_sym) : nil
@@ -26,7 +66,11 @@ module StateFu
 
     # tests if a state or state name is in the list of origins
     def from?( state )
-      origin_names.include?( state.to_sym )
+      origin_names.include?( state.to_sym ) || target_for_origin(state)
+    end
+    
+    def cycle?
+      origin && origin == target
     end
 
     # *adds to* the origin states given a list of symbols / States
@@ -53,31 +97,30 @@ module StateFu
     # origins. It's simple because it can be triggered without
     # supplying a target name - ie, <tt>go!<tt> vs <tt>go!(:home)<tt>
     def simple?
-      !! ( origins && target )
+      !! ( origins && target || sequence? )
     end
 
-    # is the event legal for the given binding, with the given
-    # (optional) arguments?
-    def fireable_by?( binding, *args )
-      requirements.reject do |r|
-        binding.evaluate_requirement_with_args( r, *args )
-      end.empty?
+    def fireable?( transition )
+      transition.valid?(true)
     end
 
+    #
+    # TODO make this readable, or remove it. utter bullshit method ...
+    #    
     # <tt>complete?(:origins) # do we have origins?<tt>
     # <tt>complete?           # do we have origins and targets?<tt>
-    def complete?( field = nil )
-      ( field && [field] ||  [:origins, :targets] ).
-        map{ |s| send(s) }.
-        all?{ |f| !(f.nil? || f.empty?) }
-    end
+    #def complete?( field = nil )
+    #  ( field && [field] ||  [:origins, :targets] ).
+    #    map{ |s| send(s) }.
+    #    all?{ |f| !(f.nil? || f.empty?) }
+    #end
 
     #
     # Lathe methods
     #
 
     # adds an event requirement.
-    # TODO MOREDOC
+    # DOCME // TODO - can this be removed?
     def requires( *args, &block )
       lathe.requires( *args, &block )
     end
@@ -89,17 +132,17 @@ module StateFu
     def from *args
       options = args.extract_options!.symbolize_keys!
       args.flatten!
-      to = options.delete(:to)
+      to = options.delete(:to) || options.delete(:transitions_to)
       if args.empty? && !to
         if options.length == 1
-          self.origins= options.keys[0]
-          self.targets= options.values[0]
+          self.origins = options.keys[0]
+          self.targets = options.values[0]
         else
           raise options.inspect
         end
       else
-        self.origins= *args
-        self.targets= to unless to.nil?
+        self.origins = *args
+        self.targets = to unless to.nil?
       end
     end
 
@@ -111,13 +154,41 @@ module StateFu
       self.targets= *args
     end
 
+    alias_method :transitions_to,   :to
+    alias_method :transitions_from, :from
+
+    #
+    # misc
+    # 
+    
+    # display nice and short
+    def inspect
+      s = self.to_s
+      s = s[0,s.length-1]
+      display_hooks = hooks.dup
+      display_hooks.each do |k,v|
+        display_hooks.delete(k) if v.empty?
+      end
+      unless display_hooks.empty?
+        s << " hooks=#{display_hooks.inspect}"
+      end
+      unless requirements.empty?
+        s << " requirements=#{requirements.inspect}"
+      end
+      s << " targets=#{targets.map(&:to_sym).inspect}" if targets
+      s << " origins=#{origins.map(&:to_sym).inspect}" if origins
+      s << ">"
+      s
+    end
+
     private
-        
+
     # internal method which accumulates states into an instance
     # variable with successive invocations.
     # ensures that calling #from multiple times adds to, rather than
     # clobbering, the list of origins / targets.
     def update_state_collection( ivar_name, *args)
+      raise ArgumentError if sequence?      
       new_states = if [args].flatten == [:ALL]
             machine.states
           else
@@ -130,7 +201,7 @@ module StateFu
       # return existing if new_states.empty?
       new_value = ((existing || [] ) + new_states).flatten.compact.uniq.extend( StateArray )
       instance_variable_set( ivar_name, new_value )
-    end    
+    end
 
   end
 end

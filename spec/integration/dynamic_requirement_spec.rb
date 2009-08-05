@@ -6,27 +6,32 @@ module MySpecHelper
       true
     end
 
-    def method_which_requires_one_arg( t )
+    def method_which_requires_one_arg( x )
       t.args.length == 1
     end
 
-    def given_any_arg?( t = nil )
+    def method_which_requires_no_arg( x )
+      puts t.args.inspect
+      t.args.length == 0
+    end
+
+    def given_any_arg?( x = nil )
       t.is_a?( StateFu::Transition ) && !t.args.empty?
     end
 
-    def falsey?( t = nil )
+    def falsey?( x = nil )
       t.is_a?( StateFu::Transition ) && !t.args.empty? && t.args.first == false
     end
 
-    def truthy?( t = nil )
+    def truthy?( x = nil )
       t.is_a?( StateFu::Transition ) && !t.args.empty? && t.args.first == true
     end
 
-    def method_which_always_returns_true( t = nil )
+    def method_which_always_returns_true( x = nil )
       true
     end
 
-    def method_which_always_returns_false( t = nil )
+    def method_which_always_returns_false( x = nil )
       false
     end
   end
@@ -41,7 +46,7 @@ describe "Transition requirement evaluation with dynamic conditions" do
 
     Klass.send :include, MySpecHelper::DynamicTransitionObjectInstanceMethods
 
-    @machine = Klass.machine do
+    @machine = Klass.state_fu_machine do
 
       state :default do
         requires :method_which_requires_one_arg, :on => [:entry, :exit]
@@ -67,8 +72,6 @@ describe "Transition requirement evaluation with dynamic conditions" do
     end
     @obj = Klass.new
     @fu  = @obj.state_fu # binding
-    # Because RR changes the arity of the method on @obj we need to do this:
-    # stub( @fu ).limit_arguments( anything ) { |t| t }
   end
 
   describe "a requirement that the transition was given one arg" do
@@ -76,7 +79,7 @@ describe "Transition requirement evaluation with dynamic conditions" do
     describe "object.cycle?()" do
 
       it "should return false given no args" do
-        @fu.cycle?().should == false
+        lambda { @fu.cycle? }.should raise_error(ArgumentError)
       end
 
       it "should be true given one arg" do
@@ -90,9 +93,10 @@ describe "Transition requirement evaluation with dynamic conditions" do
 
     it "should evaluate the requirement by passing it a transition when requirements_met? is called" do
       t = @fu.cycle()
-      # mock.proxy( @fu ).evaluate_requirement_with_transition(:method_which_requires_one_arg, t ).at_least(2)
-      t.requirements_met?.should == false
+      lambda { t.unmet_requirements }.should raise_error(ArgumentError)
+      lambda { t.requirements_met? }.should raise_error(ArgumentError)
       t.args = [1]
+      t.unmet_requirements.should == []
       t.requirements_met?.should == true
     end
 
@@ -102,8 +106,14 @@ describe "Transition requirement evaluation with dynamic conditions" do
 
     describe "valid_transitions" do
       describe "given no arguments" do
-        it "should return {}" do
-          @fu.valid_transitions.should == {}
+        it "should raise an ArgumentError" do
+          lambda { @fu.valid_transitions }.should raise_error(ArgumentError)
+        end
+      end
+
+      describe "given one argument" do
+        it "should not raise an ArgumentError" do
+          lambda { @fu.valid_transitions :snoo }.should_not raise_error(ArgumentError)
         end
       end
 
@@ -111,7 +121,8 @@ describe "Transition requirement evaluation with dynamic conditions" do
       end
 
       it "should call method_which_requires_one_arg given call_on_object_with_optional_args(:method_which_requires_one_arg .. )" do
-        t = @fu.blank_mock_transition( :first_arg )
+        pending
+        # t = @fu.transition( :first_arg )
         @obj.respond_to?(:method_which_requires_one_arg).should be_true
         meth = @obj.method(:method_which_requires_one_arg)
         meth.arity.should == 1
@@ -120,33 +131,25 @@ describe "Transition requirement evaluation with dynamic conditions" do
       end
 
       it "should call method_which_requires_one_arg with a mock transition with one argument" do
-        t = @fu.blank_mock_transition( :first_arg )
+        #t = @fu.blank_mock_transition( :first_arg )
         # mock( @obj ).method_which_requires_one_arg( t )
+        pending
         @fu.call_on_object_with_optional_args( :method_which_requires_one_arg, t ).should == true
       end
 
       it "should contain the :cycle_default event only if an arg is supplied" do
         @fu.should == :default
-        ves = @fu.valid_events( )
-        ves.length.should == 0
+        lambda { @fu.valid_events }.should raise_error(ArgumentError)
         ves = @fu.valid_events( 1 )
         ves.length.should == 1
         ves.first.should == @machine.events[:cycle_default]
 
         @machine.events[:cycle_default].target.should == @fu.current_state
-        @fu.evaluate_requirement_with_args( :method_which_requires_one_arg ).should == false
-        @fu.evaluate_requirement_with_args( :method_which_requires_one_arg, 1 ).should == true
-        @fu.current_state.enterable_by?( @fu ).should == false
-        @fu.current_state.enterable_by?( @fu, 1 ).should == true
-
-        vts = @fu.valid_transitions()
-        vts.should be_kind_of( Hash )
-        vts.should be_empty
         vts = @fu.valid_transitions( 1 )
         vts.should_not be_empty
         vts.length.should  == 1
-        vts.keys.first.should   == @machine.events[:cycle_default]
-        vts.values.first.should == [@machine.states[:default]]
+        vts.first.event.should == @machine.events[:cycle_default]
+        vts.first.target.should == @machine.states[:default]
       end
 
       it "should pass method_which_requires_one_argument() a transition with no arguments" do

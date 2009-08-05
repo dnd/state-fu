@@ -1,5 +1,35 @@
 module StateFu
   module Interface
+    module SoftAlias
+      def soft_alias(x)
+        aliases  = [ x.to_a[0] ].flatten
+        original = aliases.shift
+        existing_method_names = (self.instance_methods | self.protected_instance_methods | self.private_instance_methods).map(&:to_sym)
+        taken, ok = aliases.partition { |a| existing_method_names.include?(a.to_sym) }
+        StateFu::Logger.debug("#{self.to_s} alias for ## #{original} already taken: #{taken.inspect}")  unless taken.empty?
+        ok.each { |a| alias_method a, original}
+      end
+    end
+
+    module Aliases
+
+      def self.extended(base)
+        base.extend SoftAlias
+        base.class_eval do
+          # instance method aliases
+          soft_alias :state_fu          => [:stfu, :fu, :stateful, :workflow, :engine, :machine, :context]
+          soft_alias :state_fu_bindings => [:bindings, :workflows, :engines, :machines, :contexts]
+          soft_alias :state_fu!         => [:stfu!, :initialize_machines!, :initialize_state!]
+          class << self
+            extend SoftAlias
+            # class method aliases
+            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine ]
+            soft_alias :state_fu_machines      => [:stfus, :state_fus, :workflows, :engines]
+          end
+        end
+      end
+    end
+
     # Provides access to StateFu to your classes.  Plenty of aliases are
     # provided so you can use whatever makes sense to you.
     module ClassMethods
@@ -12,9 +42,10 @@ module StateFu
       # class, creating it if it did not exist.
       #
       # Given a symbol, return the machine by that name, creating it
-      # if it didn't exist.
+      # if it didn't exist, and definining it if a block is passed.
       #
-      # Given a block, also define it with the contents of the block.
+      # Given a block, apply it to a StateFu::Lathe to define a
+      # machine, and return it.
       #
       # This can be done multiple times; changes are cumulative.
       #
@@ -24,54 +55,36 @@ module StateFu
       #                          # equivalent to Klass.machine(:om)
       # Klass.machine(:workflow) # another totally separate machine
       #
-      # machine( name=:state_fu, options[:field_name], &block )
-
-      def machine( *args, &block )
+      # recognised options are:
+      #  :field_name - specify the field to use for persistence.
+      #  defaults to {machine_name}_field.
+      #
+      def state_fu_machine( *args, &block )
         options = args.extract_options!.symbolize_keys!
-        name    = args[0] || StateFu::DEFAULT_MACHINE
+        name    = args[0] || DEFAULT
         StateFu::Machine.for_class( self, name, options, &block )
       end
-      alias_method :stfu,          :machine
-      alias_method :state_fu,      :machine
-      alias_method :workflow,      :machine
-      alias_method :stateful,      :machine
-      alias_method :statefully,    :machine
-      alias_method :state_machine, :machine
-      alias_method :engine,        :machine
+      alias_method :machine, :state_fu_machine
 
-      # return a hash of :name => StateFu::Machine for your class.
-      def machines( *args, &block )
-        if args.empty? && !block_given?
-          StateFu::FuSpace.machines[self]
-        else
-          machine( *args, &block)
-        end
+      def state_fu_field_names
+        @_state_fu_field_names ||= {}
       end
-      alias_method :stfus,     :machines
-      alias_method :state_fus, :machines
-      alias_method :workflows, :machines
-      alias_method :engines,   :machines
 
-      # return the list of machines names for this class
-      def machine_names()
-        StateFu::FuSpace.machines[self].keys
+      def state_fu_machines
+        @_state_fu_machines ||= {}
       end
-      alias_method :stfu_names,     :machine_names
-      alias_method :state_fu_names, :machine_names
-      alias_method :workflow_names, :machine_names
-      alias_method :engine_names,   :machine_names
+      alias_method :machines, :state_fu_machines
+
     end
 
     # These methods grant access to StateFu::Binding objects, which
     # are bundles of context encapsulating a StateFu::Machine, an instance
     # of a class, and its current state in the machine.
 
-    # Again, plenty of aliases are provided so you can use whatever
-    # makes sense to you.
     module InstanceMethods
-      private
-      def _state_fu
-        @_state_fu ||= {}
+
+      def state_fu_bindings
+        @_state_fu_bindings ||= {}
       end
 
       # A StateFu::Binding comes into being when it is first referenced.
@@ -79,57 +92,37 @@ module StateFu
       # This is the accessor method through which an object instance (or developer)
       # can access a StateFu::Machine, the object's current state, the
       # methods which trigger event transitions, etc.
-      public
-      def _binding( name=StateFu::DEFAULT_MACHINE )
-        name = name.to_sym
-        if mach = StateFu::FuSpace.machines[self.class][name]
-          _state_fu[name] ||= StateFu::Binding.new( mach, self, name )
+
+      def state_fu_binding( name = DEFAULT )
+        name = name.to_sym 
+        if machine = self.class.state_fu_machines[name]
+          state_fu_bindings[name] ||= StateFu::Binding.new( machine, self, name )
+        else raise ArgumentError.new("No state machine called #{name} for #{self.class} #{self}")
         end
       end
+      alias_method :state_fu, :state_fu_binding
 
-      alias_method :fu,          :_binding
-      alias_method :stfu,        :_binding
-      alias_method :state_fu,    :_binding
-      alias_method :stateful,    :_binding
-      alias_method :workflow,    :_binding
-      alias_method :engine,      :_binding
-      alias_method :machine,     :_binding # not strictly accurate
-      alias_method :context,     :_binding
-
-      # Gain awareness of all bindings (state contexts) this object
-      # has contemplated into being.
-      # Returns a Hash of { :name => <StateFu::Binding>, ... }
-      def _bindings()
-        _state_fu
+      def current_state( name = DEFAULT )
+        state_fu_binding(name).current_state
       end
+      
+      def next!(name = DEFAULT, *args, &block )
+        state_fu_binding(name).next! *args, &block
+      end
+      alias_method :next_state!,           :next!
+      alias_method :fire_next_transition!, :next!      
 
-      alias_method :fus,          :_bindings
-      alias_method :stfus,        :_bindings
-      alias_method :state_fus,    :_bindings
-      alias_method :state_foos,   :_bindings
-      alias_method :workflows,    :_bindings
-      alias_method :engines,      :_bindings
-      alias_method :bindings,     :_bindings
-      alias_method :machines,     :_bindings # not strictly accurate
-      alias_method :contexts,     :_bindings
-
-      # Instantiate bindings for all machines defined for this class.
+      # Instantiate bindings for all machines, which ensures that persistence
+      # fields are intialized and event methods defined.
       # It's useful to call this before_create w/
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.
-      def state_fu!( *names )
-        if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
-          names = self.class.machine_names()
-        end
-        @state_fu_initialized = true
-        names.map { |n| _binding( n ) }
+      
+      def state_fu!
+        MethodFactory.define_singleton_method(self, :initialize_state_fu!) { true }
+        self.class.state_fu_machines.keys.map { |n| state_fu_binding( n ) }
       end
-      alias_method :fu!,               :state_fu!
-      alias_method :stfu!,             :state_fu!
-      alias_method :state_fu!,         :state_fu!
-      alias_method :init_machines!,    :state_fu!
-      alias_method :initialize_state!, :state_fu!
-      alias_method :build_workflow!,   :state_fu!
-    end
-  end
-end
+
+    end # ClassMethods
+  end # Interface
+end # StateFu

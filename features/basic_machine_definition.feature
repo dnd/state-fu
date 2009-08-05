@@ -3,11 +3,11 @@ Feature: defining a StateFu::Machine
   In order to use a StateFu::Machine in my class instances
   I want to be able to define one or more simple Machines for a class
 
-Scenario: defining an empty StateFu::Machine with the default name :state_fu
+Scenario: defining an empty StateFu::Machine with the default name 
   Given I have included StateFu in a class called MyClass
   When I invoke the class method MyClass.machine
   Then I should receive a StateFu::Machine
-  And it should be bound to MyClass with the name :state_fu
+  And it should be bound to MyClass with the name :default
 
 Scenario: defining a simple state in the machine block
   Given I have included StateFu in a class called MyClass
@@ -301,14 +301,14 @@ Scenario: multiple machines bound to the the same class
     end
   """
   Then MyClass.machines should be of size 2
-  And MyClass.machines(:thread_status) should return a StateFu::Machine
+  And MyClass.machines[:thread_status] should return a StateFu::Machine
   And the machine should have a StateFu::State called :idle
   And the machine should have a StateFu::State called :active
   And the machine should have a StateFu::State called :sleeping
   And the machine should have a StateFu::State called :zombie
   And the machine should not have any StateFu::Event
   And the machine should not have a StateFu::State called :vampire
-  And MyClass.machines(:undead_status) should return a StateFu::Machine
+  And MyClass.machines[:undead_status] should return a StateFu::Machine
   And the machine should have a StateFu::State called :alive
   And the machine should have a StateFu::State called :dead
   And the machine should have a StateFu::State called :vampire

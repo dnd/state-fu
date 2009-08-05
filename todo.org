@@ -6,6 +6,37 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 
+#
+# DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
+#
+
+* TODO tidy up evaluation / execution contexts once and for all
+** evaluate ALL procs in the context of a delegator which adds a few attributes of the transition / binding to the object instance
+
+#====
+
+* allow activerecord state machine syntax
+* per-state behaviours as per alter-ego
+* [#B] apply to accumulate; apply! to clobber
+
+* lathe#chain_states :red, :green, :blue
+  implies events :red_to_green , :green_to_blue
+* lathe#chain_states { :red => :green, :green => :blue}
+  as above
+
+implement Class#inherited
+
+* subclassing state
+  state MyStateClass, [:name => STATENAME], [options={}]
+  state *NAMES, [:class => MyStateClass], [options={}]
+
+* class bindings:
+** bind all instances of a class to a specific shared binding
+   this is the equivalent of class methods vs instance methods
+** define binding methods on the class, not the metaclass (?)
+
+* ensure options are merged / updated in subsequent  machine blocks
+
 * Documentation, documentation, documentation: cucumber.
 * specs
 ** review RDOC / code comments
@@ -37,9 +68,12 @@
 *** hash filter based on .options
 *** proc filter replaces block; arbitrary filtering
 *** this allows you to eg define :auto => true on some states and filter just those
-** singleton machines & deep copy / clone
+** DONE singleton machines
+
+** TODO deep copy / clone
 *** machines for an instance of a class
 *** method customize_machine! which clones & replaces class binding with instance binding
+
 ** <field_name>= method: trigger a transition if a next_state is given
 ** Rails helpers for views etc? Tie-in to controller stuff?
 ** inheritance? -> search up inheritance chain for machine ...

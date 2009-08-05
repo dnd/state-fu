@@ -1,10 +1,12 @@
 module StateFu
-  
-  # Stuff shared between StateArray and EventArray    
+
+  # Stuff shared between StateArray and EventArray
   module ArrayWithSymbolAccessor
+
     # Pass a symbol to the array and get the object with that .name
     # [<Foo @name=:bob>][:bob]
     # => <Foo @name=:bob>
+
     def []( idx )
       begin
         super( idx )
@@ -31,9 +33,40 @@ module StateFu
     def only *syms
       select {|el| syms.flatten.compact.map(&:to_sym).include?(el.to_sym) } #.extend ArrayWithSymbolAccessor
     end
+      
+    def all
+      self
+    end
+    
+    def rand
+      self.rand
+    end
 
   end
 
+  module TransitionArgsArray
+    attr_reader :transition
+    
+    def init(t)
+      @transition = t
+    end
+    
+    delegate :options, :to => :transition
+    delegate :binding, :to => :transition
+    delegate :machine, :to => :transition
+    delegate :origin,  :to => :transition
+    delegate :target,  :to => :transition                
+
+    def []( index )
+      begin
+        super( index )
+      rescue TypeError
+        options[index]
+      end
+    end
+    
+  end 
+  
   # Array extender. Used by Machine to keep a list of states.
   module StateArray
     include ArrayWithSymbolAccessor
@@ -113,6 +146,17 @@ module StateFu
 
   module ToolArray
     include ModuleRefArray
+  end
+
+
+  module MessageArray
+    def strings
+      select { |m| m.is_a? String }
+    end
+
+    def symbols
+      select { |m| m.is_a? Symbol }
+    end
   end
 
   # Extend an Array with this. It's a fairly compact implementation,

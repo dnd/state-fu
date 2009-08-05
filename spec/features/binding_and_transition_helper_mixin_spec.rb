@@ -37,7 +37,7 @@ describe "extending bindings and transitions with Lathe#helper" do
       attr_accessor :ok
     end
 
-    @machine = Klass.machine do
+    @machine = Klass.state_fu_machine do
       helper MySpecHelper::BindingExampleHelper
       helper 'my_spec_helper/other_example_helper'
 
@@ -50,7 +50,7 @@ describe "extending bindings and transitions with Lathe#helper" do
       end
     end
 
-    @other_machine = Klass.machine(:other) do
+    @other_machine = Klass.state_fu_machine(:other) do
       helper ::MySpecHelper::OtherExampleHelper
     end
     @obj = Klass.new

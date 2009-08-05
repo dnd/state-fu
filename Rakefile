@@ -1,4 +1,4 @@
-#!/usr/bin/ruby1.9
+#!/usr/bin/env ruby
 require "spec/rake/spectask"
 #require 'cucumber/rake/task'
 require "date"
@@ -44,7 +44,14 @@ end
 
 namespace :spec do
 
-  desc "Run specs"
+  desc 'run the spes'
+  Spec::Rake::SpecTask.new(:default) do |t|
+    t.spec_files = FileList["spec/state_fu_spec.rb"]
+    t.spec_opts = ["--options", "spec/spec.opts"]
+  end
+
+
+  desc "Run all (old) specs"
   Spec::Rake::SpecTask.new(:all) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
     t.spec_opts = ["--options", "spec/spec.opts"]
@@ -78,12 +85,19 @@ end
 
 desc 'Runs irb in this project\'s context'
 task :irb do |t|
-  exec 'irb -I lib -r state-fu'
+  exec 'irb -I lib -I spec -r state-fu -r spec_helper'
 end
 
 desc 'Runs rdoc on the project lib directory'
 task :doc do |t|
   exec 'rdoc lib/'
+end
+
+desc 'Delete logfiles'
+namespace :log do
+  task :clear do |t|
+    Dir['log/*.log'].each { |log| File.rm(log) }
+  end
 end
 
 begin
@@ -95,5 +109,5 @@ begin
 rescue LoadError => e
 end
 
-task :default => 'spec:all'
+task :default => 'spec:default'
 task :all     => 'spec:all'

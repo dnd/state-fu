@@ -1,9 +1,10 @@
-module ActiveSupport #:nodoc:
-  module CoreExtensions #:nodoc:
-    module Array #:nodoc:
+module ActiveSupport #:nodoc
+  module CoreExtensions #:nodoc
+    module Array #:nodoc
       module Wrapper
         # Wraps the object in an Array unless it's an Array.  Converts the
         # object to an Array using #to_ary if it implements that.
+        #:nodoc
         def wrap(object)
           case object
           when nil

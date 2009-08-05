@@ -9,10 +9,10 @@ describe StateFu::Plotter do
   before do
     reset!
     make_pristine_class('Klass')
-    @machine = Klass.machine(:drawme) do
+    @machine = Klass.state_fu_machine(:drawme) do
       chain 'clean -tarnish-> dirty -fester-> putrid'
     end
-    @machine = Klass.machine(:drawme)
+    @machine = Klass.state_fu_machine(:drawme)
   end
 
 

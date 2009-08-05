@@ -1,11 +1,12 @@
-module ActiveSupport #:nodoc:
-  module CoreExtensions #:nodoc:
-    module Array #:nodoc:
+module ActiveSupport #:nodoc
+  module CoreExtensions #:nodoc
+    module Array #:nodoc
       module Conversions
         # Converts the array to a comma-separated sentence where the last element is joined by the connector word. Options:
         # * <tt>:words_connector</tt> - The sign or word used to join the elements in arrays with two or more elements (default: ", ")
         # * <tt>:two_words_connector</tt> - The sign or word used to join the elements in arrays with two elements (default: " and ")
         # * <tt>:last_word_connector</tt> - The sign or word used to join the last element in arrays with three or more elements (default: ", and ")
+        #:nodoc
         def to_sentence(options = {})
           default_words_connector     = I18n.translate(:'support.array.words_connector',     :locale => options[:locale])
           default_two_words_connector = I18n.translate(:'support.array.two_words_connector', :locale => options[:locale])
@@ -42,6 +43,7 @@ module ActiveSupport #:nodoc:
 
         # Calls <tt>to_param</tt> on all its elements and joins the result with
         # slashes. This is used by <tt>url_for</tt> in Action Pack. 
+        #:nodoc
         def to_param
           collect { |e| e.to_param }.join '/'
         end
@@ -50,12 +52,14 @@ module ActiveSupport #:nodoc:
         # using the given +key+ as the param name.
         #
         #   ['Rails', 'coding'].to_query('hobbies') # => "hobbies%5B%5D=Rails&hobbies%5B%5D=coding"
+        #:nodoc
         def to_query(key)
           prefix = "#{key}[]"
           collect { |value| value.to_query(prefix) }.join '&'
         end
 
-        def self.included(base) #:nodoc:
+        #:nodoc
+        def self.included(base) #:nodoc
           base.class_eval do
             alias_method :to_default_s, :to_s
             alias_method :to_s, :to_formatted_s
@@ -71,6 +75,7 @@ module ActiveSupport #:nodoc:
         # output:
         #
         #   Blog.find(:all).to_formatted_s(:db) # => "First Post,Second Post,Third Post"
+        #:nodoc
         def to_formatted_s(format = :default)
           case format
             when :db
@@ -159,6 +164,7 @@ module ActiveSupport #:nodoc:
         #     </message>
         #   </messages>
         #
+        #:nodoc
         def to_xml(options = {})
           raise "Not all elements respond to to_xml" unless all? { |e| e.respond_to? :to_xml }
           require 'builder' unless defined?(Builder)

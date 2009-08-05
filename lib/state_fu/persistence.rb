@@ -1,16 +1,16 @@
 module StateFu
-  
+
   # the persistence module has a few simple tests which help decide which
   # persistence mechanism to use
-  
+
   # TODO add event hooks (on_change etc) ...
   # after benchmarking
-    
-  # To create your own custom persistence mechanism, 
+
+  # To create your own custom persistence mechanism,
   # subclass StateFu::Persistence::Base
   # and define prepare_field, read_attribute and write_attribute:
-  
-  
+
+
   #  class StateFu::Persistence::MagneticCarpet < StateFu::Persistence::Base
   #    def prepare_field
   #
@@ -23,8 +23,8 @@ module StateFu
   #      Logger.debug "magnetising ( #{field_name} => #{string_value} on #{object.inspect}"
   #      object.send "magnetised_#{field_name}=", string_value
   #    end
-  #  end 
-  
+  #  end
+
   module Persistence
     DEFAULT_SUFFIX    = '_field'
     @@class_for       = {}
@@ -33,6 +33,10 @@ module StateFu
     #
     # Class Methods
     #
+
+    def self.default_field_name( machine_name )
+      machine_name == DEFAULT ? DEFAULT_FIELD : "#{machine_name.to_s.underscore.tr(' ','_')}#{DEFAULT_SUFFIX}"
+    end
 
     # returns the appropriate persister class for the given class & field name.
     def self.class_for( klass, field_name )
@@ -47,36 +51,47 @@ module StateFu
           self::Attribute
         end
     end
-    
+
+    def self.for_class( klass, binding, field_name )
+      persister_class = class_for klass, field_name
+      prepare_field( klass, field_name, persister_class)
+      returning persister_class.new( binding, field_name ) do |persister|
+        Logger.debug( "#{persister_class}: method #{binding.method_name} as field #{persister.field_name}" )
+      end
+    end
+
+    def self.for_instance( binding, field_name )
+      metaclass = class << binding.object; self; end
+      for_class( metaclass, binding, field_name )
+    end
+
     # returns a new persister appropriate to the given binding and field_name
     # also ensures the persister class method :prepare_field has been called
     # once for the given class & field name so the field can be set up; eg an
     # attr_accessor or a before_save hook defined
     def self.for( binding )
-      field_name      = binding.field_name.to_sym
-      persister_class = class_for binding.target, field_name
-      if (klass = binding.target).is_a?(Class)
-        prepare_field( klass, field_name, persister_class)
-      end
-      returning persister_class.new( binding, field_name ) do |persister|      
-        Logger.debug( "#{persister_class}: method #{binding.method_name} as field #{persister.field_name}" )
+      field_name = binding.field_name.to_sym
+      if binding.singleton?
+        for_instance( binding, field_name )
+      else
+        for_class( binding.target, binding, field_name )
       end
     end
-    
+
     # ensures that <persister_class>.prepare_field is called only once
     def self.prepare_field(klass, field_name, persister_class=nil)
-      @@fields_prepared[klass] ||= []      
+      @@fields_prepared[klass] ||= []
       unless @@fields_prepared[klass].include?(field_name)
         persister_class ||= class_for(klass, field_name)
         persister_class.prepare_field( klass, field_name )
         @@fields_prepared[klass] << field_name
-      end      
-    end   
+      end
+    end
 
     #
     # Heuristics - simple test methods to determine which persister to use
     #
-        
+
     # checks to see if the field_name for persistence is a
     # RelaxDB attribute.
     # Safe to use (skipped) if RelaxDB is not included.
@@ -96,6 +111,6 @@ module StateFu
         klass.table_exists? &&
         klass.columns.map(&:name).include?( field_name.to_s )
     end
-    
+
   end
 end

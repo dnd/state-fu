@@ -1,6 +1,6 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-# require 'activesupport' 
+# require 'activesupport'
 # require 'activerecord'
 
 describe "Document" do
@@ -26,7 +26,7 @@ describe "Document" do
         # puts "new feed!"
       end
 
-      machine( :status ) do
+      state_fu_machine( :status ) do
         state :draft do
           event :publish, :to => :published
         end
@@ -61,6 +61,8 @@ describe "Document" do
     end
 
     it "should raise a RequirementError when publish! is called" do
+      @doc.status.name.should == :draft
+      @doc.status.publish!
       lambda { @doc.status.publish! }.should raise_error( StateFu::RequirementError )
       begin
         @doc.status.publish!
@@ -84,7 +86,6 @@ describe "Document" do
     end
 
     it "should not raise an error when publish! is called" do
-      @doc.status.evaluate_requirement_with_args(:author).should == "Susan"
       lambda { @doc.status.publish! }.should_not raise_error( )
     end
 

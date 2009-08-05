@@ -59,13 +59,12 @@ require 'rubygems'
 
 [ 'core_ext',
   'logger',
-  'helpers/applicable',
-  'helpers/contextual_eval',
-  'helpers/transitive',  
-  'helpers/arrays',
-  'context',
+  'applicable',
+  'arrays',
+  'methodical',
+  'optional',
+  'executioner',
   'exceptions',
-  'fu_space',
   'machine',
   'lathe',
   'method_factory',
@@ -81,21 +80,19 @@ require 'rubygems'
   'hooks',
   'interface',
   'transition',
-  'mock_transition',
+  'transition_query',
   'plotter' ].each do |lib|
   require File.expand_path( File.join( File.dirname(__FILE__), 'state_fu', lib ))
 end
 
 module StateFu
-  DEFAULT_MACHINE    = :state_fu
+  DEFAULT       = :default
+  DEFAULT_FIELD = :state_fu_field
 
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )
     klass.send( :include, Interface::InstanceMethods )
+    klass.extend(         Interface::Aliases )
   end
-end
-
-if __FILE__ == $0
-  # drop into irb?
 end
 

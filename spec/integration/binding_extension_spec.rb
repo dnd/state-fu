@@ -12,7 +12,7 @@ describe "extending StateFu::Lathe" do
     before do
       reset!
       make_pristine_class('Klass')
-      @machine = Klass.machine() do
+      @machine = Klass.state_fu_machine() do
         state :init
       end
     end # before

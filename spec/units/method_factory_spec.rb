@@ -13,7 +13,7 @@ describe StateFu::MethodFactory do
     describe "defined on the stateful instance / object before state_fu has been called" do
 
       before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             event( :simple_event,
                    :from => { [:a, :b] => :targ } )
             state( :a ) { cycle }
@@ -30,7 +30,7 @@ describe StateFu::MethodFactory do
               callme
             end 
           end
-          Klass.machine(){}
+          Klass.state_fu_machine(){}
         end 
         it "should call the original method_missing on an unexpected method call" do 
           @k = Klass.new
@@ -46,12 +46,11 @@ describe StateFu::MethodFactory do
         end
 
         it "should call state_fu!" do
-          mock.proxy( StateFu::Binding ).new( Klass.machine, @obj, :state_fu )
+          mock.proxy( StateFu::Binding ).new( Klass.state_fu_machine, @obj, StateFu::DEFAULT )
           @obj
           @obj.private_methods.map(&:to_sym).should include(:state_fu_field)
-          #@obj.should respond_to :state_fu_field
+          #@obj.should respond_to StateFu::DEFAULT_FIELD
           @obj.state_fu.machine.events.should_not be_empty
-
           @obj.simple_event!
 
           # @obj.should_have_received( :state_fu! )
@@ -61,14 +60,9 @@ describe StateFu::MethodFactory do
           lambda { @obj.simple_event! }.should_not raise_error( NoMethodError )
         end
 
-        it "should call binding.fire!( :simple_event ... ) with no args" do
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
-          t = @obj.simple_event!
-        end
-
         it "should call binding.fire!( :simple_event ... ) with any specified args" do
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event), :a, :b, {:c => "d"} )
-          t = @obj.simple_event!( :a, :b, :c => "d" )
+          mock.instance_of( StateFu::Binding ).fire!( anything, :a, :b, {:c => "d"} )
+          t = @obj.simple_event!( nil, :a, :b, :c => "d" )
         end
 
         it "should fire the transition" do
@@ -77,13 +71,6 @@ describe StateFu::MethodFactory do
           t.should be_accepted
           @obj.send(:state_fu_field).should == 'targ'
         end
-
-        it "should accept a block and pass it to the method on the binding" do 
-          block = lambda { }
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
-          @obj.simple_event! &block
-          pending "don't know how to mock this, or the ideal behaviour to implement ..."
-        end   
       end
     end
 
@@ -91,7 +78,7 @@ describe StateFu::MethodFactory do
     describe "defined on the binding" do
       describe "when the event is simple (has only one possible target)" do
         before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             event( :simple_event,
                    :from => { [:a, :b] => :targ } )
           end # machine
@@ -120,28 +107,28 @@ describe StateFu::MethodFactory do
           end
 
           it "should add any arguments / options it is called with to the transition" do
-            t = @binding.simple_event(:a, :b, :c, {'d' => 'e'})
+            t = @binding.simple_event(nil, :a, :b, :c, {'d' => 'e'})
             t.should be_kind_of( StateFu::Transition )
-            t.target.should == @machine.states[:targ]
-            t.event.should == @machine.events[:simple_event]
-            t.args.should == [:a,:b,:c]
+            t.target.should  == @machine.states[:targ]
+            t.event.should   == @machine.events[:simple_event]
+            t.args.should    == [:a,:b,:c,{'d' => 'e'}]
             t.options.should == {:d => 'e'}
           end
         end # transition builder
 
         describe "method which tests if the event is fireable?" do
           it "should have the name of the event suffixed with ?" do
-            @binding.should respond_to(:simple_event?)
+            @binding.should respond_to(:can_simple_event?)
           end
 
           it "should be true when the binding says it\'s fireable?" do
             @binding.fireable?( :simple_event ).should == true
-            @binding.simple_event?.should == true
+            @binding.can_simple_event?.should == true
           end
 
           it "should be false when the binding says it\'s not fireable?" do
             mock( @binding ).fireable?( anything ) { false }
-            @binding.simple_event?.should == false
+            @binding.can_simple_event?.should == false
           end
         end # fireable?
 
@@ -167,7 +154,7 @@ describe StateFu::MethodFactory do
 
       describe "when the event is complex (has more than one possible target)" do
         before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             state :orphan
             event( :complex_event,
                    :from => :home,
@@ -219,24 +206,24 @@ describe StateFu::MethodFactory do
 
         describe "method which tests if the event is fireable?" do
           it "should have the name of the event suffixed with ?" do
-            @binding.should respond_to(:complex_event?)
+            @binding.should respond_to(:can_complex_event?)
           end
 
           it "should require a valid state name" do
-            lambda { @binding.complex_event?(:nonexistent) }.should raise_error( ArgumentError )
-            lambda { @binding.complex_event?(:orphan) }.should_not  raise_error()
-            @binding.complex_event?(:orphan).should == nil
-            lambda { @binding.complex_event?(:x) }.should_not       raise_error
+            lambda { @binding.can_complex_event?(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.can_complex_event?(:orphan) }.should_not  raise_error()
+            @binding.can_complex_event?(:orphan).should == false
+            lambda { @binding.can_complex_event?(:x) }.should_not       raise_error
           end
 
           it "should be true when the binding says the event is fireable? " do
             @binding.fireable?( [:complex_event, :x] ).should == true
-            @binding.complex_event?(:x).should == true
+            @binding.can_complex_event?(:x).should == true
           end
 
           it "should be false when the binding says the event is not fireable?" do
             mock( @binding ).fireable?( anything ) { false }
-            @binding.complex_event?(:x).should == false
+            @binding.can_complex_event?(:x).should == false
           end
         end # fireable?
 
@@ -273,7 +260,7 @@ describe StateFu::MethodFactory do
       describe "cycle and next_state methods" do
         describe "when there is a valid transition available for cycle and next_state" do
           before do
-            @machine = Klass.machine do
+            @machine = Klass.state_fu_machine do
               initial_state :groundhog_day
 
               state(:groundhog_day) do
@@ -318,7 +305,7 @@ describe StateFu::MethodFactory do
 
         describe "when the machine is empty" do
           before do
-            @machine = Klass.machine() {}
+            @machine = Klass.state_fu_machine() {}
             @obj     = Klass.new
             @binding = @obj.state_fu
           end

@@ -1,4 +1,4 @@
-class Object # :nodoc:all
+class Object  #:nodoc:all
   # Returns +value+ after yielding +value+ to the block. This simplifies the
   # process of constructing an object, performing work on the object, and then
   # returning the object from a method. It is a Ruby-ized realization of the K
@@ -35,6 +35,7 @@ class Object # :nodoc:all
   #  end
   #
   #  foo # => ['bar', 'baz']
+   #:nodoc
   def returning(value)
     yield(value)
     value
@@ -50,6 +51,7 @@ class Object # :nodoc:all
   #     tap    { |x| puts "evens: #{x.inspect}" }.
   #     map    { |x| x*x }.
   #     tap    { |x| puts "squares: #{x.inspect}" }
+   #:nodoc
   def tap
     yield self
     self

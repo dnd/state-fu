@@ -1,81 +1,116 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
 module RequirementFeatureHelper
-
-  def account_expired_test
-    false
-  end
-
-  def valid_password_test
-    true
-  end
-
   def account_expired?
-    !!account_expired_test
+    !! account_expired
   end
 
   def valid_password?
-    !!valid_password_test
+    !! valid_password
   end
 end
 
-describe "requirement objects" do
-  include MySpecHelper
-  before(:all) do
-    reset!
-    make_pristine_class('Klass')
-    Klass.machine do
-      helper RequirementFeatureHelper
-
-      initial_state :guest
-
-      event :login_success, :from => :guest, :to => [:logged_in, :expired] do
-        requires :valid_password?
-      end
-
-      event :login_failure, :from => :guest, :to => :guest do
-        execute :show_error
-      end
-
-      state :logged_in do
-        requires :not_account_expired?
-      end
-
-      state :expired do
-        requires :account_expired?
-      end
-    end
-    @obj = Klass.new
-    @binding = @obj.state_fu
-  end
-
-  describe "requirements with names beginning with not_" do
+# it_should_behave_like "!" do
+shared_examples_for "not requirements" do
+    describe "requirements with names beginning with no[t]_" do
 
     it "should return the opposite of the requirement name without not_" do
-      @binding.respond_to?(:valid_password?).should == true
-      @binding.respond_to?(:not_valid_password?).should == false
-      @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
-      @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == false
+      @obj.valid_password = false
+      @binding.has_valid_password?.should == false
+      @binding.has_not_valid_password?.should == true
+      @binding.has_no_valid_password?.should == true
+      @obj.valid_password = true
+      @binding.has_valid_password?.should == true
+      @binding.has_not_valid_password?.should == false
+      @binding.has_no_valid_password?.should == false
     end
 
     it "should call the method directly if one exists" do
-      mock( @binding ).not_valid_password?() { true }
-      @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
-      @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == true
+      @obj.valid_password = true
+      (class << @obj; self; end).class_eval do
+        define_method( :no_valid_password? ) { true }
+      end
+      @binding.has_valid_password?.should == true
+      @binding.has_not_valid_password?.should == false
+      @binding.has_no_valid_password?.should == true
     end
 
-    it "should act as the opposite of requirement in guarding a transition" do
-      @binding.account_expired?.should == false
-      @binding.valid_password?.should == true
-      mock( @binding ).valid_password_test { false }
-      t = @binding.login_success(:logged_in)
-      t.requirements.should == [:not_account_expired?, :valid_password?]
-      t.unmet_requirements.should == [:valid_password?]
-      mock( @binding ).valid_password_test.times(2) { true }
-      t.unmet_requirements.should == []
-      @obj.login_success!(:logged_in).should == true
-      @binding.should == :logged_in
+  end
+
+end
+
+describe "requirements" do
+  before(:all) do
+    reset!
+    make_pristine_class('Klass')
+    Klass.class_eval do
+      attr_accessor :valid_password
+      attr_accessor :account_expired
+    end
+    @machine = StateFu::Machine.new do
+      initial_state :guest
+
+      event :has_valid_password, :from => :anonymous, :to => :logged_in do
+        requires :valid_password?
+      end
+
+      event :has_not_valid_password, :from => :anonymous, :to => :suspect do
+        requires :not_valid_password?
+      end
+
+      event :has_no_valid_password, :from => :anonymous, :to => :suspect do
+        requires :no_valid_password?
+      end
+      
     end
   end
 
+  before :each do
+    @obj.valid_password = true
+    @obj.account_expired = false
+  end
+
+  describe "requirements defined with a machine helper" do
+    before :all do
+      @machine.lathe { helper RequirementFeatureHelper }
+      @machine.bind!(Klass, :default)
+      @obj     = Klass.new
+      @binding = @obj.state_fu
+    end
+
+    it_should_behave_like "not requirements"
+
+    it "should not have methods on the object" do
+      @obj.respond_to?(:valid_password?).should == false
+      @obj.respond_to?(:account_expired?).should == false
+    end
+
+    it "should have methods on the binding" do
+      # this is a little misleading because theyre not evaluated on the binding ..
+      @binding.respond_to?(:valid_password?).should == true
+      @binding.respond_to?(:account_expired?).should == true
+      @binding.respond_to?(:not_valid_password?).should == false
+      @binding.respond_to?(:not_account_expired?).should == false
+    end
+  end
+
+  describe "requirements defined on the object" do
+    before :all do
+      @machine.bind!(Klass, :default)
+      @obj = Klass.new
+      @binding = @obj.state_fu
+      Klass.class_eval do
+        include RequirementFeatureHelper
+      end
+    end
+
+    it_should_behave_like "not requirements"
+
+    it "should have methods on the object" do
+      @obj.respond_to?(:valid_password?).should == true
+      @obj.respond_to?(:not_valid_password?).should == false
+      @obj.respond_to?(:account_expired?).should == true
+      @obj.respond_to?(:not_account_expired?).should == false
+    end
+  end
 end

@@ -1,4 +1,4 @@
-class Object # :nodoc:all
+class Object  #:nodoc:all
   # An object is blank if it's false, empty, or a whitespace string.
   # For example, "", "   ", +nil+, [], and {} are blank.
   #
@@ -9,49 +9,58 @@ class Object # :nodoc:all
   # to
   #
   #   if !address.blank?
+  #:nodoc
   def blank?
     respond_to?(:empty?) ? empty? : !self
   end
 
   # An object is present if it's not blank.
+   #:nodoc
   def present?
     !blank?
   end
 end
 
-class NilClass #:nodoc:
+class NilClass #:nodoc
+   #:nodoc
   def blank?
     true
   end
 end
 
-class FalseClass #:nodoc:
+class FalseClass #:nodoc
+   #:nodoc
   def blank?
     true
   end
 end
 
-class TrueClass #:nodoc:
+class TrueClass #:nodoc
+   #:nodoc
   def blank?
     false
   end
 end
 
-class Array #:nodoc:
+class Array #:nodoc
+   #:nodoc
   alias_method :blank?, :empty?
 end
 
-class Hash #:nodoc:
+class Hash #:nodoc
+   #:nodoc
   alias_method :blank?, :empty?
 end
 
-class String #:nodoc:
+class String #:nodoc
+   #:nodoc
   def blank?
     self !~ /\S/
   end
 end
 
-class Numeric #:nodoc:
+class Numeric #:nodoc
+   #:nodoc
   def blank?
     false
   end

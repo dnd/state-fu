@@ -1,20 +1,56 @@
 module StateFu
   class Machine
-    include StateFu::Applicable
 
-    # meta-constructor; expects to be called via Klass.machine()
+    def self.BINDINGS
+      @@_bindings ||= {}
+    end
+
+    include Applicable
+    include Optional
+    
+    attr_reader :hooks
+
+    #
+    # Class methods
+    #
+
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      
-      unless machine = StateFu::FuSpace.machines[ klass ][ name ]
-        machine = new( name, options, &block )
-        machine.bind!( klass, name, options[:field_name] )
+
+      unless machine = klass.state_fu_machines[ name ]
+        machine = new(options)
+        machine.bind! klass, name, options[:field_name] 
       end
       if block_given?
-        machine.apply!( &block )
+        machine.apply! &block 
       end
       machine
+    end
+
+    # make it so that a class which has included StateFu has a binding to
+    # this machine
+    def self.bind!( machine, owner, name, field_name)
+      name = name.to_sym
+      # define an accessor method with the given name
+      if owner.class == Class
+        owner.state_fu_machines[name]    = machine
+        owner.state_fu_field_names[name] = field_name
+        # method_missing to catch NoMethodError for event methods, etc
+        StateFu::MethodFactory.define_once_only_method_missing( owner )
+        unless owner.respond_to?(name)
+          owner.class_eval do
+            define_method name do
+              state_fu( name )
+            end
+          end
+        end
+        # prepare the persistence field
+        StateFu::Persistence.prepare_field owner, field_name 
+      else
+        _binding = StateFu::Binding.new machine, owner, name, :field_name => field_name, :singleton => true 
+        MethodFactory.define_singleton_method(owner, name) { _binding }
+      end
     end
 
     ##
@@ -23,15 +59,16 @@ module StateFu
 
     attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages, :tools
 
-    def initialize( name, options={}, &block )
-      # TODO - name isn't actually used anywhere yet - remove from constructor
-      @states  = [].extend( StateArray  )
-      @events  = [].extend( EventArray  )
-      @helpers = [].extend( HelperArray )
-      @tools   = [].extend( ToolArray   )
+    def initialize( options={}, &block )
+      @states               = [].extend( StateArray  )
+      @events               = [].extend( EventArray  )
+      @helpers              = [].extend( HelperArray )
+      @tools                = [].extend( ToolArray   )
       @named_procs          = {}
       @requirement_messages = {}
       @options              = options
+      @hooks                = Hooks.for( self )
+      apply!( &block ) if block_given?
     end
 
     # merge the commands in &block with the existing machine; returns
@@ -51,6 +88,10 @@ module StateFu
 
     def inject_tools_into( obj )
       tools.inject_into( obj )
+    end
+
+    def inject_methods_into( obj )
+      #puts 'inject_methods_into'
     end
 
     # the modules listed here will be mixed into Binding and
@@ -75,9 +116,9 @@ module StateFu
 
     # make it so a class which has included StateFu has a binding to
     # this machine
-    def bind!( owner, name=StateFu::DEFAULT_MACHINE, field_name = nil )
-      field_name ||= "#{name.to_s.underscore.tr(' ','_')}#{StateFu::Persistence::DEFAULT_SUFFIX}"
-      StateFu::FuSpace.bind!(self, owner, name, field_name)
+    def bind!( owner, name= DEFAULT, field_name = nil )
+      field_name ||= Persistence.default_field_name( name )
+      self.class.bind!(self, owner, name, field_name)
     end
 
     def empty?
@@ -138,5 +179,6 @@ module StateFu
     def graphviz
       @graphviz ||= Plotter.new(self).output
     end
+
   end
 end

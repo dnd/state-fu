@@ -4,7 +4,7 @@ describe "method_missing" do
   include MySpecHelper
   before do
     make_pristine_class('Klass')
-    Klass.machine() {}
+    Klass.state_fu_machine() {}
     @obj = Klass.new
   end
 

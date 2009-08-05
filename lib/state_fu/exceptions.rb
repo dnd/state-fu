@@ -1,59 +1,77 @@
 module StateFu
 
-  class Exception < ::Exception
-    attr_reader :binding, :options
+  class MagicMethodError < NoMethodError
   end
 
-  class RequirementError < Exception
+  class Error < ::StandardError
+    attr_reader :binding, :options
+
+    def initialize binding, message=nil, options={}
+      @binding = binding
+      @options = options
+      super message
+    end
+    
+  end
+
+  class TransitionNotFound < Error
+  end
+  
+  class TransitionError < Error
+    # TODO default message
     attr_reader :transition
-    DEFAULT_MESSAGE = "The transition was halted"
 
-    # SPECME
-    def unmet_requirements
-      transition.unmet_requirements
+    def initialize transition, message=nil, options={}
+      raise caller.inspect unless transition.is_a?(Transition)
+      @transition = transition 
+      super transition.binding, message, options
     end
 
-    def initialize( transition, message=DEFAULT_MESSAGE, options={})
-      @transition = transition
-      @options    = options
-      super( message )
-    end
+    delegate :origin, :to => :transition
+    delegate :target, :to => :transition
+    delegate :event,  :to => :transition    
+    delegate :args,   :to => :transition    
+
+    # TODO capture these on initialization
+    delegate :unmet_requirements,         :to => :transition        
+    delegate :unmet_requirement_messages, :to => :transition            
+    delegate :requirement_errors,         :to => :transition            
 
     def inspect
-      "<StateFu::RequirementError #{message} #{@transition.origin.name}=[#{@transition.event.name}]=>#{transition.target.name}>"
+      origin_name = origin && origin.name
+      target_name = target && target.name
+      event_name  = event  && event.name  
+      "<#{self.class.to_s} #{message} #{origin_name.inspect}=[#{event_name.inspect}]=>#{target_name.inspect}>"
     end
   end
 
-  class TransitionHalted < Exception
-    attr_reader :transition
+  class UnknownTarget < TransitionError
+  end
 
-    DEFAULT_MESSAGE = "The transition was halted"
-
-    def initialize( transition, message=DEFAULT_MESSAGE, options={})
-      @transition = transition
-      @options    = options
-      super( message )
+  class TransitionAlreadyFired < TransitionError
+  end
+  
+  class RequirementError < TransitionError
+    def to_a
+      unmet_requirement_messages
+    end
+    
+    def to_h
+      requirement_errors
     end
   end
 
-  class InvalidTransition < Exception
-    attr_reader :binding, :origin, :target, :event, :args
+  class TransitionHalted < TransitionError
+  end
 
-    DEFAULT_MESSAGE = "An invalid transition was attempted"
+  class InvalidTransition < TransitionError
+    attr_reader :valid_transitions
 
-    def initialize( binding,
-                    event,
-                    origin,
-                    target,
-                    message=DEFAULT_MESSAGE,
-                    options={})
-      @binding = binding
-      @event   = event
-      @origin  = origin
-      @target  = target
-      @options = options
-      super( message )
+    def initialize transition, message=nil, valid_transitions=nil, options={}
+      @valid_transitions = valid_transitions
+      super transition, message, options
     end
+    
   end
 
 end

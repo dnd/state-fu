@@ -14,9 +14,11 @@ Feature: methods defined on inclusion of StateFu
 Scenario: including StateFu into a class should define class methods to access StateFu::Machines
   Given I have required the StateFu library
   When I include StateFu in a class called MyClass
-  Then MyClass should respond to 'machine'
-  And  MyClass should respond to 'machines'
-  And  MyClass should respond to 'machine_names'
+  Then MyClass should respond to 'state_fu_machine'
+  Then MyClass should respond to 'machine'  
+  And  MyClass should respond to 'state_fu_machines'
+  And  MyClass should respond to 'machines'  
+
 
 Scenario: including StateFu into a class should define aliases for class methods
   Given I have required the StateFu library
@@ -29,23 +31,15 @@ Scenario: including StateFu into a class should define aliases for class methods
   Then MyClass should respond to 'state_machine'  as an alias for 'machine'
   Then MyClass should respond to 'engine'         as an alias for 'machine'
 
-  Then MyClass should respond to 'stfus'          as an alias for 'machines'
-  Then MyClass should respond to 'state_fus'      as an alias for 'machines'
   Then MyClass should respond to 'workflows'      as an alias for 'machines'
   Then MyClass should respond to 'engines'        as an alias for 'machines'
-
-  Then MyClass should respond to 'stfu_names'     as an alias for 'machine_names'
-  Then MyClass should respond to 'state_fu_names' as an alias for 'machine_names'
-  Then MyClass should respond to 'engine_names'   as an alias for 'machine_names'
-  Then MyClass should respond to 'engine_names'   as an alias for 'machine_names'
-  Then MyClass should respond to 'workflow_names' as an alias for 'machine_names'
 
 
 Scenario: calling MyClass.machine should return a StateFu::Machine bound to MyClass
   Given I have included StateFu in a class called MyClass
   When I invoke the class method MyClass.machine
   Then I should receive a StateFu::Machine
-  And it should be bound to MyClass with the name :state_fu
+  And it should be bound to MyClass with the name :default
   And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
 
 Scenario: calling MyClass.machine with a block should define that machine's states and events
@@ -60,7 +54,7 @@ Scenario: calling MyClass.machine with a block should define that machine's stat
   """
   And I create an instance of MyClass called @my_obj
   Then I should receive a StateFu::Machine
-  And it should be bound to MyClass with the name :state_fu
+  And it should be bound to MyClass with the name :default
   And it should return the same StateFu::Machine on subsequent invocations of MyClass.machine
   And the machine should have a StateFu::State called :frightened
   And the machine should have a StateFu::Event called :scare
@@ -78,24 +72,17 @@ Scenario: instantiating a binding to a Machine which has an event should define 
   And I create an instance of MyClass called @my_obj
   And I call @my_obj.state_fu
   Then I should receive a StateFu::Binding
-  And @my_obj should respond to 'scare?'
+  And @my_obj should respond to 'can_scare?'
   And @my_obj should respond to 'scare!'
-  And @my_obj.scare? should be true
+  And @my_obj.can_scare? should be true
   And @my_obj.scare! should cause an event transition
 
-Scenario: calling MyClass.machines should return a list of machines for MyClass
+Scenario: calling MyClass.state_fu_machines should return a list of machines for MyClass
   Given I have included StateFu in a class called MyClass
   And I have defined an empty default machine for MyClass
-  When I invoke the class method MyClass.machines
+  When I invoke the class method MyClass.state_fu_machines
   Then I should get a hash of StateFu::Machines and their names
-  And it should contain one Machine with the default name :state_fu
-
-Scenario: calling MyClass.machine_names should return a list of machine names
-  Given I have included StateFu in a class called MyClass
-  And I have defined an empty default machine for MyClass
-  When I invoke the class method MyClass.machine_names
-  Then I should get a list of machine names for MyClass
-  And it should contain only the default name :state_fu
+  And it should contain one Machine with the default name :default
 
 Scenario: including StateFu into a class should define instance methods to access StateFu::Bindings
   Given I have required the StateFu library
@@ -134,7 +121,7 @@ Scenario: the bindings instance method should return a hash of instantiated Stat
   When I call @my_obj.bindings
   Then I should receive a Hash
   And it should have one element
-  And it should include the default machine name :state_fu in its keys
+  And it should include the machine name :default in its keys
   And it should have a binding to the default StateFu::Machine for the class in its values
 
 Scenario: the state_fu! instance method should instantiate all bindings

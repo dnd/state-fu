@@ -1,11 +1,13 @@
 module StateFu
   class State < StateFu::Sprocket
 
-    attr_reader :entry_requirements, :exit_requirements
-
+    attr_reader :entry_requirements, :exit_requirements, :own_events
+    alias_method :requirements, :entry_requirements
+    
     def initialize(machine, name, options={})
       @entry_requirements = [].extend ArrayWithSymbolAccessor
       @exit_requirements  = [].extend ArrayWithSymbolAccessor
+      @own_events         = [].extend EventArray
       super( machine, name, options )
     end
 
@@ -13,28 +15,12 @@ module StateFu
       machine.events.from(self)
     end
 
-    #
-    # Proxy methods to StateFu::Lathe
-    #
-    # TODO - build something meta to build these proxy events
-    def event( name, options={}, &block )
-      if block_given?
-        lathe.event( name, options, &block )
-      else
-        lathe.event( name, options )
-      end
+    def before?(other)
+      machine.states.index(self) < machine.states.index(machine.states[other])
     end
 
-    def enterable_by?( binding, *args )
-      entry_requirements.reject do |r|
-        res = binding.evaluate_requirement_with_args( r, *args )
-      end.empty?
-    end
-
-    def exitable_by?( binding, *args )
-      exit_requirements.reject do |r|
-        binding.evaluate_requirement_with_args( r, *args )
-      end.empty?
+    def after?(other)
+      machine.states.index(self) > machine.states.index(machine.states[other])
     end
 
     # display nice and short

@@ -28,7 +28,7 @@ describe "A simple Machine definition" do
       # maybe. or maybe that's just sick.
 
       # @machine_spec = lambda do
-        Klass.machine( :method_proxy => true ) do
+        Klass.state_fu_machine( :method_proxy => true ) do
 
           states :new, :active, :limbo, :expired, :deleted
 

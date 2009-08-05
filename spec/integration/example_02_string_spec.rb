@@ -24,6 +24,7 @@ describe String do
       end
 
       def shell_escape
+        #
         klone = clone
         begin
           klone.shell.escape!
@@ -32,7 +33,7 @@ describe String do
         klone
       end
 
-      machine (:shell) do
+      state_fu_machine (:shell) do
         event(:escape, :from => {:dirty => :clean}) do
           execute :sanitize_for_shell!
         end

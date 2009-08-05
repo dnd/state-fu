@@ -6,10 +6,12 @@ rescue LoadError
   require 'activesupport'
 end
 
-# sorry, there's only Heisendocumentation (if I realize anyone's looking for
-# them, I might write some)
-
-module Vizier # :nodoc:all
+# Vizier is a simple library to help generate dot output for graphviz. It is used by StateFu's rake 
+# tasks to generate graphs of state machines.
+#
+# Sorry, there's only Heisendocumentation (if I realize anyone's looking for docs, I might write some)
+#
+module Vizier  #:nodoc:all
 
   module Support
     LEGAL_CHARS = 'a-zA-Z0-9_'

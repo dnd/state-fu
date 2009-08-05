@@ -1,9 +1,9 @@
 require 'enumerator'
 
-module ActiveSupport #:nodoc:
-  module CoreExtensions #:nodoc:
-    module Array #:nodoc:
-      module Grouping
+module ActiveSupport #:nodoc
+  module CoreExtensions #:nodoc
+    module Array #:nodoc
+      module Grouping #:nodoc:all
         # Splits or iterates over the array in groups of size +number+,
         # padding any remaining slots with +fill_with+ unless it is +false+.
         # 
@@ -19,6 +19,7 @@ module ActiveSupport #:nodoc:
         #   %w(1 2 3).in_groups_of(2, false) {|group| p group}
         #   ["1", "2"]
         #   ["3"]
+        #:nodoc
         def in_groups_of(number, fill_with = nil)
           if fill_with == false
             collection = self
@@ -56,6 +57,7 @@ module ActiveSupport #:nodoc:
         #   ["1", "2", "3"]
         #   ["4", "5"]
         #   ["6", "7"]
+        #:nodoc
         def in_groups(number, fill_with = nil)
           # size / number gives minor group size;
           # size % number gives how many objects need extra accomodation;
@@ -87,6 +89,7 @@ module ActiveSupport #:nodoc:
         #
         #   [1, 2, 3, 4, 5].split(3)                # => [[1, 2], [4, 5]]
         #   (1..10).to_a.split { |i| i % 3 == 0 }   # => [[1, 2], [4, 5], [7, 8], [10]]
+        #:nodoc
         def split(value = nil)
           using_block = block_given?
 

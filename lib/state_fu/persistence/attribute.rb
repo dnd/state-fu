@@ -24,6 +24,7 @@ module StateFu
         end
       end
 
+  def b; binding; end
       private
 
       # Read / write our strings to a plain old instance variable

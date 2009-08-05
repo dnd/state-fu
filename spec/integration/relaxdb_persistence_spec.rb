@@ -27,7 +27,7 @@ describe "a RelaxDB::Document's persister" do
     before do
       ExampleDoc.class_eval do
         property :property_field
-        machine :field_name => "property_field" do
+        state_fu_machine :field_name => "property_field" do
           # ...
         end
       end
@@ -42,7 +42,7 @@ describe "a RelaxDB::Document's persister" do
   describe "when the :field_name is not a RelaxDB property" do
     before do
       ExampleDoc.class_eval do
-        machine :field_name => "not_a_property" do
+        state_fu_machine :field_name => "not_a_property" do
           # ...
         end
       end
@@ -67,7 +67,7 @@ describe StateFu::Persistence::RelaxDB do
       make_pristine_class( 'ExampleDoc', RelaxDB::Document )
       ExampleDoc.class_eval do
         property :state_fu_field
-        machine do
+        state_fu_machine do
           state :hungry do
             event :eat, :to => :satiated
           end
