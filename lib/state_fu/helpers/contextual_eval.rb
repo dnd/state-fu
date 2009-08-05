@@ -3,7 +3,7 @@ module StateFu
   # satanic incantations we use for evaluating blocks conditionally,
   # massaging their arguments and managing execution context.
   module ContextualEval
-    # :nodoc:
+     #:nodoc
     module InstanceMethods
 
       # Truncates an argument list to match the arity of a given block.

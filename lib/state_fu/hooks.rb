@@ -2,7 +2,7 @@ module StateFu
 
   # TODO document structure / sequence of hooks elsewhere
 
-  module Hooks # :nodoc:
+  module Hooks  #:nodoc
 
     ALL_HOOKS = [[:event,  :before],   # good place to start a transaction, etc
                  [:origin, :exit],     # say goodbye!

@@ -248,7 +248,7 @@ module StateFu
     alias_method :each_event, :events
 
     # Bunch of silly little methods for defining events
-    # :nodoc:
+     #:nodoc
 
     def before   *a, &b; require_sprocket( StateFu::Event ); define_hook :before,   *a, &b; end
     def on_exit  *a, &b; require_sprocket( StateFu::State ); define_hook :exit,     *a, &b; end
@@ -296,17 +296,17 @@ module StateFu
       end
     end
 
-    # :nodoc:
+     #:nodoc
     def define_state( name, options={}, &block )
       define_sprocket( :state, name, options, &block )
     end
 
-    # :nodoc:
+     #:nodoc
     def define_event( name, options={}, &block )
       define_sprocket( :event, name, options, &block )
     end
     
-    # :nodoc:
+     #:nodoc
     def define_hook slot, method_name=nil, &block
       unless sprocket.hooks.has_key?( slot )
         raise ArgumentError, "invalid hook type #{slot.inspect} for #{sprocket.class}"
@@ -337,7 +337,7 @@ module StateFu
       sprocket.hooks[slot] << hook
     end
 
-    # :nodoc:
+     #:nodoc
     def each_sprocket( type, *args, &block)
       options = args.extract_options!.symbolize_keys!
       if args.empty? || args  == [:ALL] 

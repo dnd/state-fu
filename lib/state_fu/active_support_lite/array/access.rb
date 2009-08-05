@@ -1,14 +1,15 @@
 module ActiveSupport #:nodoc:all
-  module CoreExtensions #:nodoc:
-    module Array #:nodoc:
+  module CoreExtensions #:nodoc
+    module Array #:nodoc
       # Makes it easier to access parts of an array.
-      module Access
+      module Access #:nodoc:all
         # Returns the tail of the array from +position+.
         #
         #   %w( a b c d ).from(0)  # => %w( a b c d )
         #   %w( a b c d ).from(2)  # => %w( c d )
         #   %w( a b c d ).from(10) # => nil
         #   %w().from(0)           # => nil
+        #:nodoc
         def from(position)
           self[position..-1]
         end
@@ -19,31 +20,37 @@ module ActiveSupport #:nodoc:all
         #   %w( a b c d ).to(2)  # => %w( a b c )
         #   %w( a b c d ).to(10) # => %w( a b c d )
         #   %w().to(0)           # => %w()
+        #:nodoc
         def to(position)
           self[0..position]
         end
 
         # Equal to <tt>self[1]</tt>.
+        #:nodoc
         def second
           self[1]
         end
 
         # Equal to <tt>self[2]</tt>.
+        #:nodoc
         def third
           self[2]
         end
 
         # Equal to <tt>self[3]</tt>.
+        #:nodoc
         def fourth
           self[3]
         end
 
         # Equal to <tt>self[4]</tt>.
+        #:nodoc
         def fifth
           self[4]
         end
 
         # Equal to <tt>self[41]</tt>. Also known as accessing "the reddit".
+        #:nodoc
         def forty_two
           self[41]
         end
