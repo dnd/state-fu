@@ -1,6 +1,9 @@
 
 require 'logger'
 module StateFu
+  #
+  # TODO - SPEC ME GOOD
+  #
   class Logger
     cattr_accessor :prefix   # prefix for log messages
     cattr_accessor :suppress # set true to send messages to /dev/null
@@ -15,14 +18,17 @@ module StateFu
     ENV_LOG_LEVEL = 'STATEFU_LOGLEVEL'
     DEFAULT_LEVEL = INFO
 
-    DEFAULT_PREFIX    = nil
-    SHARED_LOG_PREFIX = '[StateFu] '
+    DEFAULT_SHARED_LOG_PREFIX = '[StateFu] '
 
-    @@prefix    = DEFAULT_PREFIX
+    @@prefix    = DEFAULT_SHARED_LOG_PREFIX
     @@logger    = nil
     @@suppress  = false
     @@shared    = false
     @@log_level = nil
+
+    def self.new( log = $stdout, level = () )
+      self.instance = get_logger( log )
+    end
 
     def self.parse_log_level(input)
       case input
@@ -31,7 +37,7 @@ module StateFu
       when 0,1,2,3,4,5
         input
       when nil
-        state_fu_log_level()
+        level
       else
         raise ArgumentError
       end
@@ -57,32 +63,22 @@ module StateFu
       !! @@shared
     end
 
-    def self.state_fu_log_level
-      if ENV[ ENV_LOG_LEVEL ]
-        const_get( ENV[ ENV_LOG_LEVEL ] )
-      else
-        DEFAULT_LEVEL
-      end
+    def self.prefix
+      shared? ? @@prefix : nil
     end
 
-    def self.new( log = $stdout, level = () )
-      self.instance = get_logger( log )
-    end
-
-    #def self.instance=( logger, options={:shared => false } )
-    #  @@logger = logger
-    #  @@shared = !!options.symbolize_keys![:shared]
-    #end
-
+    # setter for logger instance
     def self.use_logger( logger, options={:shared => false } )
       @@logger = logger
       @@shared = !!options.symbolize_keys![:shared]
       if shared?
-        @@prefix = options[:prefix] || DEFAULT_PREFIX
+        @@prefix = options[:prefix] || DEFAULT_SHARED_LOG_PREFIX
+        puts "shared :: #{@@prefix} #{prefix}"
       end
       if lvl = options[:level] || options[:log_level]
         self.level = lvl
       end
+      instance
     end
 
     def self.instance
@@ -99,7 +95,6 @@ module StateFu
           use_logger ::Logger.new( logr )
         end
       end
-      @@logger
     end
 
     def self.suppress!
@@ -113,7 +108,7 @@ module StateFu
     def self.add(severity, message = nil, progname = nil, &block)
       severity = parse_log_level( severity )
       return if suppressed?( severity )
-      message = [@@prefix, (message || (block && block.call) || progname).to_s].join
+      message = [@@prefix, (message || (block && block.call) || progname).to_s].compact.join
       # If a newline is necessary then create a new message ending with a newline.
       # Ensures that the original message is not mutated.
       message = "#{message}\n" unless message[-1] == ?\n
