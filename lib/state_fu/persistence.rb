@@ -34,6 +34,10 @@ module StateFu
     # Class Methods
     #
 
+    def self.default_field_name( machine_name )
+      machine_name == DEFAULT ? DEFAULT_FIELD : "#{machine_name.to_s.underscore.tr(' ','_')}#{DEFAULT_SUFFIX}"
+    end 
+
     # returns the appropriate persister class for the given class & field name.
     def self.class_for( klass, field_name )
       raise ArgumentError if [klass, field_name].any?(&:nil?)

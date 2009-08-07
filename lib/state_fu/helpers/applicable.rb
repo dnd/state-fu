@@ -1,9 +1,11 @@
 module StateFu    
   module Applicable
     module InstanceMethods
+      
       # if given a hash of options (or a splatted arglist containing
       # one), merge them into @options. If given a block, eval it
       # (yielding self if the block expects it)
+      
       def apply!( options={}, &block )
         options.respond_to?(:keys) || options = options.extract_options!
         @options.merge!( options.symbolize_keys! )

@@ -2,9 +2,11 @@ module StateFu
   
   # Stuff shared between StateArray and EventArray    
   module ArrayWithSymbolAccessor
+    
     # Pass a symbol to the array and get the object with that .name
     # [<Foo @name=:bob>][:bob]
     # => <Foo @name=:bob>
+    
     def []( idx )
       begin
         super( idx )

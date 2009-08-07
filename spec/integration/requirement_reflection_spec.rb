@@ -7,7 +7,7 @@ describe "Transition requirement reflection" do
   before do
     reset!
     make_pristine_class("Klass")
-    @machine = Klass.machine do
+    @machine = Klass.state_fu_machine do
       state :soviet_russia do
         requires( :papers_in_order?, :on => [:entry, :exit] )
         requires( :money_for_bribe?, :on => [:entry, :exit] )
@@ -95,7 +95,7 @@ describe "Transition requirement reflection" do
 
     describe "when a message is supplied for the money_for_bribe? entry requirement" do
       before do
-        Klass.machine do
+        Klass.state_fu_machine do
           state :soviet_russia do
             requires( :money_for_bribe?, :message => "This guard is thirsty! Do you have anything to declare?" )
           end

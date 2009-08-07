@@ -41,7 +41,7 @@ describe "Transition requirement evaluation with dynamic conditions" do
 
     Klass.send :include, MySpecHelper::DynamicTransitionObjectInstanceMethods
 
-    @machine = Klass.machine do
+    @machine = Klass.state_fu_machine do
 
       state :default do
         requires :method_which_requires_one_arg, :on => [:entry, :exit]

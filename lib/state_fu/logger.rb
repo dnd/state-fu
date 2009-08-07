@@ -2,8 +2,12 @@
 require 'logger'
 module StateFu
   #
-  # TODO - SPEC ME GOOD
+  # TODO - spec coverage
   #
+  # Provide logging facilities, including the ability to use a shared logger.  
+  # Use Rails' log if running as a rails plugin; allow independent control of 
+  # StateFu log level.
+  
   class Logger
     cattr_accessor :prefix   # prefix for log messages
     cattr_accessor :suppress # set true to send messages to /dev/null
@@ -97,11 +101,11 @@ module StateFu
       end
     end
 
-    def self.suppress!
-      @@suppress = true
+    def self.suppress! value=true
+      @@suppress = value
     end
 
-    def self.suppressed?( severity = DEBUG )
+    def self.suppressed? severity = DEBUG 
       @@suppress == true || severity < level
     end
 

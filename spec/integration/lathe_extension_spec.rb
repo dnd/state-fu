@@ -12,7 +12,7 @@ describe "extending StateFu::Lathe" do
     before do
       reset!
       make_pristine_class('Klass')
-      @machine = Klass.machine() do
+      @machine = Klass.state_fu_machine() do
         state :init
       end
     end # before
@@ -56,7 +56,7 @@ describe "extending StateFu::Lathe" do
           tool :bench_grinder
           snark()
         end
-        m2 = Klass.machine(:two) do
+        m2 = Klass.state_fu_machine(:two) do
         end
         lambda { m2.lathe.snark }.should raise_error( NoMethodError )
       end

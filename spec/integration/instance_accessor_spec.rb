@@ -1,7 +1,5 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
-StateFu::FuSpace.reset!
-
 ##
 ##
 ##
@@ -19,27 +17,26 @@ describe "An instance of Klass with StateFu included:" do
     end
 
     it "should return {} given .bindings()" do
-      @k.bindings().should == {}
+      @k.state_fu_bindings.should == {}
     end
 
     it "should return [] given .state_fu!()" do
       @k.state_fu!.should == []
-    end
+    end 
   end # no machine
 
   describe "when an empty machine is defined for the class with the default name:" do
     before(:each) do
-      Klass.machine() {}
-      StateFu::DEFAULT_MACHINE.should == :state_fu
+      Klass.state_fu_machine() {}
     end
 
     it "should return a StateFu::Binding given .state_fu()" do
-      @k.state_fu().should be_kind_of( StateFu::Binding )
+      @k.state_fu_binding.should be_kind_of( StateFu::Binding )
     end
 
     describe "before a binding is instantiated by calling .state_fu() or .state_fu!" do
       it "should return {} given .bindings()" do
-        @k.bindings().should == {}
+        @k.bindings.should == {}
       end
     end
 
@@ -50,7 +47,7 @@ describe "An instance of Klass with StateFu included:" do
 
       it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
         @k.bindings().length.should == 1
-        @k.bindings().keys.should == [:state_fu]
+        @k.bindings().keys.should == [StateFu::DEFAULT]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
@@ -59,7 +56,7 @@ describe "An instance of Klass with StateFu included:" do
       it "should return { :state_fu => <StateFu::Binding>} given .bindings()" do
         @k.state_fu!()
         @k.bindings().length.should == 1
-        @k.bindings().keys.should == [:state_fu]
+        @k.bindings().keys.should == [StateFu::DEFAULT]
         @k.bindings().values.first.should be_kind_of( StateFu::Binding )
       end
     end
@@ -71,18 +68,18 @@ describe "An instance of Klass with StateFu included:" do
 
     describe "when there is an empty machine called :two for the class" do
       before(:each) do
-        Klass.machine(:two) {}
+        Klass.state_fu_machine(:two) {}
       end
 
       it "should return the same Binding given .state_fu() and .state_fu(:state_fu)" do
         @k.state_fu().should be_kind_of( StateFu::Binding )
-        @k.state_fu().should == @k.state_fu(:state_fu)
+        @k.state_fu().should == @k.state_fu(StateFu::DEFAULT)
       end
 
       it "should return a StateFu::Binding for the machine called :two given .state_fu(:two)" do
         @k.state_fu(:two).should be_kind_of( StateFu::Binding )
         @k.state_fu(:two).should_not == @k.state_fu(:state_fu)
-        @k.state_fu(:two).machine.should == Klass.machine(:two)
+        @k.state_fu(:two).machine.should == Klass.state_fu_machine(:two)
       end
 
       it "should return nil when .state_fu() is called with the name of a machine which doesn't exist" do
@@ -93,7 +90,7 @@ describe "An instance of Klass with StateFu included:" do
         @k.state_fu!.should be_kind_of( Array )
         @k.state_fu!.length.should == 2
         @k.state_fu!.each { |m| m.should be_kind_of( StateFu::Binding ) }
-        @k.state_fu!.map(&:method_name).sort_by(&:to_s).should == [:state_fu, :two]
+        @k.state_fu!.map(&:method_name).sort_by(&:to_s).should == [StateFu::DEFAULT, :two]
       end
     end
   end

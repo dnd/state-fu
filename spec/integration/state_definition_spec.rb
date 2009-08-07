@@ -14,37 +14,37 @@ describe "Adding states to a Machine" do
   end
 
   it "should allow me to call machine() { state(:egg) }" do
-    lambda {Klass.machine(){ state :egg } }.should_not raise_error()
+    lambda {Klass.state_fu_machine(){ state :egg } }.should_not raise_error()
   end
 
   describe "having called machine() { state(:egg) }" do
 
     before(:each) do
-      Klass.machine(){ state :egg }
+      Klass.state_fu_machine(){ state :egg }
     end
 
     it "should return [:egg] given machine.state_names" do
-      Klass.machine.should respond_to(:state_names)
-      Klass.machine.state_names.should == [:egg]
+      Klass.state_fu_machine.should respond_to(:state_names)
+      Klass.state_fu_machine.state_names.should == [:egg]
     end
 
     it "should return [<StateFu::State @name=:egg>] given machine.states" do
-      Klass.machine.should respond_to(:states)
-      Klass.machine.states.length.should == 1
-      Klass.machine.states.first.should be_kind_of( StateFu::State )
-      Klass.machine.states.first.name.should == :egg
+      Klass.state_fu_machine.should respond_to(:states)
+      Klass.state_fu_machine.states.length.should == 1
+      Klass.state_fu_machine.states.first.should be_kind_of( StateFu::State )
+      Klass.state_fu_machine.states.first.name.should == :egg
     end
 
     it "should return :egg given machine.states.first.name" do
-      Klass.machine.should respond_to(:states)
-      Klass.machine.states.length.should == 1
-      Klass.machine.states.first.should respond_to(:name)
-      Klass.machine.states.first.name.should == :egg
+      Klass.state_fu_machine.should respond_to(:states)
+      Klass.state_fu_machine.states.length.should == 1
+      Klass.state_fu_machine.states.first.should respond_to(:name)
+      Klass.state_fu_machine.states.first.name.should == :egg
     end
 
     it "should return a <StateFu::State @name=:egg> given machine.states[:egg]" do
-      Klass.machine.should respond_to(:states)
-      result = Klass.machine.states[:egg]
+      Klass.state_fu_machine.should respond_to(:states)
+      result = Klass.state_fu_machine.states[:egg]
       result.should_not be_nil
       result.should be_kind_of( StateFu::State )
       result.name.should == :egg
@@ -52,22 +52,22 @@ describe "Adding states to a Machine" do
 
 
     it "should allow me to call machine(){ state(:chick) }" do
-      lambda {Klass.machine(){ state :chick } }.should_not raise_error()
+      lambda {Klass.state_fu_machine(){ state :chick } }.should_not raise_error()
     end
 
     describe "having called machine() { state(:chick) }" do
       before do
-        Klass.machine() { state :chick }
+        Klass.state_fu_machine() { state :chick }
       end
 
       it "should return [:egg] given machine.state_names" do
-        Klass.machine.should respond_to(:state_names)
-        Klass.machine.state_names.should == [:egg, :chick]
+        Klass.state_fu_machine.should respond_to(:state_names)
+        Klass.state_fu_machine.state_names.should == [:egg, :chick]
       end
 
       it "should return a <StateFu::State @name=:chick> given machine.states[:egg]" do
-        Klass.machine.should respond_to(:states)
-        result = Klass.machine.states[:chick]
+        Klass.state_fu_machine.should respond_to(:states)
+        result = Klass.state_fu_machine.states[:chick]
         result.should_not be_nil
         result.should be_kind_of( StateFu::State )
         result.name.should == :chick
@@ -79,7 +79,7 @@ describe "Adding states to a Machine" do
 
       it "should yield the state to the block as |s|" do
         state = nil
-        Klass.machine() do
+        Klass.state_fu_machine() do
           state(:bird) do |s|
             state = s
           end
@@ -94,7 +94,7 @@ describe "Adding states to a Machine" do
 
       it "should instance_eval the block as a StateFu::Lathe" do
         lathe = nil
-        Klass.machine() do
+        Klass.state_fu_machine() do
           state(:bird) do
             lathe = self
           end
@@ -109,10 +109,10 @@ describe "Adding states to a Machine" do
     describe "calling state(:bird) consecutive times" do
 
       it "should yield the same state each time" do
-        Klass.machine() { state :bird }
-        bird_1 = Klass.machine.states[:bird]
-        Klass.machine() { state :bird }
-        bird_2 = Klass.machine.states[:bird]
+        Klass.state_fu_machine() { state :bird }
+        bird_1 = Klass.state_fu_machine.states[:bird]
+        Klass.state_fu_machine() { state :bird }
+        bird_2 = Klass.state_fu_machine.states[:bird]
         bird_1.should == bird_2
       end
 
@@ -122,56 +122,62 @@ describe "Adding states to a Machine" do
   describe "calling machine() { states(:egg, :chick, :bird, :poultry => true) }" do
 
     it "should create 3 states" do
-      Klass.machine().should be_empty
-      Klass.machine() { states(:egg, :chick, :bird, :poultry => true) }
-      Klass.machine().state_names().should == [:egg, :chick, :bird]
-      Klass.machine().states.length.should == 3
-      Klass.machine().states.map(&:name).should == [:egg, :chick, :bird]
-      Klass.machine().states().each do |s|
+      Klass.state_fu_machine().should be_empty
+      Klass.state_fu_machine() { states(:egg, :chick, :bird, :poultry => true) }
+      Klass.state_fu_machine().state_names().should == [:egg, :chick, :bird]
+      Klass.state_fu_machine().states.length.should == 3
+      Klass.state_fu_machine().states.map(&:name).should == [:egg, :chick, :bird]
+      Klass.state_fu_machine().states().each do |s|
         s.options[:poultry].should be_true
         s.should be_kind_of(StateFu::State)
       end
+    end
 
-      describe "merging options" do
-        it "should merge options when states are mentioned more than once" do
-          StateFu::FuSpace.reset!
-          Klass.machine() { states(:egg, :chick, :bird, :poultry => true) }
-          machine = Klass.machine
-          machine.states.length.should == 3
+    describe "merging options" do
+      before do
+        make_pristine_class('Klass')          
+      end     
+      it "should merge options when states are mentioned more than once" do
+        # reset! 
+        machine = Klass.state_fu_machine
+        machine.states.length.should == 0
+        Klass.state_fu_machine() { states(:egg, :chick, :bird, :poultry => true) }
+        machine = Klass.state_fu_machine
+        machine.states.length.should == 3
 
-          # make sure they're the same states
-          states_1 = machine.states
-          Klass.machine(){ states( :egg, :chick, :bird, :covering => 'feathers')}
-          states_1.should == machine.states
+        # make sure they're the same states
+        states_1 = machine.states
+        Klass.state_fu_machine(){ states( :egg, :chick, :bird, :covering => 'feathers')}
+        states_1.should == machine.states
 
-          # ensure options were merged
-          machine.states().each do |s|
-            s.options[:poultry].should be_true
-            s.options[:covering].should == 'feathers'
-            s.should be_kind_of(StateFu::State)
-          end
+        # ensure options were merged
+        machine.states().each do |s|
+          s.options[:poultry].should be_true
+          s.options[:covering].should == 'feathers'
+          s.should be_kind_of(StateFu::State)
         end
       end
     end
   end
+end
 
-  describe "adding events inside a state block" do
-    before do
-      @lambda = lambda{ Klass.machine(){ state(:egg){ event(:hatch, :to => :chick) }}}
-    end
-
-    it "should not throw an error" do
-      @lambda.should_not raise_error
-    end
-
-    describe "Klass.machine(){ state(:egg){ event(:hatch, :to => :chick) }}}" do
-      before() do
-        Klass.machine(){ state(:egg){ event(:hatch, :to => :chick) }}
-      end
-      it "should add an event :hatch to the machine" do
-      end
-    end
+describe "adding events inside a state block" do
+  before do
+    @lambda = lambda{ Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}}
   end
 
+  it "should not throw an error" do
+    @lambda.should_not raise_error
+  end
+
+  describe "Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}}" do
+    before() do
+      Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}
+    end
+    it "should add an event :hatch to the machine" do
+    end
+  end
 end
+
+
 

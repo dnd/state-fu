@@ -12,7 +12,7 @@ describe "Copying / cloning a Machine" do
     before do
       reset!
       make_pristine_class("Klass")
-      @original = Klass.machine do
+      @original = Klass.state_fu_machine do
         state :a do
           event :goto_b, :to => :b
         end
@@ -58,7 +58,7 @@ describe "Copying / cloning a Machine" do
     before do
       reset!
       make_pristine_class("Klass")
-      @original = Klass.machine do
+      @original = Klass.state_fu_machine do
         state :a do
           event :goto_b, :to => :b
         end

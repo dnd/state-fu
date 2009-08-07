@@ -45,8 +45,8 @@ Then /^MyClass\.machines should be of size 2$/ do
   MyClass.machines.size.should == 2
 end
 
-Then /^MyClass\.machines\(:([a-z_]+)\) should return a StateFu::Machine$/ do |name|
-  @machine = MyClass.machines(name.to_sym)
+Then /^MyClass\.machines\[:([a-z_]+)\] should return a StateFu::Machine$/ do |name|
+  @machine = MyClass.machines[name.to_sym]
   @machine.should be_kind_of( StateFu::Machine )
 end
 

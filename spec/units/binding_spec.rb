@@ -27,29 +27,27 @@ describe StateFu::Binding do
   before do
     reset!
     make_pristine_class('Klass')
-    Klass.machine(){}
+    Klass.state_fu_machine(){}
     @obj = Klass.new()
   end
 
   describe "constructor" do
     before do
-      mock( StateFu::FuSpace ).field_names.at_most(1) do
-        {
-          Klass => { :example => :example_field }
-        }
+      mock(Klass).state_fu_field_names.at_most(1) do
+        { :example => :example_field }
       end
     end
 
     it "should create a new Binding given valid arguments" do
-      b = StateFu::Binding.new( Klass.machine, @obj, :example )
+      b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )
       b.should be_kind_of( StateFu::Binding )
       b.object.should      == @obj
-      b.machine.should     == Klass.machine
+      b.machine.should     == Klass.state_fu_machine
       b.method_name.should == :example
     end
 
     it "should add any options supplied to the binding" do
-      b = StateFu::Binding.new( Klass.machine, @obj, :example,
+      b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example,
                                 :colour => :red,
                                 :style  => [:robust, :fruity] )
       b.options.should == { :colour => :red, :style  => [:robust, :fruity] }
@@ -71,7 +69,7 @@ describe StateFu::Binding do
         end
         it "should get an ActiveRecord persister" do
           mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
-          b = StateFu::Binding.new( Klass.machine, @obj, :example )
+          b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )
           b.persister.should == @p
         end
       end
@@ -82,7 +80,7 @@ describe StateFu::Binding do
         end
         it "should get an Attribute persister" do
           mock( StateFu::Persistence::Attribute ).new( anything, :example_field ) { @p }
-          b = StateFu::Binding.new( Klass.machine, @obj, :example )
+          b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )
           b.persister.should == @p
         end
       end
@@ -93,10 +91,10 @@ describe StateFu::Binding do
     it "should create a new StateFu::Binding with default method-name & field_name" do
       b = @obj.state_fu()
       b.should be_kind_of( StateFu::Binding )
-      b.machine.should == Klass.machine
-      b.object.should == @obj
-      b.method_name.should == :state_fu
-      b.field_name.should  == :state_fu_field
+      b.machine.should      == Klass.state_fu_machine
+      b.object.should       == @obj
+      b.method_name.should       == StateFu::DEFAULT
+      b.field_name.to_sym.should == StateFu::DEFAULT_FIELD
     end
   end
 
@@ -104,13 +102,13 @@ describe StateFu::Binding do
     before do
       reset!
       make_pristine_class('Klass')
-      Klass.machine do
+      Klass.state_fu_machine do
         state :new do
           event :age, :to => :old
         end
         state :old
       end
-      @machine   = Klass.machine()
+      @machine   = Klass.state_fu_machine()
       @object    = Klass.new()
       @binding   = @object.state_fu()
     end
@@ -145,9 +143,9 @@ describe StateFu::Binding do
         reset!
         make_pristine_class("Klass")
         Klass.class_eval do
-          def tissue?(*args); true; end
+          def tissue?(*args); "o_O"; end
         end
-        @machine = Klass.machine do
+        @machine = Klass.state_fu_machine do
           state :snoo do
             event :am_fireable, :to => :wizz do
               requires :tissue?
@@ -179,7 +177,7 @@ describe StateFu::Binding do
 
         # This would make very little sense to someone trying to understand how to use the library.
         it "should pass the arguments to any requirements to determine transition availability" do          
-          set_method_arity( @obj, :tissue?, needed_arity = 1 )
+          set_method_arity( @obj, :tissue?, 1 )
           mock(@obj.state_fu).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }
           @obj.state_fu.fireable?(:am_fireable, :a, :b)
         end 

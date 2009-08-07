@@ -13,7 +13,7 @@ describe StateFu::MethodFactory do
     describe "defined on the stateful instance / object before state_fu has been called" do
 
       before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             event( :simple_event,
                    :from => { [:a, :b] => :targ } )
             state( :a ) { cycle }
@@ -30,7 +30,7 @@ describe StateFu::MethodFactory do
               callme
             end 
           end
-          Klass.machine(){}
+          Klass.state_fu_machine(){}
         end 
         it "should call the original method_missing on an unexpected method call" do 
           @k = Klass.new
@@ -46,12 +46,11 @@ describe StateFu::MethodFactory do
         end
 
         it "should call state_fu!" do
-          mock.proxy( StateFu::Binding ).new( Klass.machine, @obj, :state_fu )
+          mock.proxy( StateFu::Binding ).new( Klass.state_fu_machine, @obj, StateFu::DEFAULT )
           @obj
           @obj.private_methods.map(&:to_sym).should include(:state_fu_field)
-          #@obj.should respond_to :state_fu_field
+          #@obj.should respond_to StateFu::DEFAULT_FIELD
           @obj.state_fu.machine.events.should_not be_empty
-
           @obj.simple_event!
 
           # @obj.should_have_received( :state_fu! )
@@ -77,13 +76,6 @@ describe StateFu::MethodFactory do
           t.should be_accepted
           @obj.send(:state_fu_field).should == 'targ'
         end
-
-        it "should accept a block and pass it to the method on the binding" do 
-          block = lambda { }
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
-          @obj.simple_event! &block
-          pending "don't know how to mock this, or the ideal behaviour to implement ..."
-        end   
       end
     end
 
@@ -91,7 +83,7 @@ describe StateFu::MethodFactory do
     describe "defined on the binding" do
       describe "when the event is simple (has only one possible target)" do
         before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             event( :simple_event,
                    :from => { [:a, :b] => :targ } )
           end # machine
@@ -167,7 +159,7 @@ describe StateFu::MethodFactory do
 
       describe "when the event is complex (has more than one possible target)" do
         before do
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             state :orphan
             event( :complex_event,
                    :from => :home,
@@ -273,7 +265,7 @@ describe StateFu::MethodFactory do
       describe "cycle and next_state methods" do
         describe "when there is a valid transition available for cycle and next_state" do
           before do
-            @machine = Klass.machine do
+            @machine = Klass.state_fu_machine do
               initial_state :groundhog_day
 
               state(:groundhog_day) do
@@ -318,7 +310,7 @@ describe StateFu::MethodFactory do
 
         describe "when the machine is empty" do
           before do
-            @machine = Klass.machine() {}
+            @machine = Klass.state_fu_machine() {}
             @obj     = Klass.new
             @binding = @obj.state_fu
           end

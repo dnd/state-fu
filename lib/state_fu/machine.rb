@@ -2,12 +2,16 @@ module StateFu
   class Machine
     include StateFu::Applicable
 
+    #
+    # Class methods
+    # 
+    
     # meta-constructor; expects to be called via Klass.machine()
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
       
-      unless machine = StateFu::FuSpace.machines[ klass ][ name ]
+      unless machine = klass.state_fu_machines[ name ]
         machine = new( name, options, &block )
         machine.bind!( klass, name, options[:field_name] )
       end
@@ -15,6 +19,33 @@ module StateFu
         machine.apply!( &block )
       end
       machine
+    end
+
+    # make it so that a class which has included StateFu has a binding to
+    # this machine
+    def self.bind!( machine, owner, name, field_name)
+      name                             = name.to_sym
+      owner.state_fu_machines[name]    = machine
+      owner.state_fu_field_names[name] = field_name
+
+      # method_missing to catch NoMethodError for event methods, etc
+      StateFu::MethodFactory.prepare_class( owner )
+
+      # define an accessor method with the given name
+      if owner.class == Class 
+        unless owner.respond_to?(name)       
+          owner.class_eval do
+            define_method name do
+              state_fu( name )
+            end
+          end
+        end   
+        # prepare the persistence field
+        StateFu::Persistence.prepare_field( owner, field_name )
+      else 
+        # singleton machine ? 
+        raise NotImplementedError, "StateFu doesn't support singleton machines yet"
+      end 
     end
 
     ##
@@ -75,9 +106,9 @@ module StateFu
 
     # make it so a class which has included StateFu has a binding to
     # this machine
-    def bind!( owner, name=StateFu::DEFAULT_MACHINE, field_name = nil )
-      field_name ||= "#{name.to_s.underscore.tr(' ','_')}#{StateFu::Persistence::DEFAULT_SUFFIX}"
-      StateFu::FuSpace.bind!(self, owner, name, field_name)
+    def bind!( owner, name= DEFAULT, field_name = nil )
+      field_name ||= Persistence.default_field_name( name )
+      self.class.bind!(self, owner, name, field_name)
     end
 
     def empty?
@@ -138,5 +169,6 @@ module StateFu
     def graphviz
       @graphviz ||= Plotter.new(self).output
     end
+
   end
 end

@@ -26,7 +26,7 @@ describe "Document" do
         # puts "new feed!"
       end
 
-      machine( :status ) do
+      state_fu_machine( :status ) do
         state :draft do
           event :publish, :to => :published
         end

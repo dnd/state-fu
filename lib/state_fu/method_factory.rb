@@ -132,7 +132,7 @@ module StateFu
         # obj.event_name!( *args )
         # creates, fires and returns a transition
         method_name = "#{event.name}!"
-        define_singleton_method( obj, method_name ) do |*args|
+        define_singleton_method( obj, method_name) do |*args|
           _binding.fire!( event, *args )
         end
       end # simple

@@ -43,16 +43,15 @@ namespace :state_fu do
   end
 
   desc "Graph workflows with dot"
-  task :graph => :environment do |t|
-    StateFu::FuSpace.class_machines.each do |klass, machines|
-      machines.each do |machine_name, machine|
+  task :graph => :environment do |t|    
+    state_fu_classes = ObjectSpace.each_object { |o| x << o  if o.respond_to? :machines }
+    state_fu_classes.each do |klass| 
+      klass.state_fu_machines.each do |machine_name, machine|
         STDERR.puts "#{klass} -> #{machine_name.inspect}"
         doc_png = graph( klass, machine_name )
-
         # yield doc_png if block_given?
       end
     end
     # `open #{doc_png}`
   end
 end
-

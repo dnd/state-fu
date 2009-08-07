@@ -34,20 +34,20 @@ describe "an ActiveRecord model with StateFu included:" do
     before do
       make_pristine_class('TableMissingClass', ActiveRecord::Base )
       TableMissingClass.class_eval do
-        machine() { }
+        state_fu_machine() { }
       end
     end
 
     it "should not raise an error when the persister is instantiated" do
       lambda { TableMissingClass.columns }.should raise_error
-      lambda { TableMissingClass.machine }.should_not raise_error
+      lambda { TableMissingClass.state_fu_machine }.should_not raise_error
     end
 
   end
   describe "when the default machine is defined with no field_name specified" do
     before do
       ExampleRecord.class_eval do
-        machine do
+        state_fu_machine do
                               state :initial do
             event( :change, :to => :final ) { after :save! }
           end
@@ -162,13 +162,13 @@ describe "an ActiveRecord model with StateFu included:" do
           r = ExampleRecord.find( @r.id )
           r.state_fu.should be_kind_of( StateFu::Binding )
           r.state_fu.current_state.should be_kind_of( StateFu::State )
-          r.state_fu.current_state.should == ExampleRecord.machine.states[:final]
+          r.state_fu.current_state.should == ExampleRecord.state_fu_machine.states[:final]
         end
       end # saved record after transition
 
       describe "when a second machine named :status is defined with :field_name => 'status' " do
         before do
-          ExampleRecord.machine(:status, :field_name => 'status') do
+          ExampleRecord.state_fu_machine(:status, :field_name => 'status') do
             event( :go, :from => :initial, :to => :final )
           end
           @ex = ExampleRecord.new()

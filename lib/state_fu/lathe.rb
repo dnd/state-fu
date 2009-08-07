@@ -44,13 +44,14 @@ module StateFu
 
     # a 'child' lathe is created by apply_to, to deal with nested
     # blocks for states / events ( which are sprockets )
-    def child?
+    def nested?
       !!@sprocket
     end
+    alias_method :child?, :nested?
 
     # is this the toplevel lathe for a machine?
     def master?
-      !child?
+      !nested?
     end
 
     # get the top level Lathe for the machine
@@ -89,8 +90,8 @@ module StateFu
   
     def event( name, options={}, &block )
       options.symbolize_keys!
-      require_sprocket( StateFu::State, NilClass )
-      if child? && sprocket.is_a?( StateFu::State ) # in state block
+      valid_in_context( StateFu::State, NilClass )
+      if nested? && sprocket.is_a?( StateFu::State ) # in state block
         targets  = options.delete(:to)
         evt      = define_event( name, options, &block )
         evt.from sprocket unless sprocket.nil?
@@ -116,7 +117,7 @@ module StateFu
     #  :msg => alias for :message, for the morbidly terse
     
     def requires( *args, &block )
-      require_sprocket( StateFu::Event, StateFu::State )
+      valid_in_context( StateFu::Event, StateFu::State )
       options = args.extract_options!.symbolize_keys!
       options.assert_valid_keys(:on, :message, :msg )
       names   = args
@@ -138,12 +139,12 @@ module StateFu
           machine.named_procs[name] = block
         end
         if msg = options.delete(:message) || options.delete(:msg)
-          # TODO - move this into machine
           raise ArgumentError, msg.inspect unless [String, Symbol, Proc].include?(msg.class)
           machine.requirement_messages[name] = msg
         end
       end
     end
+    alias_method :guard,        :requires
     alias_method :must,         :requires
     alias_method :must_be,      :requires
     alias_method :needs,        :requires
@@ -154,7 +155,7 @@ module StateFu
     # Creates a loop, useful (only) for hooking behaviours onto.
     def cycle( name=nil, options={}, &block )
       name ||= "cycle_#{sprocket.name.to_s}"
-      require_sprocket( StateFu::State )
+      valid_in_context( StateFu::State )
       evt = define_event( name, options, &block )
       evt.from sprocket
       evt.to   sprocket
@@ -167,13 +168,13 @@ module StateFu
 
     # define the initial_state (otherwise defaults to the first state mentioned)
     def initial_state( *args, &block )
-      require_no_sprocket()
+      valid_unless_nested()
       machine.initial_state= state( *args, &block)
     end
 
     # define a state; given a block, apply the block to a Lathe for the state
     def state( name, options={}, &block )
-      require_no_sprocket()
+      valid_unless_nested()
       define_state( name, options, &block )
     end
 
@@ -188,7 +189,7 @@ module StateFu
     # from :eden => :armageddon
     # from [:beginning, :prelogue] => [:ende, :prologue]
     def from *args, &block
-      require_sprocket( StateFu::Event )
+      valid_in_context( StateFu::Event )
       sprocket.from( *args, &block )
     end
 
@@ -196,7 +197,7 @@ module StateFu
     # to :destination
     # to [:end, :finale, :intermission]
     def to *args, &block
-      require_sprocket( StateFu::Event )
+      valid_in_context( StateFu::Event )
       sprocket.to( *args, &block )
     end
 
@@ -231,7 +232,7 @@ module StateFu
     # Define a series of states at once, or return and iterate over all states yet defined
     #
     def states( *args, &block )
-      require_no_sprocket()
+      valid_unless_nested()
       each_sprocket( 'state', *args, &block )
     end
     alias_method :all_states, :states
@@ -241,7 +242,7 @@ module StateFu
     # Define a series of events at once, or return and iterate over all events yet defined
     #
     def events( *args, &block )
-      require_sprocket( NilClass, StateFu::State )
+      valid_in_context( NilClass, StateFu::State )
       each_sprocket( 'event', *args, &block )
     end
     alias_method :all_events, :events
@@ -250,12 +251,12 @@ module StateFu
     # Bunch of silly little methods for defining events
      #:nodoc
 
-    def before   *a, &b; require_sprocket( StateFu::Event ); define_hook :before,   *a, &b; end
-    def on_exit  *a, &b; require_sprocket( StateFu::State ); define_hook :exit,     *a, &b; end
-    def execute  *a, &b; require_sprocket( StateFu::Event ); define_hook :execute,  *a, &b; end
-    def on_entry *a, &b; require_sprocket( StateFu::State ); define_hook :entry,    *a, &b; end
-    def after    *a, &b; require_sprocket( StateFu::Event ); define_hook :after,    *a, &b; end
-    def accepted *a, &b; require_sprocket( StateFu::State ); define_hook :accepted, *a, &b; end
+    def before   *a, &b; valid_in_context( StateFu::Event ); define_hook :before,   *a, &b; end
+    def on_exit  *a, &b; valid_in_context( StateFu::State ); define_hook :exit,     *a, &b; end
+    def execute  *a, &b; valid_in_context( StateFu::Event ); define_hook :execute,  *a, &b; end
+    def on_entry *a, &b; valid_in_context( StateFu::State ); define_hook :entry,    *a, &b; end
+    def after    *a, &b; valid_in_context( StateFu::Event ); define_hook :after,    *a, &b; end
+    def accepted *a, &b; valid_in_context( StateFu::State ); define_hook :accepted, *a, &b; end
 
     #
     #
@@ -264,13 +265,13 @@ module StateFu
     private
     
     # require that the current sprocket be of a given type    
-    def require_sprocket( *valid_types )
+    def valid_in_context( *valid_types )
       raise ArgumentError.new("Lathe is for a #{sprocket.class}, not one of #{valid_types.inspect}") unless valid_types.include?( sprocket.class )
     end
 
     # ensure this is not a child lathe
-    def require_no_sprocket()
-      require_sprocket( NilClass )
+    def valid_unless_nested()
+      valid_in_context( NilClass )
     end
 
     # instantiate a child Lathe and apply the given block

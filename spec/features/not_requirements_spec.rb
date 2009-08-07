@@ -24,7 +24,7 @@ describe "requirement objects" do
   before(:all) do
     reset!
     make_pristine_class('Klass')
-    Klass.machine do
+    Klass.state_fu_machine do
       helper RequirementFeatureHelper
 
       initial_state :guest

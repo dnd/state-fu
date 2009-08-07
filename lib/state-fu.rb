@@ -65,7 +65,6 @@ require 'rubygems'
   'helpers/arrays',
   'context',
   'exceptions',
-  'fu_space',
   'machine',
   'lathe',
   'method_factory',
@@ -87,7 +86,8 @@ require 'rubygems'
 end
 
 module StateFu
-  DEFAULT_MACHINE    = :state_fu
+  DEFAULT       = :default
+  DEFAULT_FIELD = :state_fu_field
 
   def self.included( klass )
     klass.extend(         Interface::ClassMethods )

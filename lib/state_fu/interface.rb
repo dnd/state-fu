@@ -18,14 +18,13 @@ module StateFu
         base.class_eval do
           # instance method aliases
           soft_alias :state_fu          => [:stfu, :fu, :stateful, :workflow, :engine, :machine, :context]
-          soft_alias :state_fu_bindings => [:state_fus, :fus, :stfus, :state_foos, :workflows, :engines, :bindings, :machines, :contexts]
-          soft_alias :state_fu!         => [:stfu!, :init_machines!, :initialize_state!, :build_workflow! ]
+          soft_alias :state_fu_bindings => [:bindings, :workflows, :engines, :machines, :contexts]
+          soft_alias :state_fu!         => [:stfu!, :initialize_machines!, :initialize_state!, :initialize_state_fu!]
           class << self
             extend SoftAlias
             # class method aliases
-            soft_alias :machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine ]
-            soft_alias :machines      => [:stfus, :state_fus, :workflows, :engines]
-            soft_alias :machine_names => [:stfu_names, :state_fu_names, :workflow_names, :engine_names]
+            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine ]
+            soft_alias :state_fu_machines      => [:stfus, :state_fus, :workflows, :engines]
           end
         end
       end
@@ -60,38 +59,32 @@ module StateFu
       #  :field_name - specify the field to use for persistence.
       #  defaults to {machine_name}_field.
       #
-
-      def machine( *args, &block )
+      def state_fu_machine( *args, &block )
         options = args.extract_options!.symbolize_keys!
-        name    = args[0] || StateFu::DEFAULT_MACHINE
+        name    = args[0] || DEFAULT
         StateFu::Machine.for_class( self, name, options, &block )
       end
+      alias_method :machine, :state_fu_machine
 
-      # return a hash of :name => StateFu::Machine for your class.
-      def machines( *args, &block )
-        if args.empty? && !block_given?
-          StateFu::FuSpace.machines[self]
-        else
-          machine( *args, &block)
-        end
+      def state_fu_field_names
+        @_state_fu_field_names ||= {}
       end
 
-      # return the list of machines names for this class
-      def machine_names
-        StateFu::FuSpace.machines[self].keys
+      def state_fu_machines
+        @_state_fu_machines ||= {}
       end
+      alias_method :machines, :state_fu_machines
+
     end
 
     # These methods grant access to StateFu::Binding objects, which
     # are bundles of context encapsulating a StateFu::Machine, an instance
     # of a class, and its current state in the machine.
 
-    # Again, plenty of aliases are provided so you can use whatever
-    # makes sense to you.
     module InstanceMethods
-      private
-      def _state_fu
-        @_state_fu ||= {}
+
+      def state_fu_bindings
+        @_state_fu_bindings ||= {}
       end
 
       # A StateFu::Binding comes into being when it is first referenced.
@@ -99,33 +92,25 @@ module StateFu
       # This is the accessor method through which an object instance (or developer)
       # can access a StateFu::Machine, the object's current state, the
       # methods which trigger event transitions, etc.
-      public
-      def _binding( name=StateFu::DEFAULT_MACHINE )
-        name = name.to_sym
-        if mach = StateFu::FuSpace.machines[self.class][name]
-          _state_fu[name] ||= StateFu::Binding.new( mach, self, name )
+
+      def state_fu_binding( name = DEFAULT )
+        name = name.to_sym 
+        if machine = self.class.state_fu_machines[name]
+          state_fu_bindings[name] ||= StateFu::Binding.new( machine, self, name )
+        # else raise name.inspect
         end
       end
-      alias_method :state_fu,    :_binding
+      alias_method :state_fu, :state_fu_binding
 
-      # Gain awareness of all bindings (state contexts) this object
-      # has contemplated into being.
-      # Returns a Hash of { :name => <StateFu::Binding>, ... }
-      def _bindings()
-        _state_fu
-      end
-      alias_method :state_fu_bindings, :_bindings
 
-      # Instantiate bindings for all machines defined for this class.
+      # Instantiate bindings for all machines, which ensures that persistence
+      # fields are intialized and event methods defined.
       # It's useful to call this before_create w/
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.
-      def state_fu!( *names )
-        if [names || [] ].flatten!.map! {|n| n.to_sym }.empty?
-          names = self.class.machine_names()
-        end
-        @state_fu_initialized = true
-        names.map { |n| _binding( n ) }
+      
+      def state_fu! 
+        self.class.state_fu_machines.keys.map { |n| state_fu_binding( n ) }
       end
 
     end # ClassMethods

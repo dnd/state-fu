@@ -24,12 +24,14 @@ class CustomFormatter < Spec::Runner::Formatter::ProgressBarFormatter
 #    super(example,counter,failure)
 #  end
 
-  def dump_summary(duration, example_count, failure_count, pending_count)
-    @output.puts "="*72
-    @lines.each do |line|
-      @output.puts line
+  def dump_summary(duration, example_count, failure_count, pending_count)    
+    if @lines
+      @output.puts "="*72
+      @lines.each do |line|
+        @output.puts line
+      end 
+      @output.puts "="*72    
     end 
-    @output.puts "="*72    
     super(duration, example_count, failure_count, pending_count)
   end
   

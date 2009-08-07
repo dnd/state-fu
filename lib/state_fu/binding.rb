@@ -19,7 +19,7 @@ module StateFu
       @transitions   = []
       @options       = options.symbolize_keys!
       @target        = object.class
-      @field_name    = options[:field_name] || StateFu::FuSpace.field_names[@target][method_name]
+      @field_name    = options[:field_name] || @target.state_fu_field_names[method_name]
       @persister     = StateFu::Persistence.for( self )
       
       # define event methods on this binding and its @object
@@ -171,7 +171,7 @@ module StateFu
     def fireable?( event_or_array, *args )
       event, target = parse_destination( event_or_array )
       begin
-        t = transition( [event, target] )
+        t = transition( [event, target], *args )
         !! t.requirements_met?
       rescue InvalidTransition => e
         nil

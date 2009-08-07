@@ -110,8 +110,7 @@ module MySpecHelper
     #
   end
 
-  def make_pristine_class(class_name, superklass=Object, reset_first = false)
-    reset! if reset_first
+  def make_pristine_class(class_name, superklass=Object)
     @class_names ||= []
     @class_names << class_name
     klass = Class.new( superklass )
@@ -126,7 +125,6 @@ module MySpecHelper
       Object.send(:remove_const, class_name ) if Object.const_defined?( class_name )
     end
     @class_names = []
-    StateFu::FuSpace.reset!
   end
 
   def set_method_arity( object, method_name, needed_arity = 1 )

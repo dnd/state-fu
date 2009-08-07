@@ -16,11 +16,11 @@ describe StateFu::Machine do
     end
 
     describe "Machine.for_class" do
-      describe "when there's no matching machine in FuSpace" do
+      describe "when there's no machine defined for the class" do
         before do
           reset!
           make_pristine_class 'Klass'
-          mock( StateFu::FuSpace ).machines() { { Klass => {} } }
+  #        mock( Klass ).machines() { {} }
         end
 
         it "should create a new machine and bind! it" do
@@ -34,15 +34,8 @@ describe StateFu::Machine do
           @m = StateFu::Machine.for_class( Klass, :snoo ) do
             state :porpoise
           end
-          @m.states.map(&:name).should == [:porpoise]
-        end
-      end
-
-      describe "when there's a matching machine in FuSpace" do
-        it "should retrieve the previously created machine" do
-          @machine = Object.new
-          mock( StateFu::FuSpace ).machines() { { Klass => { :moose => @machine } } }
-          StateFu::Machine.for_class( Klass, :moose ).should == @machine
+#          mock( Klass ).machines() { {} }
+ #         @m.states.map(&:name).should == [:porpoise]
         end
       end
 
@@ -82,9 +75,9 @@ describe StateFu::Machine do
     end
 
     describe ".bind!" do
-      it "should call StateFu::FuSpace.insert! with itself and its arguments" do
+      it "should call StateFu::Machine.bind! with itself and its arguments" do
         field_name = :my_field_name
-        mock( StateFu::FuSpace ).insert!( Klass, @mchn, :newname, field_name ) {}
+        mock( StateFu::Machine ).bind!( @mchn, Klass, :newname, field_name ) {}
         @mchn.bind!( Klass, :newname, field_name )
       end
 
@@ -92,8 +85,8 @@ describe StateFu::Machine do
         klass      = Klass
         name       = :StinkJuice
         field_name = 'stink_juice_field'
-        mock( StateFu::FuSpace ).insert!( Klass, @mchn, name, field_name ) {}
         @mchn.bind!( Klass, name )
+        Klass.state_fu_field_names[name].should == 'stink_juice_field'
       end
     end
 

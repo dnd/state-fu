@@ -15,7 +15,7 @@ describe StateFu::Transition do
 
   describe "A simple machine with 2 states and a single event" do
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         state :src do
           event :transfer, :to => :dest
         end
@@ -90,7 +90,7 @@ describe StateFu::Transition do
 
         it "should change the field when persistence is via an attribute" do
           @obj.state_fu.persister.should be_kind_of( StateFu::Persistence::Attribute )
-          @obj.state_fu.persister.field_name.should == :state_fu_field
+          @obj.state_fu.persister.field_name.to_s.should == StateFu::DEFAULT_FIELD.to_s
           @obj.send( :state_fu_field ).should == "src"
           @t.fire!
           @obj.send( :state_fu_field ).should == "dest"
@@ -253,11 +253,11 @@ describe StateFu::Transition do
         end
 
         it "should raise an error when there is no next state" do
-          Klass.machine(:noop) {}
+          Klass.state_fu_machine(:noop) {}
           lambda { @obj.noop.next! }.should raise_error( StateFu::InvalidTransition )
         end
         it "should raise an error when there is more than one next state" do
-          Klass.machine(:toomany) { event( :go, :from => :one, :to => [:a,:b,:c] ) }
+          Klass.state_fu_machine(:toomany) { event( :go, :from => :one, :to => [:a,:b,:c] ) }
           lambda { @obj.toomany.next! }.should raise_error( StateFu::InvalidTransition )
         end
       end # next!
@@ -301,7 +301,7 @@ describe StateFu::Transition do
   describe "A simple machine with 1 state and an event cycling at the same state" do
 
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         state :state_fuega do
           event :transfer, :to => :state_fuega
         end
@@ -347,7 +347,7 @@ describe StateFu::Transition do
   describe "A simple machine with 3 states and an event to & from multiple states" do
 
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         states :a, :b
         states :x, :y
 
@@ -441,7 +441,7 @@ describe StateFu::Transition do
 
   describe "A simple machine w/ 2 states, 1 event and named hooks " do
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
 
         state :a do
           on_exit( :exiting_a )
@@ -561,7 +561,7 @@ describe StateFu::Transition do
       describe "adding an anonymous hook for event.hooks[:execute]" do
         before do
           called = @called # get us a ref for the closure
-          Klass.machine do
+          Klass.state_fu_machine do
             event( :go ) do
               execute do |ctx|
                 called << :execute_proc
@@ -586,7 +586,7 @@ describe StateFu::Transition do
 
         it "should be replace the previous proc for a slot if redefined" do
           called = @called # get us a ref for the closure
-          Klass.machine do
+          Klass.state_fu_machine do
             event( :go ) do
               execute do |ctx|
                 called << :execute_proc_2
@@ -613,7 +613,7 @@ describe StateFu::Transition do
         describe "with arity of -1/0" do
           it "should call the block in the context of the transition" do
             called = @called # get us a ref for the closure
-            Klass.machine do
+            Klass.state_fu_machine do
               event( :go ) do
                 execute(:named_execute) do
                   raise self.class.inspect unless self.is_a?( StateFu::Transition )
@@ -635,7 +635,7 @@ describe StateFu::Transition do
         describe "with arity of 1" do
           it "should call the proc in the context of the object, passing the transition as the argument" do
             called = @called # get us a ref for the closure
-            Klass.machine do
+            Klass.state_fu_machine do
               event( :go ) do
                 execute(:named_execute) do |ctx|
                   raise ctx.class.inspect unless ctx.is_a?( StateFu::Transition )
@@ -659,7 +659,7 @@ describe StateFu::Transition do
       describe "halting the transition during the execute hook" do
 
         before do
-          Klass.machine do
+          Klass.state_fu_machine do
             event( :go ) do
               execute do |ctx|
                 ctx.halt!("stop")
@@ -699,7 +699,7 @@ describe StateFu::Transition do
 
   describe "A binding for a machine with an event transition requirement" do
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         event( :go, :from => :a, :to => :b ) do
           requires( :ok? )
         end
@@ -787,7 +787,7 @@ describe StateFu::Transition do
 
   describe "A binding for a machine with a state transition requirement" do
     before do
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         event( :go, :from => :a, :to => :b )
         state( :b ) do
           requires :entry_ok?
@@ -857,7 +857,7 @@ describe StateFu::Transition do
     before do
       reset!
       make_pristine_class("Klass")
-      @machine = Klass.machine do
+      @machine = Klass.state_fu_machine do
         event(:run, :from => :start, :to => :finish ) do
           execute( :run_exec )
         end
@@ -970,7 +970,7 @@ describe StateFu::Transition do
       before do
         reset!
         make_pristine_class("Klass")
-        @machine = Klass.machine do
+        @machine = Klass.state_fu_machine do
           initial_state :alive do
             event :impossibility do
               to :afterlife
@@ -1006,7 +1006,7 @@ describe StateFu::Transition do
         before do
           reset!
           make_pristine_class("Klass")
-          @machine = Klass.machine do
+          @machine = Klass.state_fu_machine do
             initial_state :alive
 
             state :cremated
