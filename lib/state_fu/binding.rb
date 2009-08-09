@@ -2,7 +2,7 @@ module StateFu
   class Binding < Context
 
     attr_reader :object, :machine, :method_name, :field_name, :persister, :transitions, :options, :target
-    
+
 
     # the constructor should not be called manually; a binding is
     # returned when an instance of a class with a StateFu::Machine
@@ -18,10 +18,10 @@ module StateFu
       @method_name   = method_name
       @transitions   = []
       @options       = options.symbolize_keys!
-      @target        = object.class
+      @target        = singleton? ? object : object.class
       @field_name    = options[:field_name] || @target.state_fu_field_names[method_name]
       @persister     = StateFu::Persistence.for( self )
-      
+
       # define event methods on this binding and its @object
       StateFu::MethodFactory.new( self ).install!
       @machine.helpers.inject_into( self )
@@ -34,6 +34,11 @@ module StateFu
     alias_method :machine,       :machine
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
+
+    # TODO better name
+    def singleton?
+      options[:singleton]
+    end
 
     # def object=( reference )
     #   raise ArgumentError.new( reference ) unless object == reference
@@ -310,7 +315,7 @@ module StateFu
         attrs = [[:current_state, state_name.inspect],
                  [:object_type , @object.class],
                  [:method_name , method_name.inspect],
-                 [:field_name  , persister.field_name.inspect],
+                 [:field_name  , field_name.inspect],
                  [:machine     , machine.inspect]].
         map {|x| x.join('=') }.join( " " ) + ' =>|'
     end

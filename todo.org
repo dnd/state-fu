@@ -10,6 +10,12 @@
 # DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
 #
 
+implement Class#inherited
+
+* subclassing state
+  state MyStateClass, [:name => STATENAME], [options={}]
+  state *NAMES, [:class => MyStateClass], [options={}]
+
 * class bindings: bind all instances of a class to a specific shared binding
   this is the equivalent of class methods vs instance methods
 ** define binding methods on the class, not the metaclass

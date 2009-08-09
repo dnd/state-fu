@@ -56,12 +56,15 @@ describe "requirement objects" do
       @binding.respond_to?(:not_valid_password?).should == false
       @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
       @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == false
+      @binding.evaluate_named_proc_or_method( :no_valid_password? ).should == false
     end
-
-    it "should call the method directly if one exists" do
-      mock( @binding ).not_valid_password?() { true }
+ 
+    it "should call the method directly if one exists" do      
+      mock( @binding ).not_valid_password? { true }
+      mock( @binding ).no_valid_password? { true }      
       @binding.evaluate_named_proc_or_method( :valid_password? ).should == true
       @binding.evaluate_named_proc_or_method( :not_valid_password? ).should == true
+      @binding.evaluate_named_proc_or_method( :no_valid_password? ).should == true    
     end
 
     it "should act as the opposite of requirement in guarding a transition" do

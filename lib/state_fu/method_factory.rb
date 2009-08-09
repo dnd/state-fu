@@ -160,6 +160,10 @@ module StateFu
       end # complex
     end # define_event_methods_on
 
+    def define_singleton_method( object, method_name, &block )
+      self.class.define_singleton_method object, method_name, &block
+    end
+
     # define a a method on the metaclass of the given object. The
     # resulting "singleton method" will be unique to that instance,
     # not shared by other instances of its class.
@@ -169,7 +173,7 @@ module StateFu
     #
     # existing methods will never be overwritten.
 
-    def define_singleton_method( object, method_name, &block )
+    def self.define_singleton_method( object, method_name, &block )
       if object.respond_to?( method_name )
         Logger.info("Existing method #{method_name} for #{object.class} will NOT be overwritten.")
       else

@@ -30,6 +30,7 @@ module StateFu
       end
 
       def initialize( binding, field_name )
+
         @binding       = binding
         @field_name    = field_name
         @current_state = find_current_state()
@@ -53,11 +54,10 @@ module StateFu
         end
       end
 
-       
       def reload
         @current_state = find_current_state()
       end
-    
+
       def machine
         binding.machine
       end

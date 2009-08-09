@@ -178,6 +178,11 @@ module StateFu
       define_state( name, options, &block )
     end
 
+    # define a named proc
+    def proc name, &block
+      machine.named_procs[method_name] = block
+    end
+
     #
     # Event definition    
     # 
@@ -207,7 +212,7 @@ module StateFu
     def chain (string)
       rx_word    = /([a-zA-Z0-9_]+)/
       rx_state   = /^#{rx_word}$/
-      rx_event   = /^-#{rx_word}->$/
+      rx_event   = /^(?:-|>)#{rx_word}-?>$/
       previous   = nil
       string.split.each do |chunk|
         case chunk
@@ -306,7 +311,7 @@ module StateFu
     def define_event( name, options={}, &block )
       define_sprocket( :event, name, options, &block )
     end
-    
+        
      #:nodoc
     def define_hook slot, method_name=nil, &block
       unless sprocket.hooks.has_key?( slot )
@@ -343,9 +348,18 @@ module StateFu
       options = args.extract_options!.symbolize_keys!
       if args.empty? || args  == [:ALL] 
         args = machine.send("#{type}s").except( options.delete(:except) )
-      end
-      args.map { |name| self.send( type, name, options.dup, &block) }.extend StateArray
+      end   
+      args.map do |name| 
+        self.send( type, name, options.dup, &block)
+      end.extend ArrayWithSymbolAccessor
     end
 
+  end
+end
+
+class Array
+  def knock(*indexes, &block)
+    indexes.flatten.each { |idx| self[idx] = yield self[idx] }
+    self
   end
 end

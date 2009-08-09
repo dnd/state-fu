@@ -21,10 +21,6 @@ end
 
 # require 'state-fu'
 
-Spec::Runner.configure do |config|
-  config.mock_with :rr
-end
-
 module MySpecHelper
   include NoStdout
 
@@ -133,5 +129,9 @@ module MySpecHelper
     stub( object ).method( anything ) { |x| object.send(x) }
     stub( object ).method( method_name ) { a }
   end
+end
 
+Spec::Runner.configure do |config|
+  config.mock_with :rr
+  config.include MySpecHelper
 end

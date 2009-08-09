@@ -1,18 +1,22 @@
 module StateFu
   class Machine
+
+    def self.bindings
+      @@_bindings ||= {}
+    end
+
     include StateFu::Applicable
 
     #
     # Class methods
-    # 
-    
-    # meta-constructor; expects to be called via Klass.machine()
+    #
+
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-      
+
       unless machine = klass.state_fu_machines[ name ]
-        machine = new( name, options, &block )
+        machine = new( options, &block )
         machine.bind!( klass, name, options[:field_name] )
       end
       if block_given?
@@ -25,27 +29,25 @@ module StateFu
     # this machine
     def self.bind!( machine, owner, name, field_name)
       name                             = name.to_sym
-      owner.state_fu_machines[name]    = machine
-      owner.state_fu_field_names[name] = field_name
-
-      # method_missing to catch NoMethodError for event methods, etc
-      StateFu::MethodFactory.prepare_class( owner )
-
       # define an accessor method with the given name
-      if owner.class == Class 
-        unless owner.respond_to?(name)       
+      if owner.class == Class
+        owner.state_fu_machines[name]    = machine
+        owner.state_fu_field_names[name] = field_name
+        # method_missing to catch NoMethodError for event methods, etc
+        StateFu::MethodFactory.prepare_class( owner )
+        unless owner.respond_to?(name)
           owner.class_eval do
             define_method name do
               state_fu( name )
             end
           end
-        end   
+        end
         # prepare the persistence field
         StateFu::Persistence.prepare_field( owner, field_name )
-      else 
-        # singleton machine ? 
-        raise NotImplementedError, "StateFu doesn't support singleton machines yet"
-      end 
+      else
+        _binding = StateFu::Binding.new( machine, owner, name, :field_name => field_name, :singleton => true )
+        MethodFactory.define_singleton_method( owner, name ) { _binding }
+      end
     end
 
     ##
@@ -54,12 +56,11 @@ module StateFu
 
     attr_reader :states, :events, :options, :helpers, :named_procs, :requirement_messages, :tools
 
-    def initialize( name, options={}, &block )
-      # TODO - name isn't actually used anywhere yet - remove from constructor
-      @states  = [].extend( StateArray  )
-      @events  = [].extend( EventArray  )
-      @helpers = [].extend( HelperArray )
-      @tools   = [].extend( ToolArray   )
+    def initialize( options={}, &block )
+      @states               = [].extend( StateArray  )
+      @events               = [].extend( EventArray  )
+      @helpers              = [].extend( HelperArray )
+      @tools                = [].extend( ToolArray   )
       @named_procs          = {}
       @requirement_messages = {}
       @options              = options

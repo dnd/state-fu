@@ -111,8 +111,11 @@ module StateFu
       self.targets= *args
     end
 
+    alias_method :transitions_to, :to
+    alias_method :transitions_from, :from
+
     private
-        
+
     # internal method which accumulates states into an instance
     # variable with successive invocations.
     # ensures that calling #from multiple times adds to, rather than
@@ -130,7 +133,7 @@ module StateFu
       # return existing if new_states.empty?
       new_value = ((existing || [] ) + new_states).flatten.compact.uniq.extend( StateArray )
       instance_variable_set( ivar_name, new_value )
-    end    
+    end
 
   end
 end
