@@ -17,28 +17,12 @@ module StateFu
     def length
       result.length
     end
-    
-    # def method_missing(method_name, *args, &block)
-    #   if result.respond_to?(method_name)
-    #     result.send method_name, *args, &block
-    #   else
-    #     super method_name, *args, &block
-    #   end
-    # end
-    
+        
     #
     #
     #
     def find( event_or_array )
       event, target = parse_destination(event_or_array)
-      #if target.nil? 
-      #  possible_targets = all_destinations.select {|evt, tgt| evt == event }.map(&:last)
-      #  if possible_targets.length == 1
-      #    target = possible_targets.first
-      #  else
-      #    raise TransitionNotFound.new(binding, {:event => event, :target => target})
-      #  end
-      #end
       binding.new_transition(event, target)
     end
     
@@ -78,6 +62,10 @@ module StateFu
       self
     end
     
+    #
+    #
+    #
+    
     def singular
       result.first if result.length == 1
     end
@@ -85,9 +73,14 @@ module StateFu
     def next
       @options[:cyclic] ||= false
       singular
-      # t = result.length == 1 && result.first || nil
-      # t && t.apply!
-      # t
+    end
+
+    def events
+      map {|t| t.event }
+    end
+
+    def targets
+      map {|t| t.target }
     end
 
     def apply! # (&block
@@ -95,7 +88,8 @@ module StateFu
     end
 
     def with(*args, &block)
-      @args = *args
+      @args  = *args
+      @block = block
       self
     end
     
@@ -139,7 +133,7 @@ module StateFu
         next if options[:event] and event != options[:event]
         returning [] do |ts|
 
-          # hmm ... "sequences" ... TODO delete ?
+          # TODO hmm ... "sequences" ... delete this?
           if options[:sequences]
             if target = event.target_for_origin(current_state)
               ts << binding.transition([event,target], *args) unless options[:cyclic]
@@ -151,13 +145,21 @@ module StateFu
             event.targets.flatten.each do |target|
               next if options[:target] and target != options[:target]
               t = binding.new_transition( event, target, *args)
-              #  raise "#{event.name.to_s} #{target.name.to_s}" unless t.is_a?(Transition)
               ts << t if (t.valid? or !options[:valid])
             end
           end
 
         end
       end.flatten.extend(Result)
+      
+      if @args || @block
+        @result.each do |t|
+          t.args = @args     if @args
+          t.apply!( &@block) if @block 
+        end
+      end
+      
+      @result
     end # result 
 
     # sanitizes / extracts destination for find.

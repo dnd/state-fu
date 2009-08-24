@@ -35,9 +35,7 @@ module StateFu
       @args       = args.extend(TransitionArgsArray) #.init(self)
       
       @options    = (args.last.is_a?(Hash)? args.last.symbolize_keys : {} )
-      n=  @options == {}
       apply!( @options, &block ) if block_given?
-      raise "!" + args.inspect if @options == {} && !n
 
       # ensure event is a StateFu::Event
       if event.is_a?(Symbol) && e = binding.machine.events[event]
@@ -48,15 +46,11 @@ module StateFu
       # ensure we have a target
       target = find_event_target( event, target ) || raise( UnknownTarget.new(self, "target cannot be determined: #{target.inspect} #{self.inspect}"))
 
-      # puts " [[ #{binding.method_name}:: #{origin.name} --#{event.name}-> #{target.name} ]].   ..........  "
-
       @target     = target
       @event      = event
       @errors     = []
       @testing    = @options.delete(:test_only)
-      
-      # raise InvalidTransition.new(self, "event :#{event.name} is not from :#{origin.name}") unless event.from?(origin)
-      
+            
       if event.target_for_origin(origin) == target
         # ...
       else
@@ -74,6 +68,14 @@ module StateFu
       machine.inject_helpers_into( self )
     end
 
+    def args=(argument_list)
+      returning @args = argument_list do |args|
+        if args.last.is_a?(Hash)
+          apply! args.last
+        end
+      end 
+    end
+    
     #
     # Requirements
     #
@@ -203,9 +205,6 @@ module StateFu
       options.each *a, &b 
     end
 
-    
-    
-    
     def halted?
       !@errors.empty?
     end
@@ -227,14 +226,10 @@ module StateFu
     end
     alias_method :complete?, :accepted?
     
-    # def current_state
-    #   if accepted?
-    #     :accepted
-    #   else
-    #     current_hook.state rescue :unfired
-    #   end
-    # end
-
+    def current_state
+      binding.current_state
+    end
+   
     #
     # give as many choices as possible
     #
@@ -267,6 +262,10 @@ module StateFu
         accepted?
       when false
         !accepted?
+      when State, Symbol
+        current_state == other.to_sym
+      when Transition
+        inspect == other.inspect
       else
         super( other )
       end

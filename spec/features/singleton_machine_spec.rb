@@ -22,7 +22,7 @@ describe "singleton machines" do
   end
 
   it "should have event methods defined" do
-    %w/beatify beatify? beatify!/.each do |method_name|
+    %w/beatify can_beatify? beatify!/.each do |method_name|
       @obj.my_binding.should respond_to(method_name)
       @obj.should respond_to(method_name)
     end

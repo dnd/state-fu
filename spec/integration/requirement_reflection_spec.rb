@@ -54,7 +54,7 @@ describe "Transition requirement reflection" do
       #@obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
       
       #@obj.state_fu.fireable?([:fly_spaceship,:moon]).should == true
-      @obj.fly_spaceship?(:moon).should == true
+      @obj.can_fly_spaceship?(:moon).should == true
       #@obj.fly_spaceship(:moon).requirements_met?.should == true
       #@obj.fly_spaceship(:moon).should be_valid
     end
@@ -63,7 +63,7 @@ describe "Transition requirement reflection" do
       stub( @obj ).spacesuit?() { false }
       @obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
       # @obj.state_fu.evaluate(:spacesuit?).should == false
-      @obj.fly_spaceship?(:moon).should == false
+      @obj.can_fly_spaceship?(:moon).should == false
       @obj.fly_spaceship(:moon).requirements_met?.should == false
       @obj.fly_spaceship(:moon).should_not be_valid
     end
@@ -71,11 +71,11 @@ describe "Transition requirement reflection" do
 
   describe "flying from russia to america without one's affairs in order while wearing a turban" do
     before do
-      mock( @obj ).us_visa?() { false }
-      mock( @obj ).no_turban?() { false }
-      mock( @obj ).no_arrest_warrant?() { false }
-      mock( @obj ).money_for_bribe?() { false }
-      mock( @obj ).papers_in_order?() { false }
+      mock( @obj ).us_visa?(anything) { false }
+      mock( @obj ).no_turban?(anything) { false }
+      mock( @obj ).no_arrest_warrant?(anything) { false }
+      mock( @obj ).money_for_bribe?(anything) { false }
+      mock( @obj ).papers_in_order?(anything) { false }
     end
 
     describe "when no messages are supplied for the requirements" do
@@ -137,8 +137,8 @@ describe "Transition requirement reflection" do
 
     describe "when a message is supplied for the requirement" do
       it "should contain a list of the requirement failure messages as strings" do
-        mock( @obj ).spacesuit?() { false }
-        mock( @obj ).fuel?() { false }
+        mock( @obj ).spacesuit?(anything) { false }
+        mock( @obj ).fuel?(anything) { false }
         @obj.state_fu.fly_spaceship(:moon).unmet_requirements.should == [:spacesuit?, :fuel?]
       end
     end
@@ -205,7 +205,7 @@ describe "Transition requirement reflection" do
           messages.length.should == 2
           messages.strings.length.should == 1
           messages.strings.first.should be_kind_of( String )
-          messages.strings.first.should == "I am a Klass and I fail it"
+          messages.strings.first.should == "I am a StateFu::Executioner and I fail it"
           messages.symbols.first.should == :fuel?
         end
       end # arity 1

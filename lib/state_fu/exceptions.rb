@@ -59,6 +59,14 @@ module StateFu
     def to_h
       requirement_errors
     end
+    
+    def to_s
+      inspect
+    end
+    
+    def inspect
+      "<#{self.class.to_s}::#{__id__} :#{transition.origin.to_sym}-[#{transition.event.to_sym}]->:#{transition.target.to_sym} unmet_requirements=#{to_a.inspect}>"
+    end
   end
 
   class TransitionHalted < TransitionError

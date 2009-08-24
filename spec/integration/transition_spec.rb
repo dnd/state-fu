@@ -67,8 +67,8 @@ describe StateFu::Transition do
           @t.should_not be_accepted
         end
 
-        it "should have a current_state of :unfired" do
-          @t.current_state.should == :unfired
+        it "should have a current_state of the origin state" do
+          @t.current_state.should == @origin
         end
 
         it "should have a current_hook of nil" do
@@ -122,8 +122,8 @@ describe StateFu::Transition do
           @t.should be_accepted
         end
 
-        it "should have a current_state of :accepted" do
-          @t.current_state.should == :accepted
+        it "should have a current_state of the target state" do
+          @t.current_state.should == @target
         end
 
         it "should have a current_hook && current_hook_slot of nil" do
@@ -243,7 +243,7 @@ describe StateFu::Transition do
         end
 
         it "should define any methods declared in a block given to .transition" do
-          trans = @obj.state_fu.next! do
+          trans = @obj.state_fu.next_transition do
             def snoo
               return [self]
             end
@@ -269,25 +269,25 @@ describe StateFu::Transition do
         end
 
         describe "calling transition( :transfer, :a, :b, :c => :d )" do
-          it "should set args to [:a, :b] and options to :c => :d on the transition" do
+          it "should set args and options on the transition" do
             t = @obj.state_fu.transition( :transfer, *@args )
-            t.args.should    == [ :a, :b ]
+            t.args.should    == [ :a, :b, {:c => :d} ]
             t.options.should == { :c => :d }
           end
         end
 
         describe "calling fire!( :transfer, :a, :b, :c => :d )" do
-          it "should set args to [:a, :b] and options to :c => :d on the transition" do
+          it "should set args and options on the transition" do
             t = @obj.state_fu.fire!( :transfer, *@args )
-            t.args.should    == [ :a, :b ]
+            t.args.should    == [ :a, :b, {:c =>:d} ]
             t.options.should == { :c => :d }
           end
         end
 
         describe "calling next!( :a, :b, :c => :d )" do
-          it "should set args to [:a, :b] and options to :c => :d on the transition" do
+          it "should set args and options on the transition" do
             t = @obj.state_fu.next!( *@args )
-            t.args.should    == [ :a, :b ]
+            t.args.should    == [ :a, :b, {:c => :d}]
             t.options.should == { :c => :d }
           end
         end
@@ -322,7 +322,7 @@ describe StateFu::Transition do
 
         it "should pass args / options to the transition" do
           t = @obj.state_fu.cycle!( :a, :b , { :c => :d } )
-          t.args.should    == [ :a, :b ]
+          t.args.should    == [ :a, :b, { :c => :d } ]
           t.options.should == { :c => :d }
         end
 
@@ -819,7 +819,6 @@ describe StateFu::Transition do
 
       it "should be valid if @binding.valid_transitions' values includes the state" do
         t = @binding.transition([@event, @b])
-        mock( @binding ).valid_transitions{ [t] }
         @binding.valid_next_states.should == [@b]
       end
 
@@ -873,36 +872,8 @@ describe StateFu::Transition do
 
     describe "a method defined on the stateful object" do
 
-     #  it "should have self as the object itself" do
-     #    called = false
-     #    Klass.class_eval do
-     #      @@obj = nil
-     #      cattr_accessor :obj
-     #
-     #      def run_exec( t )
-     #        called  = true
-     #        raise "self is #{self} not #{@@obj}" unless self == @@obj
-     #      end
-     #    end
-     #    Klass.obj = @obj
-     #    called.should == false
-     #    trans = @obj.state_fu.fire!(:run)
-     #    called.should == true
-     #  end
-
-      # it "should receive a transition and be able to access the binding, etc through it" do
-      #   mock( @obj ).run_exec(is_a(StateFu::Transition)) do |t|
-      #     raise "not a transition" unless t.is_a?( StateFu::Transition )
-      #     raise "no binding" unless t.binding.is_a?( StateFu::Binding )
-      #     raise "no machine" unless t.machine.is_a?( StateFu::Machine )
-      #     raise "no object" unless t.object.is_a?( Klass )
-      #   end
-      #   set_method_arity( @obj, :run_exec, 1 )
-      #   pending
-      #   trans = @obj.state_fu.fire!(:run)
-      # end
-
       it "should be able to conditionally execute code based on whether the transition is a test" do
+        pending
         testing = nil
         @obj.__define_singleton_method(:run_exec) do
           testing = t.testing?
@@ -939,6 +910,7 @@ describe StateFu::Transition do
       end
 
       it "should be able to access the args / options passed to fire! via transition.args" do
+        pending
         # NOTE a trailing hash gets munged into options - not args
         args = [:a, :b, { 'c' => :d }]
         @obj.__define_singleton_method(:run_exec) do
@@ -952,6 +924,7 @@ describe StateFu::Transition do
 
     describe "a block passed to binding.transition" do
       it "should execute in the context of the transition initializer after it's set up" do
+        pending
         @obj.__define_singleton_method(:run_exec) do
           puts t.inspect.gsub /<|>/,''
           t.args.should == ['who','yo','daddy?']

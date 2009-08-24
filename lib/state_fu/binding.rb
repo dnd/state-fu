@@ -88,39 +88,11 @@ module StateFu
       transitions.valid.with(*args)
     end
 
-    # def _valid_transitions(*args)
-    #   options = {}
-    #
-    #   if args.last.is_a?(Hash)
-    #     options = args.last.symbolize_keys
-    #     cycle = !!options[:cycle]
-    #   end
-    #   events.select{|e| !cycle || e.cycle? }.map do |event|
-    #     returning [] do |ts|
-    #       if target = event.target_for_origin(current_state)
-    #         puts "#valid_transitions ; sequence"
-    #         ts << transition([event,target], *args)
-    #       end
-    #       if event.targets
-    #         event.targets.flatten.each do |target|
-    #           t = transition([event, target], *args)
-    #           #  raise "#{event.name.to_s} #{target.name.to_s}" unless t.is_a?(Transition)
-    #           ts << t if t.valid?
-    #         end
-    #       end
-    #     end
-    #   end.flatten
-    # end
-
     def valid_next_states(*args)
-      # valid_transitions(*args).map(&:target).uniq.extend StateArray
-      transitions.with(*args).states
+      transitions.with(*args).targets
     end
 
     def valid_events(*args)
-      #events.select do |evt|
-      #  evt.targets.any? { |tgt| transition([evt,tgt], *args).valid?(true) }
-      #end.flatten.extend EventArray
       transitions.with(*args).events
     end
 
@@ -168,7 +140,8 @@ module StateFu
       end
     end
 
-    # construct an event transition and fire it
+    # construct an event transition and fire it, returning the transition.
+    # (which is == true if the transition completed successfully.)
     def fire!( event_or_array, *args, &block)
       # special case - complex event with no target supplied, but only one is possible
       # TODO / FIXME rather than testing next_transition, check that only one target is valid for this event.
@@ -191,60 +164,26 @@ module StateFu
     alias_method :trigger!,    :fire!
     alias_method :transition!, :fire!
 
-    def _event_method(action, event, *args)
-      target_or_options = args.shift
-      options           = {}
-      case target_or_options
-      when Hash
-        options = target_or_options.symbolize_keys!
-        target  = target_or_options.delete[:to]
-      when Symbol, String
-        target  = target_or_options.to_sym
-      when nil
-        target  = nil
-      end
 
-      #puts [action, event.name, target, options, args].inspect + " <------# _event_method"
-
-      case action
-      when :get_transition
-        transition [event, target], *args, &lambda {|t| t.options = options}
-      when :query_transition
-        fireable?  [event, target], *args, &lambda {|t| t.options = options}
-      when :fire_transition
-        fire!      [event, target], *args, &lambda {|t| t.options = options}
-      else
-        raise ArgumentError.new(action)
-      end
-    end
-
+    #
     # next_transition and friends: when there's exactly one valid move
-
+    #
+    
     # if there is exactly one legal transition which can be fired with
     # the given (optional) arguments, return it.
     def next_transition( *args, &block )
-      # nts = valid_transitions(*args)
-      # if nts.length == 1
-      #   t = nts[0].apply! &block
-      #   t
-      # end
       transitions.with(*args, &block).next
     end
 
     def next_transition_excluding_cycles( *args, &block )
-      # nts = valid_transitions(*args).reject {|t| t.origin == t.target }
-      # if nts.length == 1
-      #   t = nts[0].apply! &block
-      #   t
-      # end
       transitions.not_cyclic.with(*args, &block).next
     end
 
     # if there is exactly one state reachable via a transition which
     # is valid with the given optional arguments, return it.
     def next_state( *args )
-      nt = next_transition( *args )
-      nt && nt.target || nil
+      nt = next_transition_excluding_cycles( *args )
+      nt && nt.target # || nil
     end
 
     # if there is exactly one event which is valid with the given
@@ -253,6 +192,10 @@ module StateFu
       nt = next_transition_excluding_cycles( *args )
       nt && nt.event
     end
+    
+    #
+    # refactor move these blocks of code into TransitionQuery
+    #
 
     # if there is a next_transition, create, fire & return it
     # otherwise raise an InvalidTransition
@@ -268,10 +211,8 @@ module StateFu
         t.fire!
         t
       else
-        vts = valid_transitions( *args )
-        # TODO FIXME::
+        vts             = valid_transitions( *args )
         vt_destinations = vts.map {|t| [t.event.name, t.target.name]}
-        # n   = vts && vts.length
         raise TransitionNotFound.new( self, "there are #{vts.length} candidate transitions, need exactly 1 :: #{vt_destinations.inspect}", :valid_transitions => vts)
       end
     end
@@ -367,7 +308,7 @@ module StateFu
         map {|x| x.join('=') }.join( " " ) + ' =>|'
     end
 
-    # let's be == the current_state_name as a symbol.
+    # let's be == (and hence ===) the current_state_name as a symbol.
     # a nice little convenience.
     def == other
       if other.respond_to?( :to_sym ) && current_state
@@ -377,8 +318,32 @@ module StateFu
       end
     end
 
-    private
+    # This method is called from methods defined by MethodFactory. 
+    # You don't want to call it directly.
+    def _event_method(action, event, *args)
+      target_or_options = args.shift
+      options           = {}
+      case target_or_options
+      when Hash
+        options = target_or_options.symbolize_keys!
+        target  = target_or_options.delete[:to]
+      when Symbol, String
+        target  = target_or_options.to_sym
+      when nil
+        target  = nil
+      end
 
+      case action
+      when :get_transition
+        transition [event, target], *args, &lambda {|t| t.options = options}
+      when :query_transition
+        fireable?  [event, target], *args, &lambda {|t| t.options = options}
+      when :fire_transition
+        fire!      [event, target], *args, &lambda {|t| t.options = options}
+      else
+        raise ArgumentError.new(action)
+      end
+    end
 
   end
 end

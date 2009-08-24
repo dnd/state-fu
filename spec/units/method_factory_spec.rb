@@ -111,7 +111,7 @@ describe StateFu::MethodFactory do
             t.should be_kind_of( StateFu::Transition )
             t.target.should  == @machine.states[:targ]
             t.event.should   == @machine.events[:simple_event]
-            t.args.should    == [:a,:b,:c,{'d' => 'e'}]
+            t.args.should    == [:a,:b,:c,{:d => 'e'}]
             t.options.should == {:d => 'e'}
           end
         end # transition builder
@@ -144,9 +144,9 @@ describe StateFu::MethodFactory do
           end
 
           it "should pass any arguments to the transition as args / options" do
-            t = @binding.simple_event!( :a, :b, {'c' => :d } )
+            t = @binding.simple_event!( nil, :a, :b, {'c' => :d } )
             t.should be_kind_of( StateFu::Transition )
-            t.args.should    == [:a, :b ]
+            t.args.should    == [:a, :b, {:c => :d} ]
             t.options.should == { :c => :d }
           end
         end # bang!
@@ -178,11 +178,11 @@ describe StateFu::MethodFactory do
           end
 
           it "should raise an error if called without any arguments" do
-            lambda { @binding.complex_event() }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event() }.should raise_error( StateFu::UnknownTarget )
           end
 
           it "should raise an ArgumentError if called with a nonexistent target state" do
-            lambda { @binding.complex_event(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
           end
 
           it "should raise an InvalidTransition if called with an invalid target state" do
@@ -199,7 +199,7 @@ describe StateFu::MethodFactory do
             t = @binding.complex_event(:x,
                                        :a, :b, :c, {'d' => 'e'})
             t.should be_kind_of( StateFu::Transition )
-            t.args.should == [:a,:b,:c]
+            t.args.should == [:a,:b,:c,{:d =>'e'}]
             t.options.should == {:d => 'e'}
           end
         end # transition builder
@@ -210,9 +210,9 @@ describe StateFu::MethodFactory do
           end
 
           it "should require a valid state name" do
-            lambda { @binding.can_complex_event?(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.can_complex_event?(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
             lambda { @binding.can_complex_event?(:orphan) }.should_not  raise_error()
-            @binding.can_complex_event?(:orphan).should == false
+            @binding.can_complex_event?(:orphan).should == nil
             lambda { @binding.can_complex_event?(:x) }.should_not       raise_error
           end
 
@@ -233,7 +233,7 @@ describe StateFu::MethodFactory do
           end
 
           it "should require a valid state name" do
-            lambda { @binding.complex_event!(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event!(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
             lambda { @binding.complex_event!(:orphan) }.should      raise_error( StateFu::InvalidTransition )
             lambda { @binding.complex_event!(:x) }.should_not       raise_error
           end
@@ -250,7 +250,7 @@ describe StateFu::MethodFactory do
                                          :a, :b, {'c' => :d } )
             t.should be_kind_of( StateFu::Transition )
             t.target.should  == @machine.states[:x]
-            t.args.should    == [:a, :b ]
+            t.args.should    == [:a, :b,{:c =>:d} ]
             t.options.should == { :c => :d }
           end
         end # bang!
@@ -329,8 +329,8 @@ describe StateFu::MethodFactory do
             end
 
             describe "cycle!" do
-              it "should raise_error( InvalidTransition )" do
-                lambda { @binding.cycle!.should == nil }.should raise_error( StateFu::InvalidTransition )
+              it "should raise_error( TransitionNotFound )" do
+                lambda { @binding.cycle!.should == nil }.should raise_error( StateFu::TransitionNotFound )
               end
             end
           end # cycle

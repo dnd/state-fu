@@ -6,7 +6,7 @@ describe StateFu::Lathe do
   before do
     reset!
     make_pristine_class('Klass')
-    @machine = Object.new()
+    @machine = StateFu::Machine.new()
     @state   = Object.new()
     @event   = Object.new()
 

@@ -169,7 +169,7 @@ describe StateFu::Binding do
           @obj.state_fu.name.should == :snoo
           lambda { @obj.state_fu.transition(:not_fireable) }.should raise_error( StateFu::InvalidTransition )
           lambda { @obj.state_fu.fireable?(:not_fireable) }.should_not raise_error( StateFu::InvalidTransition )
-          @obj.state_fu.fireable?(:not_fireable).should == false
+          @obj.state_fu.fireable?(:not_fireable).should == nil
         end
       end
 

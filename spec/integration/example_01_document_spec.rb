@@ -62,7 +62,6 @@ describe "Document" do
 
     it "should raise a RequirementError when publish! is called" do
       @doc.status.name.should == :draft
-      @doc.status.publish!
       lambda { @doc.status.publish! }.should raise_error( StateFu::RequirementError )
       begin
         @doc.status.publish!
@@ -90,7 +89,7 @@ describe "Document" do
     end
 
     it "should call update_rss when publish! is called" do
-      mock( @doc ).update_rss() {}
+      mock( @doc ).update_rss(anything) {}
       @doc.status.publish!
     end
 
@@ -125,7 +124,7 @@ describe "Document" do
   describe "delete!" do
 
     it "should execute destroy()" do
-      mock( @doc ).destroy() {}
+      mock( @doc ).destroy(anything) {}
       @doc.status.delete!
     end
 

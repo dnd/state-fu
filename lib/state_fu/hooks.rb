@@ -24,6 +24,7 @@ module StateFu
       x = if    me.is_a?(State);   STATE_HOOKS
           elsif me.is_a?(Event);   EVENT_HOOKS
           elsif me.is_a?(Machine); MACHINE_HOOKS
+          elsif me.is_a?(Sprocket); [] # let specs pass
           else  raise me
           end.
         map { |type, name| [name, [].extend( OrderedHash )] }

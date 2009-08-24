@@ -86,7 +86,7 @@ describe StateFu::Event do
           end
 
           it "should have the event as the sprocket" do
-            @lathe.sprocket.should == @event
+            @lathe.state_or_event.should == @event
           end
 
         end
@@ -203,29 +203,10 @@ describe StateFu::Event do
           @event.from?( :a ).should == true
         end
 
-        it "should return false given a symbol which is not the name of a state in @origin" do
+        it "should return nil given a symbol which is not the name of a state in @origin" do
           mock( @event ).origins().times(any_times) {  [StateFu::State.new(@machine,:a)] }
-          @event.from?( :b ).should == false
+          @event.from?( :b ).should == nil
         end
-      end
-
-      describe 'complete?' do
-        it "should be false if either origin / target are nil" do
-          @event.complete?.should == false
-        end
-
-        it "should be true when origin / target are both not nil" do
-          mock( @event ).origins { [:a] }
-          mock( @event ).targets { [:b] }
-          @event.complete?.should == true
-        end
-
-        it "should be false when either origin / target are nil" do
-          mock( @event ).origins { [:a] }
-          mock( @event ).targets { nil  }
-          @event.complete?.should == false
-        end
-
       end
 
     end # describe instance methods

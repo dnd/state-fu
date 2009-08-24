@@ -7,18 +7,21 @@ module StateFu
       # (yielding self if the block expects it)
 
       def apply!( opts={}, &block )
-        opts = opts.extract_options! unless opts.respond_to?(:keys)
+        # opts = opts.extract_options! unless opts.respond_to?(:keys)
         opts.symbolize_keys!
-        return self unless block_given?
-        case block.arity.abs
-        when 1, -1
-          instance_exec self, &block
-        when 0
-          instance_eval &block
-        else
-          raise ArgumentError, "block wants too many arguments!"
+        @options.merge!(opts)
+        returning self do
+          if block_given?
+            case block.arity.abs
+            when 1, -1
+              instance_exec self, &block
+            when 0
+              instance_exec &block
+            else
+              raise ArgumentError, "Your block wants too many arguments!"
+            end
+          end
         end
-        self
       end
     end
 
