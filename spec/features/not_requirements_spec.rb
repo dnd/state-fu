@@ -15,14 +15,16 @@ shared_examples_for "not requirements" do
     describe "requirements with names beginning with no[t]_" do
 
     it "should return the opposite of the requirement name without not_" do
+#      @obj.current_state.should == :guest
+      @obj.stfu.teleport! :anonymous
       @obj.valid_password = false
-      @binding.has_valid_password?.should == false
-      @binding.has_not_valid_password?.should == true
-      @binding.has_no_valid_password?.should == true
+      @binding.can_has_valid_password?.should == false
+      @binding.can_has_not_valid_password?.should == true
+      @binding.can_has_no_valid_password?.should == true
       @obj.valid_password = true
-      @binding.has_valid_password?.should == true
-      @binding.has_not_valid_password?.should == false
-      @binding.has_no_valid_password?.should == false
+      @binding.can_has_valid_password?.should == true
+      @binding.can_has_not_valid_password?.should == false
+      @binding.can_has_no_valid_password?.should == false
     end
 
     it "should call the method directly if one exists" do
@@ -30,9 +32,9 @@ shared_examples_for "not requirements" do
       (class << @obj; self; end).class_eval do
         define_method( :no_valid_password? ) { true }
       end
-      @binding.has_valid_password?.should == true
-      @binding.has_not_valid_password?.should == false
-      @binding.has_no_valid_password?.should == true
+      @binding.can_has_valid_password?.should == true
+      @binding.can_has_not_valid_password?.should == false
+      @binding.can_has_no_valid_password?.should == true
     end
 
   end

@@ -107,6 +107,7 @@ module StateFu
         evaluate_requirement_message requirement 
       end.extend MessageArray
     end
+    alias_method :error_messages, :unmet_requirement_messages
     
     def requirement_errors(revalidate=false, fail_fast=false)
       Hash[ unmet_requirements(revalidate, fail_fast).

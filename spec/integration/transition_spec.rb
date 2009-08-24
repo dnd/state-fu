@@ -24,7 +24,6 @@ describe StateFu::Transition do
     end
 
     it "should behave like this" do
-      puts @t.inspect.gsub /<|t>/,''
       @t.args.should    == [:a, :b, {'c' => 'cat'}]
       @t.options.should == {:c => 'cat'} 
 
@@ -961,15 +960,13 @@ describe StateFu::Transition do
       it "should execute in the context of the transition initializer after it's set up" do
         pending
         @obj.__define_singleton_method(:run_exec) do
-          puts t.inspect.gsub /<|>/,''
           t.args.should == ['who','yo','daddy?']
           t.options.should == {:hi => :mum}
         end
         trans = @obj.state_fu.transition( :run ) do
           @args    = %w/ who yo daddy? /
           @options = {:hi => :mum}
-          puts self.inspect.gsub(/<|>/,';')
-          # puts self.__id__.to_s + ';'
+
         end
         trans.fire!()
       end

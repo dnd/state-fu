@@ -193,7 +193,7 @@ describe "Transition requirement reflection" do
 
       describe "when the arity of the proc is 0" do
         before do
-          @msg = lambda { "I am a #{self.class} and I fail it" }
+          @msg = lambda { "No #{t.target.name} for you!" }
           @machine.requirement_messages[:spacesuit?] = @msg
         end
 
@@ -205,7 +205,7 @@ describe "Transition requirement reflection" do
           messages.length.should == 2
           messages.strings.length.should == 1
           messages.strings.first.should be_kind_of( String )
-          messages.strings.first.should == "I am a StateFu::Executioner and I fail it"
+          messages.strings.first.should == "No moon for you!"
           messages.symbols.first.should == :fuel?
         end
       end # arity 1
@@ -213,31 +213,26 @@ describe "Transition requirement reflection" do
     end # 1 proc msg of 2
     describe "when a symbol message is defined for one of two unmet_requirements" do
       before do
-        #stub( @obj ).spacesuit?() { false }
-        #stub( @obj ).fuel?() { false }
+
         @machine.requirement_messages[:spacesuit?] = :no_spacesuit_msg_method
         Klass.class_eval do
           attr_accessor :arg
           def spacesuit?; false end
-          def fuel?; false end
-            
-          def no_spacesuit_msg_method
-            # raise ArgumentError unless t.is_a?( StateFu::Transition )
+          def fuel?;      false end            
+          
+          def no_spacesuit_msg_method(t)
             "You can't go to the #{t.target.name} without a spacesuit!"
           end
+          
         end
       end
 
       describe "when there is no named proc on the machine matching the symbol" do
 
-        it "should call the method on @obj given transition.evaluate() with the method name" do
-          
-          # @obj.method( :no_spacesuit_msg_method ).arity.should == 1
+        it "should call the method on @obj given transition.evaluate() with the method name" do          
           t = @obj.state_fu.fly_spaceship(:moon)
-          
-          #x = @obj.state_fu.evaluate(:no_spacesuit_msg_method )
           @obj.arg.should == nil
-          t.unmet_requirements.should == /You can't go to the moon/
+          t.unmet_requirement_messages.should == ["You can't go to the moon without a spacesuit!", :fuel?]
         end
 
         it "should call t.evaluate_named_proc_or_method(:no_spacesuit_msg_method)" do

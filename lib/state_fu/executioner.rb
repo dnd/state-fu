@@ -91,7 +91,7 @@ module StateFu
         # ensure we don't pass too many arguments
         arguments = arguments[0, meth.arity.abs]
       end
-
+      
       # execute it!
       __target__.with_methods_on(self) do
         self.instance_exec *arguments, &meth
