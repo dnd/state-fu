@@ -49,6 +49,7 @@ module StateFu
     
     def init(t)
       @transition = t
+      self
     end
     
     delegate :options, :to => :transition

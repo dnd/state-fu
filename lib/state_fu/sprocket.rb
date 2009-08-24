@@ -5,7 +5,8 @@ module StateFu
     include Applicable # define apply!
     include Optional
     
-    attr_reader :machine, :name, :options, :hooks
+    attr_reader :machine, :name, :hooks
+    attr_accessor :options
 
     def initialize(machine, name, options={})
       @machine = machine

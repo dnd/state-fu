@@ -115,12 +115,15 @@ module StateFu
     # If a block is given, it yields the Transition or is executed in
     # its evaluation context, depending on the arity of the block.
     def transition( event_or_array, *args, &block )
-      returning transitions.find(event_or_array) do |t|
-        if t
-          t.args = args
-          t.apply!(&block) if block_given?
-        end
-      end
+      # raise args.inspect
+      return transitions.with(*args, &block).find(event_or_array)
+      
+      # returning transitions.find(event_or_array) do |t|
+      #   if t
+      #     t.apply!(&block) if block_given?
+      #     t.args = args
+      #   end
+      # end
       # Transition.new( self, event, target, *args, &block )
     end
     alias_method :fire,             :transition
@@ -218,7 +221,7 @@ module StateFu
     end
     alias_method :next_transition!, :next!
     alias_method :next_event!, :next!
-    alias_method :next_event!, :next!
+    alias_method :next_state!, :next!
 
     # if there is a next_transition, return true / false depending on
     # whether its requirements are met

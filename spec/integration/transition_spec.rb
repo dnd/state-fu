@@ -9,6 +9,41 @@ describe StateFu::Transition do
     make_pristine_class("Klass")
   end
 
+  describe "transition args / options" do
+    before do
+      make_pristine_class('Alphabet') do
+        machine do
+          connect_states :a, :b
+        end
+      end
+      @abc = Alphabet.new
+      evt  = Alphabet.machine.events[:a_to_b]
+      tgt  = Alphabet.machine.states[:b]
+      @t   = @abc.stfu.new_transition(evt, tgt,
+                                      :a, :b, 'c' => 'cat')
+    end
+
+    it "should behave like this" do
+      puts @t.inspect.gsub /<|t>/,''
+      @t.args.should    == [:a, :b, {'c' => 'cat'}]
+      @t.options.should == {:c => 'cat'} 
+
+      @t.apply!({'d' => :e})
+      @t.options.should == {:c => 'cat', :d =>  :e} 
+      
+      @t.args.should    == [:a, :b, {'c' => 'cat'}]
+      
+      @t.args = [:A, :B]
+      @t.args.should    == [:A, :B]
+      @t.options.should == {:c => 'cat', :d => :e} 
+      
+      @t.args = [:X, :Y, {:scale => :metric }]
+      
+      @t.options.should == { :c => 'cat', :d => :e , :scale => :metric }
+      @t.args.options.should == @t.options
+    end
+  end
+
   #
   #
   #

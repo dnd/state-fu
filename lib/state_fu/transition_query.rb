@@ -21,9 +21,16 @@ module StateFu
     #
     #
     #
+    
     def find( event_or_array )
       event, target = parse_destination(event_or_array)
-      binding.new_transition(event, target)
+      _args, _block = @args, @block
+      returning binding.new_transition(event, target) do |t|
+        t.apply!(&_block) if _block
+        if _args
+          t.args = _args 
+        end
+      end        
     end
     
     def cyclic
@@ -88,7 +95,7 @@ module StateFu
     end
 
     def with(*args, &block)
-      @args  = *args
+      @args  = args
       @block = block
       self
     end
@@ -154,8 +161,8 @@ module StateFu
       
       if @args || @block
         @result.each do |t|
-          t.args = @args     if @args
           t.apply!( &@block) if @block 
+          t.args = @args     if @args
         end
       end
       

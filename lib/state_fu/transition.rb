@@ -20,29 +20,27 @@ module StateFu
                   :args,
                   :errors,
                   :object,
-                  :options,
                   :current_hook_slot,
                   :current_hook )
 
-    attr_accessor :test_only, :args, :options
+    attr_accessor :test_only
     alias_method :arguments, :args
     
-    def initialize( binding, event, target=nil, *args, &block )
-      @binding    = binding
-      @machine    = binding.machine
-      @object     = binding.object
-      @origin     = binding.current_state
-      @args       = args.extend(TransitionArgsArray) #.init(self)
-      
-      @options    = (args.last.is_a?(Hash)? args.last.symbolize_keys : {} )
-      apply!( @options, &block ) if block_given?
-
+    def initialize( binding, event, target=nil, *argument_list, &block )
       # ensure event is a StateFu::Event
       if event.is_a?(Symbol) && e = binding.machine.events[event]
         event = e
       end
       raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a? Event 
 
+      @binding    = binding
+      @machine    = binding.machine
+      @object     = binding.object
+      @origin     = binding.current_state
+            
+      self.args= argument_list
+      apply!(argument_list, &block ) 
+      
       # ensure we have a target
       target = find_event_target( event, target ) || raise( UnknownTarget.new(self, "target cannot be determined: #{target.inspect} #{self.inspect}"))
 
@@ -68,12 +66,13 @@ module StateFu
       machine.inject_helpers_into( self )
     end
 
-    def args=(argument_list)
-      returning @args = argument_list do |args|
-        if args.last.is_a?(Hash)
-          apply! args.last
-        end
-      end 
+    def options=(opts={})
+      @options = opts
+    end
+
+    def args=(a)      
+      @args = a.extend(TransitionArgsArray).init(self)    
+      apply!(a) if a.last.is_a?(Hash)
     end
     
     #
@@ -279,6 +278,7 @@ module StateFu
       s << " origin=#{origin.to_sym.inspect}" if origin
       s << " target=#{target.to_sym.inspect}" if target
       s << " args=#{args.inspect}" if args
+      s << " options=#{options.inspect}" if options
       s << ">"
       s
     end
