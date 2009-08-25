@@ -228,7 +228,7 @@ describe "A door which opens and shuts:" do
       rescue StateFu::RequirementError => e
         e.to_a.should == ["Sorry, it's locked."]
         e.to_h.should == {:not_locked? => "Sorry, it's locked."}
-        e.each.should be_kind_of(Enumerable::Enumerator)
+        e.to_enum.should be_kind_of(Enumerable::Enumerator)
         e.should_not be_empty
         e.length.should == 1
         e.each do |requirement, message|
