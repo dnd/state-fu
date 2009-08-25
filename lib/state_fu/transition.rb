@@ -23,14 +23,11 @@ module StateFu
                 :current_hook_slot,
                 :current_hook 
 
-    attr_accessor :test_only
     alias_method :arguments, :args
     
     def initialize( binding, event, target=nil, *argument_list, &block )
-      # ensure event is a StateFu::Event
-      if event.is_a?(Symbol) && e = binding.machine.events[event]
-        event = e
-      end
+      # ensure we have an Event
+      event = binding.machine.events[event] if event.is_a?(Symbol)
       raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a? Event 
 
       @binding    = binding
@@ -47,10 +44,12 @@ module StateFu
       @target     = target
       @event      = event
       @errors     = []
-      @testing    = @options.delete(:test_only)
             
       if event.target_for_origin(origin) == target
-        # ...
+        # it's a "sequence"
+        # which is a hacky way of emulating simpler state machines with
+        # state-local events - and in which case, the targets & origins are
+        # valid. Quite likely this notion will be removed in time.
       else
         # ensure target is valid for the event
         unless event.targets.include? target 
@@ -66,13 +65,13 @@ module StateFu
       machine.inject_helpers_into( self )
     end
 
-    def options=(opts={})
-      @options = opts
+    def args=(args)      
+      @args = args.extend(TransitionArgsArray).init(self)    
+      apply!(args) if args.last.is_a?(Hash) unless options.nil?
     end
-
-    def args=(a)      
-      @args = a.extend(TransitionArgsArray).init(self)    
-      apply!(a) if a.last.is_a?(Hash)
+    
+    def with(*args)
+      self.args = args      
     end
     
     #
@@ -83,18 +82,18 @@ module StateFu
       origin.exit_requirements + target.entry_requirements + event.requirements
     end
 
-    def unmet_requirements(revalidate=false, fail_fast=false) # TODO
+    def unmet_requirements(revalidate=false, fail_fast=false) 
       if revalidate
-        return @unmet_requirements if @unmet_requirements
-      else
         @unmet_requirements = nil
+      else
+        return @unmet_requirements if @unmet_requirements
       end
       result = requirements.uniq.inject([]) do |unmet, requirement|
         next if fail_fast && !unmet.empty?
         unmet << requirement unless evaluate(requirement)
         unmet
       end
-      @unmet_requirements = result if (!fail_fast || unmet_requirements.length <= 1)
+      @unmet_requirements = result if (!fail_fast || unmet_requirements.length != 1)
       result
     end
     
@@ -149,8 +148,6 @@ module StateFu
       evaluate hook 
     end
 
-
-
     #
     #
     #
@@ -166,9 +163,10 @@ module StateFu
     #
     
     # actually fire the transition
-    def fire!
+    def fire!(*arguments) # block? 
       raise TransitionAlreadyFired.new(self) if fired?
-      # return false if fired? # no infinite loops please
+      self.args = arguments unless arguments.empty?
+            
       check_requirements!
       @fired = true
       begin
@@ -218,14 +216,6 @@ module StateFu
       !!@fired
     end
 
-    def testing?
-      !!@test_only
-    end
-
-    def live?
-      !testing?
-    end
-
     def accepted?
       !!@accepted
     end
@@ -255,12 +245,6 @@ module StateFu
     alias_method :original_state, :origin
     alias_method :initial_state,  :origin
     alias_method :from,           :origin
-
-    alias_method :test?,          :testing?
-    alias_method :test_only?,     :testing?
-    alias_method :read_only?,     :testing?
-    alias_method :only_pretend?,  :testing?
-    alias_method :dry_run?,       :testing?
 
     # an accepted transition == true
     # an unaccepted transition == false
@@ -325,7 +309,7 @@ module StateFu
       when StateFu::State
         tgt
       when Symbol
-        binding && binding.machine.states[ tgt ] # || raise( tgt.inspect )
+        binding && binding.machine.states[ tgt ] 
       when NilClass
         evt.respond_to?(:target) && evt.target
       else
