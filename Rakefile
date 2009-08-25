@@ -44,8 +44,8 @@ end
 
 namespace :spec do
 
-  desc 'run the spes'
-  Spec::Rake::SpecTask.new(:default) do |t|
+  desc 'run the nice new specs'
+  Spec::Rake::SpecTask.new(:state_fu) do |t|
     t.spec_files = FileList["spec/state_fu_spec.rb"]
     t.spec_opts = ["--options", "spec/spec.opts"]
   end
@@ -81,6 +81,7 @@ namespace :spec do
     exec 'autospec'
   end
 
+  task :default => :state_fu
 end
 
 desc 'Runs irb in this project\'s context'
@@ -109,5 +110,5 @@ begin
 rescue LoadError => e
 end
 
-task :default => 'spec:default'
 task :all     => 'spec:all'
+task :default => :all
