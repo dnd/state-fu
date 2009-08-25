@@ -15,6 +15,20 @@ module StateFu
   end
 
   class TransitionNotFound < Error
+    attr_reader :valid_transitions
+    attr_reader :valid_destinations    
+    DEFAULT_MESSAGE = "Transition could not be determined"
+    
+    def initialize(binding, valid_transitions, message=DEFAULT_MESSAGE, options={})
+      @valid_transitions  = valid_transitions
+      @valid_destinations = valid_transitions.map(&:destination)
+      super(binding, message, options)
+    end
+
+    def inspect
+      "<#{self.class.to_s} #{message} available=[#{valid_destinations.inspect}]>"
+    end
+    
   end
   
   class TransitionError < Error
@@ -52,6 +66,12 @@ module StateFu
   end
   
   class RequirementError < TransitionError
+    include Enumerable 
+    
+    def each *a, &b
+      to_h.each *a, &b
+    end
+    
     def to_a
       unmet_requirement_messages
     end

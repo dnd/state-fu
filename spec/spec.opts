@@ -6,4 +6,4 @@ mtime
 --require 
 spec/custom_formatter.rb
 --format 
-CustomFormatter
+progress

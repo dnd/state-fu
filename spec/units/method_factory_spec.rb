@@ -344,6 +344,7 @@ describe StateFu::MethodFactory do
 
             describe "next_state?" do
               it "should return nil" do
+                pending
                 @binding.next_state?.should == nil
               end
             end

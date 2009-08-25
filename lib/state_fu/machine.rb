@@ -6,7 +6,7 @@ module StateFu
     end
 
     include Applicable
-    include Optional
+    include HasOptions
     
     attr_reader :hooks
 

@@ -3,10 +3,9 @@ module StateFu
   # defines behaviours shared by both classes
   class Sprocket 
     include Applicable # define apply!
-    include Optional
+    include HasOptions
     
     attr_reader :machine, :name, :hooks
-    attr_accessor :options
 
     def initialize(machine, name, options={})
       @machine = machine

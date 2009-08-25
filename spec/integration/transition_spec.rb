@@ -355,7 +355,7 @@ describe StateFu::Transition do
         end
 
         it "should pass args / options to the transition" do
-          t = @obj.state_fu.cycle!( :a, :b , { :c => :d } )
+          t = @obj.state_fu.cycle!( nil, :a, :b , { :c => :d } )
           t.args.should    == [ :a, :b, { :c => :d } ]
           t.options.should == { :c => :d }
         end

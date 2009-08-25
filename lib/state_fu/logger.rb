@@ -32,8 +32,10 @@ module StateFu
     @@shared    = false
     @@log_level = nil
 
-    def self.new( log = $stdout, level = () )
-      self.instance = get_logger( log )
+    def self.new( logger = $stdout, options={} )
+      self.suppress = false
+      self.logger   = logger, options
+      self
     end
 
     def self.initial_log_level
@@ -61,11 +63,11 @@ module StateFu
     end
 
     def self.logger= logger
-      use_logger logger
+      set_logger logger
     end
 
     def self.instance
-      @@logger ||= get_logger($stdout)
+      @@logger ||= set_logger(Logger.default_logger)
     end
 
     def self.suppress!
@@ -80,8 +82,6 @@ module StateFu
       severity = parse_log_level( severity )
       return if suppressed?( severity )
       message = [prefix, (message || (block && block.call) || progname).to_s].compact.join
-      # If a newline is necessary then create a new message ending with a newline.
-      # Ensures that the original message is not mutated.
       # message = "#{message}\n" unless message[-1] == ?\n
       instance.add( severity, message )
     end
@@ -98,8 +98,18 @@ module StateFu
     #
     
     # setter for logger instance
-    def self.use_logger( logger, options = { :shared => false } )
-      @@logger    = logger      
+    def self.set_logger( logger, options = { :shared => false } )
+      case logger
+      when String
+        file     = File.open(logger, File::WRONLY | File::APPEND)        
+        @@logger = Logger.activesupport_logger_available? ? ActiveSupport::BufferedLogger.new(file) : ::Logger.new(file)
+      when ::Logger
+        @@logger = logger
+      when Logger.activesupport_logger_available? && ActiveSupport::BufferedLogger
+        @@logger = logger
+      else
+        raise ArgumentError.new
+      end
       self.shared = !!options.symbolize_keys![:shared]
       if shared?
         @@prefix = options[:prefix] || DEFAULT_SHARED_LOG_PREFIX
@@ -107,8 +117,7 @@ module StateFu
       end      
       if lvl = options[:level] || options[:log_level]
         self.level = lvl
-      end
-      
+      end      
       instance
     end
 
@@ -116,16 +125,28 @@ module StateFu
     
     def self.get_logger( logr = $stdout )
       if Object.const_defined?( "RAILS_DEFAULT_LOGGER" )
-        use_logger RAILS_DEFAULT_LOGGER, :shared => true
+        set_logger RAILS_DEFAULT_LOGGER, :shared => true
       else
         if Object.const_defined?( 'ActiveSupport' ) && ActiveSupport.const_defined?('BufferedLogger')
-          use_logger( ActiveSupport::BufferedLogger.new( logr ))
+          set_logger( ActiveSupport::BufferedLogger.new( logr ))
         else
-          use_logger ::Logger.new( logr )
+          set_logger ::Logger.new( logr )
         end
       end
     end
 
+    def self.activesupport_logger_available?
+      Object.const_defined?( 'ActiveSupport' ) && ActiveSupport.const_defined?('BufferedLogger')
+    end
+    
+    def self.default_logger
+      if Object.const_defined?( "RAILS_DEFAULT_LOGGER" )
+        RAILS_DEFAULT_LOGGER
+      else
+        $stdout
+      end
+    end
+    
     def self.parse_log_level(input)
       case input
       when String, Symbol

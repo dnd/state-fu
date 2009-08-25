@@ -81,6 +81,24 @@ module StateFu
       @options[:cyclic] ||= false
       singular
     end
+    
+    def next_state
+      @options[:cyclic] ||= false
+      if result.map(&:target).uniq.length == 1
+        result.first.target
+      end
+    end
+
+    def next_event
+      @options[:cyclic] ||= false
+      if result.map(&:event).uniq.length == 1
+        result.first.event
+      end
+    end
+    
+    #
+    #
+    #
 
     def events
       map {|t| t.event }
@@ -111,7 +129,7 @@ module StateFu
     private
 
     #
-    # Result class
+    # Result 
     #
     
     module Result

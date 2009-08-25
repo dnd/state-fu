@@ -10,18 +10,18 @@ module StateFu
 
   class Transition
     include Applicable
-    include Optional
+    include HasOptions
 
-    attr_reader(  :binding,
-                  :machine,
-                  :origin,
-                  :target,
-                  :event,
-                  :args,
-                  :errors,
-                  :object,
-                  :current_hook_slot,
-                  :current_hook )
+    attr_reader :binding,
+                :machine,
+                :origin,
+                :target,
+                :event,
+                :args,
+                :errors,
+                :object,
+                :current_hook_slot,
+                :current_hook 
 
     attr_accessor :test_only
     alias_method :arguments, :args
@@ -192,7 +192,7 @@ module StateFu
         Logger.info("Transition halted for #{object.class} #{object}: #{e.inspect}")
         @errors << e
       end
-      return accepted?
+      self
     end
     
     #
@@ -228,6 +228,10 @@ module StateFu
     
     def current_state
       binding.current_state
+    end
+    
+    def destination
+      [event, target].map(&:to_sym)
     end
    
     #

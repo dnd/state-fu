@@ -62,7 +62,7 @@ require 'rubygems'
   'applicable',
   'arrays',
   'methodical',
-  'optional',
+  'has_options',
   'executioner',
   'exceptions',
   'machine',

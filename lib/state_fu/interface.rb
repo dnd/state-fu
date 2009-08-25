@@ -1,6 +1,9 @@
 module StateFu
   module Interface
     module SoftAlias
+
+      # define aliases that won't clobber existing methods - 
+      # so we can be liberal with them.
       def soft_alias(x)
         aliases  = [ x.to_a[0] ].flatten
         original = aliases.shift
@@ -9,6 +12,7 @@ module StateFu
         StateFu::Logger.debug("#{self.to_s} alias for ## #{original} already taken: #{taken.inspect}")  unless taken.empty?
         ok.each { |a| alias_method a, original}
       end
+      
     end
 
     module Aliases
@@ -23,7 +27,7 @@ module StateFu
           class << self
             extend SoftAlias
             # class method aliases
-            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine ]
+            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine]
             soft_alias :state_fu_machines      => [:stfus, :state_fus, :workflows, :engines]
           end
         end

@@ -104,16 +104,6 @@ module StateFu
       transition.valid?(true)
     end
 
-    #
-    # TODO make this readable, or remove it. utter bullshit method ...
-    #    
-    # <tt>complete?(:origins) # do we have origins?<tt>
-    # <tt>complete?           # do we have origins and targets?<tt>
-    #def complete?( field = nil )
-    #  ( field && [field] ||  [:origins, :targets] ).
-    #    map{ |s| send(s) }.
-    #    all?{ |f| !(f.nil? || f.empty?) }
-    #end
 
     #
     # Lathe methods

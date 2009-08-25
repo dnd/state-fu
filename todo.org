@@ -6,6 +6,8 @@
 # i.e., don't expect it to be up to date.
 ==================================================
 
+todo standardize: == / === 
+
 #
 # DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
 #

@@ -10,7 +10,7 @@ require 'rubygems'
 require 'spec'
 
 # record the log output on each run
-LOGFILE = File.join('log', 'spec.log')
+LOGFILE = File.join('log', 'spec.log') unless Object.const_defined?('LOGFILE')
 FileUtils.rm LOGFILE if File.exists?(LOGFILE)
 StateFu::Logger.level  = Logger::INFO
 StateFu::Logger.logger = Logger.new(LOGFILE)
