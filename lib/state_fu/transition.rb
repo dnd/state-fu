@@ -110,8 +110,9 @@ module StateFu
     alias_method :error_messages, :unmet_requirement_messages
     
     def requirement_errors(revalidate=false, fail_fast=false)
-      Hash[ unmet_requirements(revalidate, fail_fast).
-        map { |requirement| [requirement, evaluate_requirement_message(requirement)] }]
+      unmet_requirements(revalidate, fail_fast).
+        map { |requirement| [requirement, evaluate_requirement_message(requirement)]}.
+        to_h
     end
 
     def first_unmet_requirement(revalidate=false)
