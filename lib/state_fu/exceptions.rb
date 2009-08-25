@@ -67,19 +67,11 @@ module StateFu
   
   class RequirementError < TransitionError
     include Enumerable 
-    
-    def each *a, &b
-      to_h.each *a, &b
-    end
-    
-    def empty?
-      to_a.empty?
-    end
 
-    def length
-      to_a.length
-    end
-    
+    delegate :each,   :to => :to_h
+    delegate :length, :to => :to_h
+    delegate :empty?, :to => :to_h
+        
     def to_a
       unmet_requirement_messages
     end
