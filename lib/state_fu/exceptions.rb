@@ -1,59 +1,113 @@
 module StateFu
 
-  class Exception < ::Exception
-    attr_reader :binding, :options
+  class MagicMethodError < NoMethodError
   end
 
-  class RequirementError < Exception
-    attr_reader :transition
-    DEFAULT_MESSAGE = "The transition was halted"
+  class Error < ::StandardError
+    attr_reader :binding, :options
 
-    # SPECME
-    def unmet_requirements
-      transition.unmet_requirements
+    def initialize binding, message=nil, options={}
+      @binding = binding
+      @options = options
+      super message
     end
+    
+  end
 
-    def initialize( transition, message=DEFAULT_MESSAGE, options={})
-      @transition = transition
-      @options    = options
-      super( message )
+  class TransitionNotFound < Error
+    attr_reader :valid_transitions
+    attr_reader :valid_destinations    
+    DEFAULT_MESSAGE = "Transition could not be determined"
+    
+    def initialize(binding, valid_transitions, message=DEFAULT_MESSAGE, options={})
+      @valid_transitions  = valid_transitions
+      @valid_destinations = valid_transitions.map(&:destination)
+      super(binding, message, options)
     end
 
     def inspect
-      "<StateFu::RequirementError #{message} #{@transition.origin.name}=[#{@transition.event.name}]=>#{transition.target.name}>"
+      "<#{self.class.to_s} #{message} available=[#{valid_destinations.inspect}]>"
     end
+    
   end
-
-  class TransitionHalted < Exception
+  
+  class TransitionError < Error
+    # TODO default message
     attr_reader :transition
 
-    DEFAULT_MESSAGE = "The transition was halted"
+    def initialize transition, message=nil, options={}
+      raise caller.inspect unless transition.is_a?(Transition)
+      @transition = transition 
+      super transition.binding, message, options
+    end
 
-    def initialize( transition, message=DEFAULT_MESSAGE, options={})
-      @transition = transition
-      @options    = options
-      super( message )
+    delegate :origin, :to => :transition
+    delegate :target, :to => :transition
+    delegate :event,  :to => :transition    
+    delegate :args,   :to => :transition    
+
+    # TODO capture these on initialization
+    delegate :unmet_requirements,         :to => :transition        
+    delegate :unmet_requirement_messages, :to => :transition            
+    delegate :requirement_errors,         :to => :transition            
+
+    def inspect
+      origin_name = origin && origin.name
+      target_name = target && target.name
+      event_name  = event  && event.name  
+      "<#{self.class.to_s} #{message} #{origin_name.inspect}=[#{event_name.inspect}]=>#{target_name.inspect}>"
     end
   end
 
-  class InvalidTransition < Exception
-    attr_reader :binding, :origin, :target, :event, :args
+  class UnknownTarget < TransitionError
+  end
 
-    DEFAULT_MESSAGE = "An invalid transition was attempted"
-
-    def initialize( binding,
-                    event,
-                    origin,
-                    target,
-                    message=DEFAULT_MESSAGE,
-                    options={})
-      @binding = binding
-      @event   = event
-      @origin  = origin
-      @target  = target
-      @options = options
-      super( message )
+  class TransitionAlreadyFired < TransitionError
+  end
+  
+  class RequirementError < TransitionError
+    include Enumerable 
+    
+    def each *a, &b
+      to_h.each *a, &b
     end
+    
+    def empty?
+      to_a.empty?
+    end
+
+    def length
+      to_a.length
+    end
+    
+    def to_a
+      unmet_requirement_messages
+    end
+    
+    def to_h
+      requirement_errors
+    end
+    
+    def to_s
+      inspect
+    end
+    
+    def inspect
+      "<#{self.class.to_s}::#{__id__} :#{transition.origin.to_sym}-[#{transition.event.to_sym}]->:#{transition.target.to_sym} unmet_requirements=#{to_a.inspect}>"
+    end
+  end
+
+  class TransitionHalted < TransitionError
+  end
+
+  class InvalidTransition < TransitionError
+    attr_reader :valid_transitions
+
+    def initialize transition, message=nil, valid_transitions=nil, options={}
+      @valid_transitions = valid_transitions
+      super transition, message, options
+    end
+    
   end
 
 end

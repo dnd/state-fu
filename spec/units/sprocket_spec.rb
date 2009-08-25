@@ -9,7 +9,7 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
   include MySpecHelper
   Sprocket = StateFu::Sprocket
   before do
-    @machine = Object.new
+    @machine = StateFu::Machine.new
   end
 
   describe "calling Sprocket.new" do
@@ -40,24 +40,22 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
         @sprocket.apply!{ yielded = self }
         yielded.should == @sprocket
       end
-    end
-
-    describe "update!" do
+      
       it "should merge any options passed into .options" do
         opts    = @sprocket.options
         newopts =  { :size => "huge", :colour => "orange" }
-        @sprocket.update!( newopts )
+        @sprocket.apply!( newopts )
         @sprocket.options.should == opts.merge(newopts)
       end
 
       it "should instance_eval the block if one is passed" do
         ref = nil
-        @sprocket.update!(){ ref = self }
+        @sprocket.apply!(){ ref = self }
         ref.should == @sprocket
       end
 
       it "should return itself" do
-        @sprocket.update!.should == @sprocket
+        @sprocket.apply!.should == @sprocket
       end
     end
 

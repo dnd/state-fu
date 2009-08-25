@@ -6,152 +6,207 @@ module StateFu
   # This is what gets yielded to event hooks; it also gets attached
   # to any TransitionHalted exceptions raised.
 
-  class Transition < Context
-    include Applicable # define apply!
-    include Transitive 
+  # TODO - make transition evaluate as true if accepted, false if failed, or nil unless fired
+
+  class Transition
+    include Applicable
+    include HasOptions
+
+    attr_reader :binding,
+                :machine,
+                :origin,
+                :target,
+                :event,
+                :args,
+                :errors,
+                :object,
+                :current_hook_slot,
+                :current_hook 
+
+    attr_accessor :test_only
+    alias_method :arguments, :args
     
-    attr_reader(  :binding,
-                  :machine,
-                  :origin,
-                  :target,
-                  :event,
-                  :args,
-                  :errors,
-                  :object,
-                  :options,
-                  :current_hook_slot,
-                  :current_hook )
+    def initialize( binding, event, target=nil, *argument_list, &block )
+      # ensure event is a StateFu::Event
+      if event.is_a?(Symbol) && e = binding.machine.events[event]
+        event = e
+      end
+      raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a? Event 
 
-    attr_accessor :test_only, :args, :options
-
-    def initialize( binding, event, target=nil, *args, &block )
       @binding    = binding
       @machine    = binding.machine
       @object     = binding.object
       @origin     = binding.current_state
+            
+      self.args= argument_list
+      apply!(argument_list, &block ) 
+      
+      # ensure we have a target
+      target = find_event_target( event, target ) || raise( UnknownTarget.new(self, "target cannot be determined: #{target.inspect} #{self.inspect}"))
 
-      # ensure event is a StateFu::Event
-      if event.is_a?( Symbol ) && e = binding.machine.events[ event ]
-        event = e
-      end
-      raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a?( StateFu::Event )
-
-      target = find_event_target( event, target ) || raise( ArgumentError, "target cannot be determined: #{target.inspect}" )
-
-      # ensure target is valid for the event
-      unless event.targets.include?( target )
-        raise( StateFu::InvalidTransition.new( binding, event, binding.current_state, target,
-                                               "Illegal target #{target} for #{event}" ))
-      end
-
-      # ensure current_state is a valid origin for the event
-      unless event.origins.include?( binding.current_state )
-        raise( StateFu::InvalidTransition.new( binding, event, binding.current_state, target,
-                                               "Illegal event #{event.name} for current state #{binding.state_name}" ))
-      end
-
-      @options    = args.extract_options!.symbolize_keys!
       @target     = target
       @event      = event
-      @args       = args
       @errors     = []
-      @testing    = @options.delete( :test_only )
+      @testing    = @options.delete(:test_only)
+            
+      if event.target_for_origin(origin) == target
+        # ...
+      else
+        # ensure target is valid for the event
+        unless event.targets.include? target 
+          raise InvalidTransition.new self, "Illegal target #{target} for #{event}" 
+        end
 
+        # ensure current_state is a valid origin for the event
+        unless event.origins.include? origin 
+          raise InvalidTransition.new( self, "Illegal event #{event.name} for current state #{binding.state_name}" )
+        end
+      end 
+      
       machine.inject_helpers_into( self )
-
-      # do stuff with the transition in a block, if you like
-      apply!( &block ) if block_given?
     end
 
+    def options=(opts={})
+      @options = opts
+    end
+
+    def args=(a)      
+      @args = a.extend(TransitionArgsArray).init(self)    
+      apply!(a) if a.last.is_a?(Hash)
+    end
+    
+    #
+    # Requirements
+    #
+    
     def requirements
       origin.exit_requirements + target.entry_requirements + event.requirements
     end
 
-    def unmet_requirements
-      requirements.reject do |requirement|
-        binding.evaluate_requirement_with_transition( requirement, self )
-      end
-    end
-
-    def evaluate_requirement_message( name )
-      msg = machine.requirement_messages[name]
-      case msg
-      when String, nil
-        msg
-      when Symbol, Proc
-        evaluate_named_proc_or_method( msg, self )
+    def unmet_requirements(revalidate=false, fail_fast=false) # TODO
+      if revalidate
+        return @unmet_requirements if @unmet_requirements
       else
-        raise msg.class.to_s
+        @unmet_requirements = nil
       end
-    end
-
-    def unmet_requirement_messages
-      unmet_requirements.map do |requirement|
-        evaluate_requirement_message( requirement )
+      result = requirements.uniq.inject([]) do |unmet, requirement|
+        next if fail_fast && !unmet.empty?
+        unmet << requirement unless evaluate(requirement)
+        unmet
       end
+      @unmet_requirements = result if (!fail_fast || unmet_requirements.length <= 1)
+      result
+    end
+    
+    def first_unmet_requirement(revalidate=false)
+      unmet_requirements(revalidate, fail_fast=true)[0]
     end
 
-    def check_requirements!
-      raise RequirementError.new( self, unmet_requirements.inspect ) unless requirements_met?
+    def unmet_requirement_messages(revalidate=false, fail_fast=false) # TODO
+      unmet_requirements(revalidate, fail_fast).map do |requirement|
+        evaluate_requirement_message requirement 
+      end.extend MessageArray
+    end
+    alias_method :error_messages, :unmet_requirement_messages
+    
+    def requirement_errors(revalidate=false, fail_fast=false)
+      Hash[ unmet_requirements(revalidate, fail_fast).
+        map { |requirement| [requirement, evaluate_requirement_message(requirement)] }]
     end
 
-    def requirements_met?
-      unmet_requirements.empty?
+    def first_unmet_requirement(revalidate=false)
+      unmet_requirements(revalidate, fail_fast=true)[0]
+    end
+
+    def first_unmet_requirement_message(revalidate=false)
+      unmet_requirement_messages(revalidate, fail_fast=true)[0]
+    end
+
+    def check_requirements!(revalidate=false, fail_fast=true) # TODO
+      raise RequirementError.new( self, unmet_requirement_messages.inspect ) unless requirements_met?(revalidate, fail_fast)
+    end
+
+    def requirements_met?(revalidate=false, fail_fast=false) # TODO
+      unmet_requirements(revalidate, fail_fast).empty?
     end
     alias_method :valid?, :requirements_met?
-
-    def hooks_for( element, slot )
+    
+    #
+    # Hooks
+    #
+    def hooks_for(element, slot)
       send(element).hooks[slot]
     end
 
-    def hooks()
+    def hooks
       StateFu::Hooks::ALL_HOOKS.map do |owner, slot|
-        [ [owner, slot], send( owner ).hooks[ slot ] ]
+        [ [owner, slot], send(owner).hooks[slot] ]
       end
     end
 
-    def current_state
-      if accepted?
-        :accepted
-      else
-        current_hook.state rescue :unfired
-      end
+    def run_hook hook 
+      evaluate hook 
     end
 
-    def run_hook( hook )
-      evaluate_named_proc_or_method( hook, self )
-    end
 
-    def halt!( message )
+
+    #
+    #
+    #
+
+    # halt a transition with a message
+    # can be used to back out of a transition inside eg a state entry hook
+    def halt! message 
       raise TransitionHalted.new( self, message )
     end
 
+    #
+    #
+    #
+    
+    # actually fire the transition
     def fire!
-      return false if fired? # no infinite loops please
+      raise TransitionAlreadyFired.new(self) if fired?
+      # return false if fired? # no infinite loops please
       check_requirements!
       @fired = true
       begin
+        # duplicated: see #hooks method
         StateFu::Hooks::ALL_HOOKS.map do |owner, slot|
-          [ [owner, slot], send( owner ).hooks[ slot ] ]
+          [ [owner, slot], send(owner).hooks[slot] ]
         end.each do |address, hooks|
+          Logger.info("running #{address.inspect} hooks for #{object.class} #{object}")
           owner,slot = *address
           hooks.each do |hook|
+            Logger.info("running hook #{hooks} for #{object.class} #{object}")
             @current_hook_slot = address
             @current_hook      = hook
-            run_hook( hook )
+            run_hook hook 
           end
           if slot == :entry
             @accepted                        = true
             @binding.persister.current_state = @target
+            Logger.info("State is now :#{@target.name} for #{object.class} #{object}")
           end
         end
         # transition complete
         @current_hook_slot               = nil
         @current_hook                    = nil
       rescue TransitionHalted => e
+        Logger.info("Transition halted for #{object.class} #{object}: #{e.inspect}")
         @errors << e
       end
-      return accepted?
+      self
+    end
+    
+    #
+    # It can pretend it's a hash; so the transition makes a good argument to be
+    # passed to methods.
+    # 
+    include Enumerable
+
+    def each *a, &b 
+      options.each *a, &b 
     end
 
     def halted?
@@ -173,9 +228,18 @@ module StateFu
     def accepted?
       !!@accepted
     end
-
+    alias_method :complete?, :accepted?
+    
+    def current_state
+      binding.current_state
+    end
+    
+    def destination
+      [event, target].map(&:to_sym)
+    end
+   
     #
-    # Try to give as many options (chances) as possible
+    # give as many choices as possible
     #
 
     alias_method :obj,            :object
@@ -191,24 +255,10 @@ module StateFu
     alias_method :initial_state,  :origin
     alias_method :from,           :origin
 
-    alias_method :om,             :binding
-    alias_method :stateful,       :binding
-    alias_method :binding,        :binding
-    alias_method :present,        :binding
-
-    alias_method :workflow,       :machine
-
-    alias_method :write? ,        :live?
-    alias_method :destructive?,   :live?
-    alias_method :real?,          :live?
-    alias_method :really?,        :live?
-    alias_method :seriously?,     :live?
-
     alias_method :test?,          :testing?
     alias_method :test_only?,     :testing?
     alias_method :read_only?,     :testing?
     alias_method :only_pretend?,  :testing?
-    alias_method :pretend?,       :testing?
     alias_method :dry_run?,       :testing?
 
     # an accepted transition == true
@@ -220,9 +270,67 @@ module StateFu
         accepted?
       when false
         !accepted?
+      when State, Symbol
+        current_state == other.to_sym
+      when Transition
+        inspect == other.inspect
       else
         super( other )
       end
     end
+
+    # display nice and short
+    def inspect
+      s = self.to_s
+      s = s[0,s.length-1]
+      s << " event=#{event.to_sym.inspect}" if event
+      s << " origin=#{origin.to_sym.inspect}" if origin
+      s << " target=#{target.to_sym.inspect}" if target
+      s << " args=#{args.inspect}" if args
+      s << " options=#{options.inspect}" if options
+      s << ">"
+      s
+    end
+
+    private
+
+    def executioner
+      @executioner ||= Executioner.new( self ) do |ex|
+        machine.inject_helpers_into( ex )
+        machine.inject_methods_into( ex )
+      end
+    end
+
+    def evaluate(method_name_or_proc)
+      executioner.evaluate(method_name_or_proc)
+    end
+
+    def evaluate_requirement_message( name )
+      msg = machine.requirement_messages[name]
+      case msg
+      when String
+        msg
+      when nil
+        name
+      when Symbol, Proc
+        evaluate msg 
+      else
+        raise msg.class.to_s
+      end
+    end
+
+    def find_event_target( evt, tgt )
+      case tgt
+      when StateFu::State
+        tgt
+      when Symbol
+        binding && binding.machine.states[ tgt ] # || raise( tgt.inspect )
+      when NilClass
+        evt.respond_to?(:target) && evt.target
+      else
+        raise ArgumentError.new( "#{tgt.class} is not a Symbol, StateFu::State or nil (#{evt})" )
+      end
+    end
+
   end
 end

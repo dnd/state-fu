@@ -65,7 +65,7 @@ describe StateFu::Binding do
       describe "when StateFu::Persistence.active_record_column? is true" do
         before do
           mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(1) { true }
-          mock( Klass ).before_create( :state_fu!) { }          
+          mock( Klass ).before_create( :state_fu!) { }
         end
         it "should get an ActiveRecord persister" do
           mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
@@ -176,11 +176,13 @@ describe StateFu::Binding do
       describe "when called with additional arguments after the destination event/state" do
 
         # This would make very little sense to someone trying to understand how to use the library.
-        it "should pass the arguments to any requirements to determine transition availability" do          
-          set_method_arity( @obj, :tissue?, 1 )
-          mock(@obj.state_fu).tissue?(is_a(StateFu::Transition)) {|t| t.args.should == [:a,:b] }
-          @obj.state_fu.fireable?(:am_fireable, :a, :b)
-        end 
+        it "should pass the arguments to any requirements to determine transition availability" do
+          pending
+          mock(@obj).tissue?() do
+            current_transition.should be_kind_of(StateFu::Transition)
+          end #{|tr| tr.args.should == [:a,:b] }
+          @obj.state_fu.am_fireable?(:a, :b)
+        end
       end
 
     end

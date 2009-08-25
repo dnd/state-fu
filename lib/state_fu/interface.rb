@@ -1,14 +1,18 @@
 module StateFu
   module Interface
     module SoftAlias
+
+      # define aliases that won't clobber existing methods - 
+      # so we can be liberal with them.
       def soft_alias(x)
         aliases  = [ x.to_a[0] ].flatten
         original = aliases.shift
         existing_method_names = (self.instance_methods | self.protected_instance_methods | self.private_instance_methods).map(&:to_sym)
         taken, ok = aliases.partition { |a| existing_method_names.include?(a.to_sym) }
-        StateFu::Logger.info("#{self.to_s} alias for ## #{original} TAKEN: #{taken.inspect}")  unless taken.empty?
+        StateFu::Logger.debug("#{self.to_s} alias for ## #{original} already taken: #{taken.inspect}")  unless taken.empty?
         ok.each { |a| alias_method a, original}
       end
+      
     end
 
     module Aliases
@@ -19,11 +23,11 @@ module StateFu
           # instance method aliases
           soft_alias :state_fu          => [:stfu, :fu, :stateful, :workflow, :engine, :machine, :context]
           soft_alias :state_fu_bindings => [:bindings, :workflows, :engines, :machines, :contexts]
-          soft_alias :state_fu!         => [:stfu!, :initialize_machines!, :initialize_state!, :initialize_state_fu!]
+          soft_alias :state_fu!         => [:stfu!, :initialize_machines!, :initialize_state!]
           class << self
             extend SoftAlias
             # class method aliases
-            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine ]
+            soft_alias :state_fu_machine       => [:stfu, :state_fu, :workflow, :stateful, :statefully, :state_machine, :engine]
             soft_alias :state_fu_machines      => [:stfus, :state_fus, :workflows, :engines]
           end
         end
@@ -97,11 +101,20 @@ module StateFu
         name = name.to_sym 
         if machine = self.class.state_fu_machines[name]
           state_fu_bindings[name] ||= StateFu::Binding.new( machine, self, name )
-        # else raise name.inspect
+        else raise ArgumentError.new("No state machine called #{name} for #{self.class} #{self}")
         end
       end
       alias_method :state_fu, :state_fu_binding
 
+      def current_state( name = DEFAULT )
+        state_fu_binding(name).current_state
+      end
+      
+      def next!(name = DEFAULT, *args, &block )
+        state_fu_binding(name).next! *args, &block
+      end
+      alias_method :next_state!,           :next!
+      alias_method :fire_next_transition!, :next!      
 
       # Instantiate bindings for all machines, which ensures that persistence
       # fields are intialized and event methods defined.
@@ -109,7 +122,8 @@ module StateFu
       # ActiveRecord classes, as this will cause the database field
       # to be populated with the default state name.
       
-      def state_fu! 
+      def state_fu!
+        MethodFactory.define_singleton_method(self, :initialize_state_fu!) { true }
         self.class.state_fu_machines.keys.map { |n| state_fu_binding( n ) }
       end
 

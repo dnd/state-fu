@@ -6,7 +6,7 @@ describe StateFu::Lathe do
   before do
     reset!
     make_pristine_class('Klass')
-    @machine = Object.new()
+    @machine = StateFu::Machine.new()
     @state   = Object.new()
     @event   = Object.new()
 
@@ -23,23 +23,23 @@ describe StateFu::Lathe do
       lathe = StateFu::Lathe.new( @machine )
       lathe.should be_kind_of( StateFu::Lathe )
       lathe.machine.should  == @machine
-      lathe.sprocket.should == nil
+      lathe.state_or_event.should == nil
       lathe.options.should  == {}
     end
 
-    it "should accept a sprocket (state / event ) and if given one, be a child" do
+    it "should accept a state_or_event (state / event ) and if given one, be a child" do
       options = {}
       mock( @state ).apply!( options ) {}
       lathe = StateFu::Lathe.new( @machine, @state )
       lathe.should be_kind_of( StateFu::Lathe )
       lathe.machine.should  == @machine
-      lathe.sprocket.should == @state
+      lathe.state_or_event.should == @state
       lathe.options.should  == {}
       lathe.should be_child
     end
   end
 
-  describe "lathe instance with no sprocket (master lathe for a machine)" do
+  describe "lathe instance with no state_or_event (master lathe for a machine)" do
     before do
     end
 
@@ -351,7 +351,7 @@ describe StateFu::Lathe do
         @lathe   = StateFu::Lathe.new( @machine, @state )
       end
 
-      it "should create a named event from and to the lathe's sprocket (state)" do
+      it "should create a named event from and to the lathe's state_or_event (state)" do
 
         @machine.events.should be_empty
         @machine.states.length.should == 1
@@ -380,7 +380,7 @@ describe StateFu::Lathe do
 
     describe ".event(:name)" do
       before do
-        mock( @machine ).find_or_create_states_by_name( @lathe.sprocket ).at_least(1) { @lathe.sprocket }
+        mock( @machine ).find_or_create_states_by_name( @lathe.state_or_event ).at_least(1) { @lathe.state_or_event }
       end
 
       it "should create the named event if it does not exist" do

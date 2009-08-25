@@ -1,4 +1,4 @@
-require File.expand_path("#{File.dirname(__FILE__)}/../helper")
+require File.expand_path("#{File.dirname(__FILE__)}/../spec_helper")
 
 describe "extending bindings and transitions with Lathe#helper" do
 
@@ -27,40 +27,56 @@ describe "extending bindings and transitions with Lathe#helper" do
   #
 
   describe StateFu::Transition  do
-    describe "#==" do
+    describe "equality" do
+
+      it "should == the current_state" do
+        @transition.should == @transition.current_state
+      end
+
+      it "should != any other state" do
+        @transition.should_not == @transition.target
+      end
+
+      it "should == the current_state_name" do
+        @transition.should == @transition.current_state
+      end
+
+      it "should != any other State's name" do
+        @transition.should_not == @transition.target.name
+      end
 
       describe "with an unaccepted transition" do
         before do
-          stub(@transition).accepted? { false }
+          # stub(@transition).accepted? { false }
         end
 
-        it "should == true" do
+        it "should != true" do
           @transition.should_not == true
         end
 
-        it "should not == false" do
+        it "should == false" do
           @transition.should == false
         end
 
-        it "should === true" do
+        it "should not === true" do
           @transition.should_not === true
         end
 
-        it "should not === false" do
+        it "should === false" do
           @transition.should === false
         end
-
-        it "should not evaluate as truthy" do
-          pending
-          x = @transition || 1
-          x.should == 1
+        
+        it "should not be nil?" do
+          @transition.nil?.should be_false
         end
       end
 
 
       describe "with an accepted transition" do
         before do
-          stub(@transition).accepted? { true }
+          @obj.ok = true
+          @transition.fire!
+          @transition.should be_accepted
         end
         it "should == true" do
           @transition.should == true
@@ -76,11 +92,6 @@ describe "extending bindings and transitions with Lathe#helper" do
 
         it "should not === false" do
           @transition.should_not === false
-        end
-
-        it "should evaluate as truthy" do
-          x = @transition || 1
-          x.should == @transition
         end
 
       end

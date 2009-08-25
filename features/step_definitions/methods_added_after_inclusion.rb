@@ -98,8 +98,8 @@ Then /^@my_obj\.bindings should not be empty$/ do
   @my_obj.bindings.should_not be_empty
 end
 
-Then /^@my_obj\.scare\? should be true$/ do
-  @my_obj.scare?.should == true
+Then /^@my_obj\.can_scare\? should be true$/ do
+  @my_obj.can_scare?.should == true
 end
 
 Then /^@my_obj\.scare! should cause an event transition$/ do

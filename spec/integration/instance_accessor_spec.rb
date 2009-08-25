@@ -12,8 +12,8 @@ describe "An instance of Klass with StateFu included:" do
   end
 
   describe "when no machine is defined" do
-    it "should return nil given .state_fu()" do
-      @k.state_fu().should be_nil
+    it "should raise an ArgumentError given .state_fu()" do
+      lambda { @k.state_fu() }.should raise_error(ArgumentError)
     end
 
     it "should return {} given .bindings()" do
@@ -78,12 +78,12 @@ describe "An instance of Klass with StateFu included:" do
 
       it "should return a StateFu::Binding for the machine called :two given .state_fu(:two)" do
         @k.state_fu(:two).should be_kind_of( StateFu::Binding )
-        @k.state_fu(:two).should_not == @k.state_fu(:state_fu)
+        @k.state_fu(:two).should_not == @k.state_fu(StateFu::DEFAULT)
         @k.state_fu(:two).machine.should == Klass.state_fu_machine(:two)
       end
 
-      it "should return nil when .state_fu() is called with the name of a machine which doesn't exist" do
-        @k.state_fu(:hibiscus).should be_nil
+      it "should raise an ArgumentError when .state_fu() is called with the name of a machine which doesn't exist" do
+        lambda { @k.state_fu(:hibiscus) }.should raise_error(ArgumentError)
       end
 
       it "should return an array of the two StateFu::Bindings given .state_fu!" do

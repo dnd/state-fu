@@ -1,9 +1,10 @@
 module StateFu
   # This class is responsible for defining methods at runtime.
   #
-  #
-  #
-  #
+  # TODO: all events, simple or complex, should get the same method signature
+  # simple events will be called as:  event_name! nil,    *args
+  # complex events will be called as: event_name! :state, *args
+  
   class MethodFactory
 
     # An instance of MethodFactory is created to define methods on a specific StateFu::Binding, and
@@ -12,7 +13,55 @@ module StateFu
     # During the initializer, it will call define_event_methods_on(the binding), which installs
     #
     def initialize( _binding )
-      @binding = _binding
+      # store @binding in a local variable so it's accessible within
+      # the closures below (for define_singleton_method ).
+
+      # i.e, we're embedding a reference to @binding inside the method
+      @binding = _binding      
+      @defs    = {}
+
+      @binding.machine.states.each do |state|
+        @defs[:"#{state.name}?"] = lambda { _binding.current_state.name == state.name }
+      end
+      
+      # method definitions for simple events (only one possible target)
+      @binding.machine.events.each do |event|
+        @defs[event.name]           = lambda \
+        {|*args| _binding._event_method :get_transition,   event, args.shift, *args }
+        @defs[:"can_#{event.name}?"] = lambda \
+          {|*args| _binding._event_method :query_transition, event, args.shift, *args }
+        @defs[:"#{event.name}!"]     = lambda \
+          {|*args| _binding._event_method :fire_transition,  event, args.shift, *args }
+        
+        #if !event.targets.blank? # && event.targets.length > 1
+        event.targets.each do |target_state|
+          method_name = "#{event.name}_to_#{target_state.name}"
+
+          # object.event_name [:target], *arguments
+          #
+          # returns a new transition. Will raise an InvalidTransition if 
+          # it is not given arguments which result in a valid combination
+          # of event and target state being deducted.
+          #
+          # object.event_name suffices without any arguments if the event 
+          # has only one possible target, or only one valid target for 
+          
+          # object.event_name! [:target], *arguments
+          #
+          # as per the method above, except that it also
+          
+          @defs[method_name.to_sym]     = lambda \
+            {|*args| _binding._event_method :get_transition,   event, target_state, *args }
+            
+          # object.event_name! [:]
+          @defs[:"can_#{method_name}?"] = lambda \
+            {|*args| _binding._event_method :query_transition, event, target_state, *args }
+            
+          @defs[:"#{method_name}!"]     = lambda \
+            {|*args| _binding._event_method :fire_transition,  event, target_state, *args }          
+            
+        end unless event.targets.nil?
+      end    
     end
 
     #
@@ -26,9 +75,7 @@ module StateFu
     # not when StateFu is included.
 
     def self.prepare_class( klass )
-      unless klass.is_a?(Class)
-        raise NotImplementedError.new("singleton machines are not yet supported")
-      end
+      raise caller.inspect
       self.define_once_only_method_missing( klass )
     end # prepare_class
 
@@ -51,24 +98,36 @@ module StateFu
     # MethodFactory#define_once_only_method_missing.
 
     def self.define_once_only_method_missing( klass )
-      return if klass.instance_methods.map(&:to_sym).include? :method_missing_before_state_fu
-      klass.class_eval do
-        alias_method :method_missing_before_state_fu, :method_missing
-        def method_missing( method_name, *args, &block )
-          # invoke state_fu! to define methods
-          state_fu!
-          # reset method_missing for this instance
-          # more for tidy stack traces than anything else
-          # TODO - benchmark with presence / absence of this reset
-          metaclass = class << self; self; end
-          metaclass.instance_eval do
-            alias_method :method_missing, :method_missing_before_state_fu
+      raise ArgumentError.new(klass.to_s) unless klass.is_a?(Class)      
+      
+      klass.class_eval do                
+        return false if @_state_fu_prepared
+        @_state_fu_prepared = true
+
+        alias_method(:method_missing_before_state_fu, :method_missing) # if defined?(:method_missing, true)
+
+        def method_missing(method_name, *args, &block)
+          # invoke state_fu! to ensure event, etc methods are defined
+          begin            
+            state_fu! unless defined? initialize_state_fu!            
+          rescue NoMethodError => e
+            raise e
           end
+          
+          # reset method_missing for this instance
+          class << self; self; end.class_eval do
+            alias_method :method_missing, :method_missing_before_state_fu              
+          end
+        
           # call the newly defined method, or the original method_missing
-          if respond_to?( method_name ) # it was defined by calling state_fu!
-            send( method_name, *args, &block )
-          else
-            method_missing_before_state_fu( method_name, *args, &block )
+          if respond_to?(method_name, true) 
+            # it was defined by calling state_fu!, which instantiated bindings
+            # for its state machines, which defined singleton methods for its
+            # states & events when it was constructed.
+            __send__( method_name, *args, &block )
+          else 
+            # call the original method_missing (method_missing_before_state_fu)
+            method_missing( method_name, *args, &block )
           end
         end # method_missing
       end # class_eval
@@ -104,64 +163,13 @@ module StateFu
     # as with simple event methods.
     #
     def define_event_methods_on( obj )
-      # store @binding in a local variable so it's accessible within
-      # the closures below (for define_singleton_method ).
-
-      # i.e, we're embedding a reference to @binding inside the method
-
-      _binding        = @binding
-      simple, complex = @binding.machine.events.partition(&:simple? )
-
-      # method definitions for simple events (only one possible target)
-      simple.each do |event|
-
-        # obj.event_name( *args )
-        # returns a new transition
-        method_name = event.name
-        define_singleton_method( obj, method_name ) do |*args|
-          _binding.transition( event, *args )
-        end
-
-        # obj.event_name?()
-        # true if the event is fireable? (ie, requirements met)
-        method_name = "#{event.name}?"
-        define_singleton_method( obj, method_name ) do
-          _binding.fireable?( event )
-        end
-
-        # obj.event_name!( *args )
-        # creates, fires and returns a transition
-        method_name = "#{event.name}!"
-        define_singleton_method( obj, method_name) do |*args|
-          _binding.fire!( event, *args )
-        end
-      end # simple
-      # method definitions for complex events (target must be specified)
-      complex.each do |event|
-        # obj.event_name( target, *args )
-        # returns a new transition
-        define_singleton_method( obj, event.name ) do |target, *args|
-          _binding.transition( [event, target], *args )
-        end
-
-        # obj.event_name?( target )
-        # true if the event is fireable? (ie, requirements met)
-        method_name = "#{event.name}?"
-        define_singleton_method( obj, method_name ) do |target, *args|
-          _binding.fireable?( [event, target], *args )
-        end
-
-        # obj.event_name!( target, *args )
-        # creates, fires and returns a transition
-        method_name = "#{event.name}!"
-        define_singleton_method( obj, method_name ) do |target, *args|
-          _binding.fire!( [event, target], *args )
-        end
-      end # complex
+      @defs.each do |method_name, method_body|
+        define_singleton_method( obj, method_name, &method_body)
+      end
     end # define_event_methods_on
 
     def define_singleton_method( object, method_name, &block )
-      self.class.define_singleton_method object, method_name, &block
+      MethodFactory.define_singleton_method object, method_name, &block
     end
 
     # define a a method on the metaclass of the given object. The
@@ -173,11 +181,15 @@ module StateFu
     #
     # existing methods will never be overwritten.
 
-    def self.define_singleton_method( object, method_name, &block )
-      if object.respond_to?( method_name )
-        Logger.info("Existing method #{method_name} for #{object.class} will NOT be overwritten.")
+    def self.define_singleton_method( object, method_name, options={}, &block )
+      if object.respond_to?(method_name, true) 
+        msg = !options[:force]
+        Logger.info "Existing method #{method(method_name) rescue [method_name].inspect} "\
+          "for #{object.class} #{object} "\
+          "#{options[:force] ? 'WILL' : 'won\'t'} "\
+          "be overwritten."
       else
-        metaclass   = class << object; self; end
+        metaclass = class << object; self; end
         metaclass.class_eval do
           define_method( method_name, &block )
         end
@@ -187,3 +199,5 @@ module StateFu
 
   end # class MethodFactory
 end # module StateFu
+
+

@@ -1,9 +1,9 @@
 --colour
---format
-CustomFormatter
 --loadby
 mtime
 --reverse
 --debugger
 --require 
 spec/custom_formatter.rb
+--format 
+progress

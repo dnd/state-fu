@@ -67,7 +67,7 @@ module StateFu
       end
 
       def klass
-        object.class
+        binding.target
       end
 
       def current_state=( state )

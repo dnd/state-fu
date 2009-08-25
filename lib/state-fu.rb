@@ -59,11 +59,11 @@ require 'rubygems'
 
 [ 'core_ext',
   'logger',
-  'helpers/applicable',
-  'helpers/contextual_eval',
-  'helpers/transitive',
-  'helpers/arrays',
-  'context',
+  'applicable',
+  'arrays',
+  'methodical',
+  'has_options',
+  'executioner',
   'exceptions',
   'machine',
   'lathe',
@@ -80,7 +80,7 @@ require 'rubygems'
   'hooks',
   'interface',
   'transition',
-  'mock_transition',
+  'transition_query',
   'plotter' ].each do |lib|
   require File.expand_path( File.join( File.dirname(__FILE__), 'state_fu', lib ))
 end
@@ -94,9 +94,5 @@ module StateFu
     klass.send( :include, Interface::InstanceMethods )
     klass.extend(         Interface::Aliases )
   end
-end
-
-if __FILE__ == $0
-  # drop into irb?
 end
 

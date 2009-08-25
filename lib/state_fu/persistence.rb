@@ -63,7 +63,6 @@ module StateFu
     def self.for_instance( binding, field_name )
       metaclass = class << binding.object; self; end
       for_class( metaclass, binding, field_name )
-#      Attribute.new( binding, field_name )
     end
 
     # returns a new persister appropriate to the given binding and field_name

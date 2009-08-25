@@ -3,8 +3,9 @@ module StateFu
   # defines behaviours shared by both classes
   class Sprocket 
     include Applicable # define apply!
-
-    attr_reader :machine, :name, :options, :hooks
+    include HasOptions
+    
+    attr_reader :machine, :name, :hooks
 
     def initialize(machine, name, options={})
       @machine = machine
@@ -31,14 +32,6 @@ module StateFu
 
     def to_s
       "#<#{self.class}::#{self.object_id} @name=#{name.inspect}>"
-    end
-
-    def []v
-      options[v]
-    end
-
-    def []=v,k
-      options[v]=k
     end
 
     # allows state == <name> || event == <name> to return true

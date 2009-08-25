@@ -60,14 +60,9 @@ describe StateFu::MethodFactory do
           lambda { @obj.simple_event! }.should_not raise_error( NoMethodError )
         end
 
-        it "should call binding.fire!( :simple_event ... ) with no args" do
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event) )
-          t = @obj.simple_event!
-        end
-
         it "should call binding.fire!( :simple_event ... ) with any specified args" do
-          mock.instance_of( StateFu::Binding ).fire!( is_a(StateFu::Event), :a, :b, {:c => "d"} )
-          t = @obj.simple_event!( :a, :b, :c => "d" )
+          mock.instance_of( StateFu::Binding ).fire!( anything, :a, :b, {:c => "d"} )
+          t = @obj.simple_event!( nil, :a, :b, :c => "d" )
         end
 
         it "should fire the transition" do
@@ -112,28 +107,28 @@ describe StateFu::MethodFactory do
           end
 
           it "should add any arguments / options it is called with to the transition" do
-            t = @binding.simple_event(:a, :b, :c, {'d' => 'e'})
-            t.should be_kind_of( StateFu::Transition )
-            t.target.should == @machine.states[:targ]
-            t.event.should == @machine.events[:simple_event]
-            t.args.should == [:a,:b,:c]
+            t = @binding.simple_event nil, :a, :b, :c, {'d' => 'e'}
+            #t.should be_kind_of( StateFu::Transition )
+            #t.target.should  == @machine.states[:targ]
+            #t.event.should   == @machine.events[:simple_event]
+            t.args.should    == [:a,:b,:c,{'d' => 'e'}]
             t.options.should == {:d => 'e'}
           end
         end # transition builder
 
         describe "method which tests if the event is fireable?" do
           it "should have the name of the event suffixed with ?" do
-            @binding.should respond_to(:simple_event?)
+            @binding.should respond_to(:can_simple_event?)
           end
 
           it "should be true when the binding says it\'s fireable?" do
             @binding.fireable?( :simple_event ).should == true
-            @binding.simple_event?.should == true
+            @binding.can_simple_event?.should == true
           end
 
           it "should be false when the binding says it\'s not fireable?" do
             mock( @binding ).fireable?( anything ) { false }
-            @binding.simple_event?.should == false
+            @binding.can_simple_event?.should == false
           end
         end # fireable?
 
@@ -149,9 +144,9 @@ describe StateFu::MethodFactory do
           end
 
           it "should pass any arguments to the transition as args / options" do
-            t = @binding.simple_event!( :a, :b, {'c' => :d } )
+            t = @binding.simple_event!( nil, :a, :b, {'c' => :d } )
             t.should be_kind_of( StateFu::Transition )
-            t.args.should    == [:a, :b ]
+            t.args.should    == [:a, :b, {'c' => :d} ]
             t.options.should == { :c => :d }
           end
         end # bang!
@@ -183,11 +178,11 @@ describe StateFu::MethodFactory do
           end
 
           it "should raise an error if called without any arguments" do
-            lambda { @binding.complex_event() }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event() }.should raise_error( StateFu::UnknownTarget )
           end
 
           it "should raise an ArgumentError if called with a nonexistent target state" do
-            lambda { @binding.complex_event(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
           end
 
           it "should raise an InvalidTransition if called with an invalid target state" do
@@ -204,31 +199,31 @@ describe StateFu::MethodFactory do
             t = @binding.complex_event(:x,
                                        :a, :b, :c, {'d' => 'e'})
             t.should be_kind_of( StateFu::Transition )
-            t.args.should == [:a,:b,:c]
+            t.args.should == [:a,:b,:c,{'d' =>'e'}]
             t.options.should == {:d => 'e'}
           end
         end # transition builder
 
         describe "method which tests if the event is fireable?" do
           it "should have the name of the event suffixed with ?" do
-            @binding.should respond_to(:complex_event?)
+            @binding.should respond_to(:can_complex_event?)
           end
 
           it "should require a valid state name" do
-            lambda { @binding.complex_event?(:nonexistent) }.should raise_error( ArgumentError )
-            lambda { @binding.complex_event?(:orphan) }.should_not  raise_error()
-            @binding.complex_event?(:orphan).should == nil
-            lambda { @binding.complex_event?(:x) }.should_not       raise_error
+            lambda { @binding.can_complex_event?(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
+            lambda { @binding.can_complex_event?(:orphan) }.should_not  raise_error()
+            @binding.can_complex_event?(:orphan).should == nil
+            lambda { @binding.can_complex_event?(:x) }.should_not       raise_error
           end
 
           it "should be true when the binding says the event is fireable? " do
             @binding.fireable?( [:complex_event, :x] ).should == true
-            @binding.complex_event?(:x).should == true
+            @binding.can_complex_event?(:x).should == true
           end
 
           it "should be false when the binding says the event is not fireable?" do
             mock( @binding ).fireable?( anything ) { false }
-            @binding.complex_event?(:x).should == false
+            @binding.can_complex_event?(:x).should == false
           end
         end # fireable?
 
@@ -238,7 +233,7 @@ describe StateFu::MethodFactory do
           end
 
           it "should require a valid state name" do
-            lambda { @binding.complex_event!(:nonexistent) }.should raise_error( ArgumentError )
+            lambda { @binding.complex_event!(:nonexistent) }.should raise_error( StateFu::UnknownTarget )
             lambda { @binding.complex_event!(:orphan) }.should      raise_error( StateFu::InvalidTransition )
             lambda { @binding.complex_event!(:x) }.should_not       raise_error
           end
@@ -255,7 +250,7 @@ describe StateFu::MethodFactory do
                                          :a, :b, {'c' => :d } )
             t.should be_kind_of( StateFu::Transition )
             t.target.should  == @machine.states[:x]
-            t.args.should    == [:a, :b ]
+            t.args.should    == [:a, :b,{'c' =>:d} ]
             t.options.should == { :c => :d }
           end
         end # bang!
@@ -334,8 +329,8 @@ describe StateFu::MethodFactory do
             end
 
             describe "cycle!" do
-              it "should raise_error( InvalidTransition )" do
-                lambda { @binding.cycle!.should == nil }.should raise_error( StateFu::InvalidTransition )
+              it "should raise_error( TransitionNotFound )" do
+                lambda { @binding.cycle!.should == nil }.should raise_error( StateFu::TransitionNotFound )
               end
             end
           end # cycle
@@ -349,13 +344,14 @@ describe StateFu::MethodFactory do
 
             describe "next_state?" do
               it "should return nil" do
+                pending
                 @binding.next_state?.should == nil
               end
             end
 
             describe "next_state!" do
               it "should raise_error( InvalidTransition )" do
-                lambda { @binding.next_state! }.should raise_error( StateFu::InvalidTransition )
+                lambda { @binding.next_state! }.should raise_error( StateFu::TransitionNotFound )
               end
             end
           end # next_state

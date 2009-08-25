@@ -72,9 +72,9 @@ Scenario: instantiating a binding to a Machine which has an event should define 
   And I create an instance of MyClass called @my_obj
   And I call @my_obj.state_fu
   Then I should receive a StateFu::Binding
-  And @my_obj should respond to 'scare?'
+  And @my_obj should respond to 'can_scare?'
   And @my_obj should respond to 'scare!'
-  And @my_obj.scare? should be true
+  And @my_obj.can_scare? should be true
   And @my_obj.scare! should cause an event transition
 
 Scenario: calling MyClass.state_fu_machines should return a list of machines for MyClass

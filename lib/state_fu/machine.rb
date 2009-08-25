@@ -1,11 +1,14 @@
 module StateFu
   class Machine
 
-    def self.bindings
+    def self.BINDINGS
       @@_bindings ||= {}
     end
 
-    include StateFu::Applicable
+    include Applicable
+    include HasOptions
+    
+    attr_reader :hooks
 
     #
     # Class methods
@@ -16,11 +19,11 @@ module StateFu
       name = name.to_sym
 
       unless machine = klass.state_fu_machines[ name ]
-        machine = new( options, &block )
-        machine.bind!( klass, name, options[:field_name] )
+        machine = new(options)
+        machine.bind! klass, name, options[:field_name] 
       end
       if block_given?
-        machine.apply!( &block )
+        machine.apply! &block 
       end
       machine
     end
@@ -28,13 +31,13 @@ module StateFu
     # make it so that a class which has included StateFu has a binding to
     # this machine
     def self.bind!( machine, owner, name, field_name)
-      name                             = name.to_sym
+      name = name.to_sym
       # define an accessor method with the given name
       if owner.class == Class
         owner.state_fu_machines[name]    = machine
         owner.state_fu_field_names[name] = field_name
         # method_missing to catch NoMethodError for event methods, etc
-        StateFu::MethodFactory.prepare_class( owner )
+        StateFu::MethodFactory.define_once_only_method_missing( owner )
         unless owner.respond_to?(name)
           owner.class_eval do
             define_method name do
@@ -43,10 +46,10 @@ module StateFu
           end
         end
         # prepare the persistence field
-        StateFu::Persistence.prepare_field( owner, field_name )
+        StateFu::Persistence.prepare_field owner, field_name 
       else
-        _binding = StateFu::Binding.new( machine, owner, name, :field_name => field_name, :singleton => true )
-        MethodFactory.define_singleton_method( owner, name ) { _binding }
+        _binding = StateFu::Binding.new machine, owner, name, :field_name => field_name, :singleton => true 
+        MethodFactory.define_singleton_method(owner, name) { _binding }
       end
     end
 
@@ -64,6 +67,8 @@ module StateFu
       @named_procs          = {}
       @requirement_messages = {}
       @options              = options
+      @hooks                = Hooks.for( self )
+      apply!( &block ) if block_given?
     end
 
     # merge the commands in &block with the existing machine; returns
@@ -83,6 +88,10 @@ module StateFu
 
     def inject_tools_into( obj )
       tools.inject_into( obj )
+    end
+
+    def inject_methods_into( obj )
+      #puts 'inject_methods_into'
     end
 
     # the modules listed here will be mixed into Binding and
