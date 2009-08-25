@@ -72,6 +72,14 @@ module StateFu
       to_h.each *a, &b
     end
     
+    def empty?
+      to_a.empty?
+    end
+
+    def length
+      to_a.length
+    end
+    
     def to_a
       unmet_requirement_messages
     end

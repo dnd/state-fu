@@ -13,11 +13,15 @@ module StateFu
     def each *a, &b
       result.each *a, &b
     end
-    
-    def length
-      result.length
+
+    def method_missing(method_name, *args, &block)
+      if result.respond_to?(method_name, true)
+        result.__send__(method_name, *args, &block)
+      else
+        super(method_name, *args, &block)
+      end
     end
-        
+            
     #
     #
     #

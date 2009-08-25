@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 # Door
 #
 
-describe "a simple machine, a door which opens and shuts:" do
+describe "A door which opens and shuts:" do
   before :all do
 
     # class Door
@@ -13,13 +13,21 @@ describe "a simple machine, a door which opens and shuts:" do
       
       attr_accessor :locked
       
+      def shut
+        "I don't know how to shut!"
+      end
+      
       def locked?
-        #raise "!"
         !!locked
+      end
+      
+      def method_missing(method_name, *args, &block)
+        raise NoMethodError.new("I'm just a door!")
       end
 
       machine do
         event :shut, :transitions_from => :open,   :to => :closed
+        event :slam, :transitions_from => :open,   :to => :closed
         event :open, :transitions_from => :closed, :to => :open, 
                              :requires => :not_locked?,
                               :message => "Sorry, it's locked."
@@ -33,7 +41,7 @@ describe "a simple machine, a door which opens and shuts:" do
     end
 
     it "have two events, :shut and :open" do
-      Door.machine.events.names.should == [:shut, :open]
+      Door.machine.events.names.should == [:shut, :slam, :open]
     end
 
     it "have an initial state of :open, the first state defined" do
@@ -52,7 +60,7 @@ describe "a simple machine, a door which opens and shuts:" do
       Door.machine.requirement_messages[:not_locked?].should == "Sorry, it's locked."
     end
 
-    it "reflect on event origin and target states" do
+    it "can reflect on event origin and target states" do
       event = Door.machine.events[:open]
       event.origin_names.should == [:closed]
       event.target_names.should == [:open]
@@ -68,14 +76,125 @@ describe "a simple machine, a door which opens and shuts:" do
     before do
       @door = Door.new
     end
+    
+    describe "magic event methods" do
+      
+      it "doesn't normally have a method #shut!" do
+        @door.respond_to?(:shut!).should == false
+      end
 
-    it "transition from :open to :closed on #shut!" do
+      it "will define #shut! when method_missing is called for the first time" do
+        begin
+          @door.play_the_ukelele
+        rescue NoMethodError           
+        end
+        @door.respond_to?(:shut!).should == true        
+      end
+      
+      it "will keep any existing methods when method_missing is triggered" do
+        @door.respond_to?(:shut).should == true
+        @door.respond_to?(:can_shut?).should == false
+        @door.shut.should == "I don't know how to shut!"
+        @door.can_shut?.should               == true      # triggers method_missing
+        @door.respond_to?(:shut).should      == true
+        @door.respond_to?(:can_shut?).should == true      # new methods defined
+        @door.shut.should == "I don't know how to shut!"  # old method retained
+      end
+      
+      it "gets a set of new methods when any magic method is called" do
+        @door.respond_to?(:shut).should      == true  # already defined
+        @door.respond_to?(:open).should      == false
+        @door.respond_to?(:can_shut?).should == false
+        @door.respond_to?(:can_open?).should == false
+        @door.respond_to?(:shut!).should     == false
+        @door.respond_to?(:open!).should     == false
+        @door.can_shut?.should               == true  # call one of them (triggers method_missing)
+        @door.respond_to?(:open).should      == false # a private method: Kernel#open  
+        @door.respond_to?(:can_shut?).should == true  # but these are all newly defined public methods
+        @door.respond_to?(:can_open?).should == true  
+        @door.respond_to?(:shut!).should     == true  
+        @door.respond_to?(:open!).should     == true  
+      end
+      
+      it "retains any previously defined method_missing" do
+        begin
+          @door.hug_me
+        rescue NoMethodError => e
+          e.message.should == "I'm just a door!"
+        end        
+      end
+      
+      describe "for :slam - " do
+        describe "#slam" do
+          it "should return an unfired StateFu::Transition" do
+            t = @door.slam
+            t.should be_kind_of(StateFu::Transition)
+            t.fired?.should == false
+          end        
+        end
+
+        describe "#can_slam?" do
+          it "should be true if the transition is valid for the current state" do
+            @door.current_state.should == :open
+            @door.can_slam?.should == true
+          end        
+          
+          it "should be false when the transition has unmet requirements" do
+            Door.machine.events[:slam].lathe do
+              requires :some_impossible_condition do
+                false
+              end
+            end
+            @door.can_slam?.should == false
+          end
+
+          it "should be nil when the transition is invalid for the current state" do
+            @door.shut!
+            @door.current_state.should == :closed
+            @door.can_slam?.should == nil
+          end          
+        end
+      end
+      
+    end # magic event methods 
+    
+    describe "magic state methods" do
+      it "should be defined for each state by method_missing voodoo" do
+        @door.should_not respond_to(:closed?)
+        @door.should_not respond_to(:open?)
+        @door.open?.should == true
+        @door.should respond_to(:closed?)
+        @door.should respond_to(:open?)        
+      end
+      
+      describe "for :closed - " do
+        describe "#closed?" do
+          it "should be true when the current_state is :closed" do
+            @door.current_state.should == :open
+            @door.closed?.should == false
+            @door.shut!
+            @door.closed?.should == true
+          end
+        end
+      end
+    end # magic state methods
+
+    it "#can_shut? when the current state is open" do
       @door.current_state.should == :open
-      @door.shut!.should be_true
-      @door.current_state.should == :closed
+      @door.can_shut?.should     == true
+      @door.can_open?.should     == nil # not a valid transition from this state -> nil
     end
 
-    it "raise a StateFu::InvalidTransition if #shut! is called when it's already closed" do
+    it "transitions from :open to :closed on #shut!" do
+      @door.current_state.should == :open
+      shut_result = @door.shut!
+      shut_result.should be_true
+      shut_result.should be_kind_of(StateFu::Transition)
+      shut_result.should be_complete
+      @door.current_state.should == :closed
+    end
+    
+    it "raises a StateFu::InvalidTransition if #shut! is called when already :closed" do
       @door.current_state.should == :open
       @door.shut!.should be_true
       @door.current_state.should == :closed
@@ -84,20 +203,14 @@ describe "a simple machine, a door which opens and shuts:" do
         t.origin.should == :open
       end.should raise_error(StateFu::InvalidTransition)
     end
-
-    it "tell you why it won't open if you rescue the error" do
+    
+    it "raises StateFu::RequirementError if #open! is called when it is locked" do
       @door.shut!
       @door.locked = true
-      @door.locked?.should be_true
-      begin
-        @door.open!
-      rescue StateFu::RequirementError => e
-        e.to_a.should == ["Sorry, it's locked."]
-        e.to_h.should == {:not_locked? => "Sorry, it's locked."}
-      end
+      lambda { @door.open! }.should raise_error(StateFu::RequirementError)
     end
-
-    it "tell you why it won't open if you ask nicely" do
+    
+    it "tells you why it won't open if you ask nicely" do
       @door.shut!
       @door.locked = true
       @door.locked?.should be_true
@@ -106,6 +219,85 @@ describe "a simple machine, a door which opens and shuts:" do
       transition.requirement_errors.should == {:not_locked? => "Sorry, it's locked."}
     end
 
+    it "gives you information about the requirement errors if you rescue the RequirementError" do
+      @door.shut!
+      @door.locked = true
+      @door.locked?.should be_true
+      begin
+        @door.open!
+      rescue StateFu::RequirementError => e
+        e.to_a.should == ["Sorry, it's locked."]
+        e.to_h.should == {:not_locked? => "Sorry, it's locked."}
+        e.each.should be_kind_of(Enumerable::Enumerator)
+        e.should_not be_empty
+        e.length.should == 1
+        e.each do |requirement, message|
+          requirement.should == :not_locked?
+          message.should     == "Sorry, it's locked."
+        end
+      end
+    end
+    
+    describe "Transition objects" do
+      
+      # TODO refactor me 
+      def should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed(transition)
+        transition.should be_kind_of(StateFu::Transition)
+        transition.fired?.should == false
+        transition.current_state.should == :open
+        transition.event.should  == :slam
+        transition.origin.should == :open
+        transition.target.should == :closed        
+      end
+    
+      it "returns a Transition on #slam" do
+        transition = @door.slam
+        should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
+      end
+
+      it "returns a Transition on #state_fu.slam" do
+        transition = @door.state_fu.slam
+        should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
+      end
+
+      it "returns a Transition on #state_fu.transition :slam" do
+        transition = @door.state_fu.transition :slam
+        should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
+      end
+
+      it "returns a Transition on #state_fu.transition [:slam, :closed]" do
+        transition = @door.state_fu.transition [:slam, :closed]
+        should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
+      end
+    
+      it "changes the door's state when you #fire! the transition" do
+        transition = @door.slam
+        transition.fire!
+        transition.fired?.should == true
+        transition.complete?.should == true
+        @door.current_state.should == :closed      
+      end
+      
+      it "can tell you its #origin and #target states" do
+        transition = @door.state_fu.transition :shut
+        transition.origin.should be_kind_of(StateFu::State)
+        transition.target.should be_kind_of(StateFu::State)
+        transition.origin.should == :open
+        transition.target.should == :closed
+      end
+
+      it "can give you information about any requirement errors" do
+        @door.shut!
+        @door.locked = true
+        transition = @door.state_fu.transition :open
+        transition.valid?.should == false
+        transition.unmet_requirements.should         == [:not_locked?]
+        transition.unmet_requirement_messages.should == ["Sorry, it's locked."] 
+        transition.requirement_errors.should         == {:not_locked? => "Sorry, it's locked."}
+        transition.first_unmet_requirement.should    == :not_locked?
+        transition.first_unmet_requirement_message.should == "Sorry, it's locked."
+      end
+    end 
 
     # TODO save this for later ...............
     describe "#state_fu_binding" do
@@ -117,17 +309,21 @@ describe "a simple machine, a door which opens and shuts:" do
         @door.state_fu_binding.current_state.should == :open
       end
 
-      it "have one event, :shut" do
-        @door.state_fu_binding.events.should == [:shut]
+      it "have two events, :shut and :slam" do
+        @door.state_fu_binding.events.should == [:shut, :slam]
       end
 
       it "have a list of #valid_transitions" do
         @door.state_fu_binding.valid_transitions.should be_kind_of(StateFu::TransitionQuery)
-        @door.state_fu_binding.valid_transitions.length.should == 1
+        @door.state_fu_binding.valid_transitions.length.should == 2
         t = @door.state_fu_binding.valid_transitions.first
+        t.event.name.should  == :shut
         t.origin.name.should == :open
         t.target.name.should == :closed
-        t.event.name.should  == :shut
+        t = @door.state_fu_binding.valid_transitions.last
+        t.event.name.should  == :slam        
+        t.origin.name.should == :open
+        t.target.name.should == :closed
       end
     end
 
@@ -412,7 +608,7 @@ describe "arguments given to different method signatures" do
       end
 
       describe "methods which expect three arguments" do
-        it "receive a StateFu::Transition, an argument list and the recorder" do
+        it "receive a StateFu::Transition, an argument list and the recorder object" do
           @results[:a3].should == [@t, @t.args, @recorder]
           @results[:b3].should == [@t, @t.args, @recorder]
           @results[:c3].should == [@t, @t.args, [@recorder]]      

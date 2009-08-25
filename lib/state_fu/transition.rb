@@ -114,6 +114,10 @@ module StateFu
         map { |requirement| [requirement, evaluate_requirement_message(requirement)] }]
     end
 
+    def first_unmet_requirement(revalidate=false)
+      unmet_requirements(revalidate, fail_fast=true)[0]
+    end
+
     def first_unmet_requirement_message(revalidate=false)
       unmet_requirement_messages(revalidate, fail_fast=true)[0]
     end
