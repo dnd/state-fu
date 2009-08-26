@@ -25,6 +25,7 @@ require 'rubygems'
   'support/arrays',
   'support/methodical',
   'support/has_options',
+  'support/vizier',
   'support/plotter',
   'support/exceptions',
   'executioner',
