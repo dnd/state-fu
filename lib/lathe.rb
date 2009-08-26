@@ -301,7 +301,7 @@ module StateFu
 
     # chain_states :a => [:b,:c], :c => :d, :c => :d
     # chain_states :a,:b,:c,:d, :a => :c
-    def connect_states *array, &b
+    def connect_states *array
       array.flatten!
       hash = array.extract_options!.symbolize_keys!
       array.inject(nil) do |origin, target|
@@ -320,6 +320,10 @@ module StateFu
     #
     # Define a series of states at once, or return and iterate over all states yet defined
     #
+    # states :a, :b, :c, :colour => "purple"
+    # states(:ALL) do
+    #
+    # end
     def states *args, &block
       valid_unless_nested()
       each_state_or_event 'state', *args, &block
@@ -502,9 +506,15 @@ module StateFu
       if args.empty? || args  == [:ALL]
         args = machine.send("#{type}s").except options.delete(:except)
       end
+      mod = case type.to_s
+            when 'state'
+              StateArray
+            when 'event'
+              EventArray
+            end
       args.map do |name|
         self.send type, name, options.dup, &block
-      end.extend ArrayWithSymbolAccessor
+      end.extend mod
     end
 
   end

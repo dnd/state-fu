@@ -14,6 +14,9 @@ module StateFu
       result.each *a, &b
     end
 
+    # calling result() will cause the set of transitions to be calculated -
+    # the cat will then be either dead or alive; until then it's a litte from
+    # column A, a little from column B.
     def method_missing(method_name, *args, &block)
       if result.respond_to?(method_name, true)
         result.__send__(method_name, *args, &block)
@@ -21,46 +24,27 @@ module StateFu
         super(method_name, *args, &block)
       end
     end
-            
-    #
-    # 
-    #
-    
-    # same as find, except that if there is more than one target for the event
-    # and only one is valid, it will return that one.
-    # def search(destination=nil, &block)
-    #   # use the prepared event & target if none are supplied
-    #   event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
-    #   query         = for_event(event).to(target)
-    #   query.find || query.valid.singular || NilTransition.new
-    # end
-
-    # find a transition by event and optionally (optional if it can be inferred) target.
-    def find(destination=nil, &block)
-      # use the prepared event & target if none are supplied
-      event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
-      _args, _block = @args, @block
-      returning binding.new_transition(event, target) do |transition|
-        # return NilTransition.new if transition.nil?
-        transition.apply!(&_block) if _block
-        if _args
-          transition.args = _args 
-        end
-      end        
+                
+    # prepare the query with arguments / block
+    # so that they can be applied to the transition once one is selected
+    def with(*args, &block)
+      @args  = args
+      @block = block if block_given?
+      self
     end
     
-    # def legal?(destination=nil, &block)
-    #   # use the prepared event & target if none are supplied
-    #   event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
-    #   begin
-    #     !!search(destination, &block)
-    #   rescue IllegalTransition
-    #     false
-    #   end
+    # build a list of possible transition destinations ([event, target])
+    # without actually constructing any transition objects
+    # def all_destinations
+    #   binding.events.inject([]){ |arr, evt| arr += evt.targets.map{|tgt| [evt,tgt] }; arr}.uniq
+    # end
+    # 
+    # def all_destination_names
+    #   all_destinations.map {|tuple| tuple.map(&:to_sym) }
     # end
 
     #
-    #
+    # Chainable Filters
     #     
     
     def cyclic
@@ -100,15 +84,26 @@ module StateFu
     end
     
     #
-    #
+    # Means to an outcome
     #
     
-    def only_one
+    # find a transition by event and optionally (optional if it can be inferred) target.
+    def find(destination=nil, &block)
+      # use the prepared event & target, and block, if none are supplied
+      event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
+      block ||= @block
+      returning Transition.new(binding, event, target, &block) do |transition|
+        if @args
+          transition.args = @args 
+        end
+      end        
+    end
+  
+    def singular
       result.first if result.length == 1
     end
-    alias_method :singular, :only_one
 
-    def only_one?
+    def singular?
       !!singular
     end
 
@@ -131,10 +126,6 @@ module StateFu
       end
     end
     
-    #
-    #
-    #
-
     def events
       map {|t| t.event }
     end
@@ -143,30 +134,9 @@ module StateFu
       map {|t| t.target }
     end
 
-    def apply! # (&block
-      result.each { |t| t.apply &block if block }
-    end
-
-    def with(*args, &block)
-      @args  = args
-      @block = block if block_given?
-      self
-    end
-    
-    def all_destinations
-      binding.events.inject([]){ |arr, evt| arr += evt.targets.map{|tgt| [evt,tgt] }; arr}.uniq
-    end
-    
-    def all_destination_names
-      all_destinations.map {|tuple| tuple.map(&:to_sym) }
-    end
-
     private
 
-    #
-    # Result 
-    #
-    
+    # extend result with this to provide a few conveniences   
     module Result
       def states
         map(&:target).uniq.extend StateArray
@@ -179,6 +149,11 @@ module StateFu
       end
     end # Result
 
+    # looks a little complex because of all the places that previously set
+    # options can filter the set of transitions - but all it's doing is
+    # looping over each event, and each event's possible targets, and building
+    # a list of transitions.
+    
     def result
       @result = binding.events.select do |e| 
         case options[:cyclic]
@@ -193,18 +168,19 @@ module StateFu
         next if options[:event] and event != options[:event]
         returning [] do |ts|
 
-          # TODO hmm ... "sequences" ... delete this?
+          # TODO hmm ... "sequences" ... undecided on these. see Event / Lathe for more detail          
           if options[:sequences]
             if target = event.target_for_origin(current_state)
               ts << binding.transition([event,target], *args) unless options[:cyclic]
             end
           end
 
+          # build a list of transitions from the possible events and their targets
           if event.targets
             next unless event.target if options[:simple]
             event.targets.flatten.each do |target|
               next if options[:target] and target != options[:target]
-              t = binding.new_transition( event, target, *args)
+              t = Transition.new(binding, event, target, *args)
               ts << t if (t.valid? or !options[:valid])
             end
           end
@@ -245,3 +221,4 @@ module StateFu
 
   end
 end
+ 

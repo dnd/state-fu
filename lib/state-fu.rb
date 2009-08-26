@@ -14,61 +14,23 @@
 # impose very few limits on your ability to introspect, manipulate and
 # extend the core features.
 #
-# It is also delightfully elegant and easy to use for simple things:
-#
-#   class Document < ActiveRecord::Base
-#     include StateFu
-#
-#     def update_rss
-#       puts "new feed!"
-#       # ... do something here
-#     end
-#
-#     machine( :status ) do
-#       state :draft do
-#         event :publish, :to => :published
-#       end
-#
-#       state :published do
-#         on_entry :update_rss
-#         requires :author  # a database column
-#       end
-#
-#       event :delete, :from => :ALL, :to => :deleted do
-#         execute :destroy
-#       end
-#     end
-#   end
-#
-#  my_doc = Document.new
-#
-#  my_doc.status                          # returns a StateFu::Binding, which lets us access the 'Fu
-#  my_doc.status.state     => 'draft'     # if this wasn't already a database column or attribute, an
-#                                         # attribute has been created to keep track of the state
-#  my_doc.status.name      => :draft      # the name of the current_state (defaults to the first defined)
-#  my_doc.status.publish!                 # raised =>  StateFu::RequirementError: [:author]
-#                                         # the author requirement prevented the transition
-#  my_doc.status.name      => :draft      # see? still a draft.
-#  my_doc.author = "Susan"                # so let's satisfy it ...
-#  my_doc.publish!                        # and try again
-#  "new feed!"                            # aha - our event hook fires!
-#  my_doc.status.name      => :published  # and the state has been updated.
+# It is also delightfully elegant and easy to use for simple things.
+
 
 require 'rubygems'
-# require 'activesupport'
 
-[ 'core_ext',
-  'logger',
-  'applicable',
-  'arrays',
-  'methodical',
-  'has_options',
+[ 'support/core_ext',
+  'support/logger',
+  'support/applicable',
+  'support/arrays',
+  'support/methodical',
+  'support/has_options',
+  'support/plotter',
+  'support/exceptions',
   'executioner',
-  'exceptions',
   'machine',
   'lathe',
   'method_factory',
-  'nil_transition',
   'binding',
   'persistence',
   'persistence/base',
@@ -81,10 +43,7 @@ require 'rubygems'
   'hooks',
   'interface',
   'transition',
-  'transition_query',
-  'plotter' ].each do |lib|
-  require File.expand_path( File.join( File.dirname(__FILE__), 'state_fu', lib ))
-end
+  'transition_query' ].each { |lib| require File.expand_path(File.join(File.dirname(__FILE__),lib))}
 
 module StateFu
   DEFAULT       = :default

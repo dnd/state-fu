@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__),'../vizier')
+require 'vizier'
 require 'tempfile'
 
 module StateFu

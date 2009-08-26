@@ -19,7 +19,7 @@ describe StateFu::Transition do
       @abc = Alphabet.new
       evt  = Alphabet.machine.events[:a_to_b]
       tgt  = Alphabet.machine.states[:b]
-      @t   = @abc.stfu.new_transition(evt, tgt,
+      @t   = StateFu::Transition.new(@abc.stfu, evt, tgt,
                                       :a, :b, 'c' => 'cat')
     end
 

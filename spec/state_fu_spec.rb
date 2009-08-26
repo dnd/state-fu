@@ -10,17 +10,17 @@ describe "A door which opens and shuts:" do
     # class Door
     make_pristine_class('Door') do
       include StateFu
-      
+
       attr_accessor :locked
-      
+
       def shut
         "I don't know how to shut!"
       end
-      
+
       def locked?
         !!locked
       end
-      
+
       def method_missing(method_name, *args, &block)
         raise NoMethodError.new("I'm just a door!" )
       end
@@ -28,7 +28,7 @@ describe "A door which opens and shuts:" do
       machine do
         event :shut, :transitions_from => :open,   :to => :closed
         event :slam, :transitions_from => :open,   :to => :closed
-        event :open, :transitions_from => :closed, :to => :open, 
+        event :open, :transitions_from => :closed, :to => :open,
                              :requires => :not_locked?,
                               :message => "Sorry, it's locked."
       end
@@ -51,7 +51,7 @@ describe "A door which opens and shuts:" do
     it "have an initial state of :open, the first state defined" do
       Door.machine.initial_state.name.should == :open
     end
-    
+
     it "have a requirement :not_locked? for the :open event" do
       Door.machine.events[:open].requirements.should == [:not_locked?]
     end
@@ -76,9 +76,9 @@ describe "A door which opens and shuts:" do
     before do
       @door = Door.new
     end
-    
+
     describe "magic event methods" do
-      
+
       it "doesn't normally have a method #shut!" do
         @door.respond_to?(:shut!).should == false
       end
@@ -86,11 +86,11 @@ describe "A door which opens and shuts:" do
       it "will define #shut! when method_missing is called for the first time" do
         begin
           @door.play_the_ukelele
-        rescue NoMethodError           
+        rescue NoMethodError
         end
-        @door.respond_to?(:shut!).should == true        
+        @door.respond_to?(:shut!).should == true
       end
-      
+
       it "will keep any existing methods when method_missing is triggered" do
         @door.respond_to?(:shut).should == true
         @door.respond_to?(:can_shut?).should == false
@@ -100,7 +100,7 @@ describe "A door which opens and shuts:" do
         @door.respond_to?(:can_shut?).should == true      # new methods defined
         @door.shut.should == "I don't know how to shut!"  # old method retained
       end
-      
+
       it "gets a set of new methods when any magic method is called" do
         @door.respond_to?(:shut).should      == true  # already defined
         @door.respond_to?(:open).should      == false
@@ -109,36 +109,36 @@ describe "A door which opens and shuts:" do
         @door.respond_to?(:shut!).should     == false
         @door.respond_to?(:open!).should     == false
         @door.can_shut?.should               == true  # call one of them (triggers method_missing)
-        @door.respond_to?(:open).should      == false # a private method: Kernel#open  
+        @door.respond_to?(:open).should      == false # a private method: Kernel#open
         @door.respond_to?(:can_shut?).should == true  # but these are all newly defined public methods
-        @door.respond_to?(:can_open?).should == true  
-        @door.respond_to?(:shut!).should     == true  
-        @door.respond_to?(:open!).should     == true  
+        @door.respond_to?(:can_open?).should == true
+        @door.respond_to?(:shut!).should     == true
+        @door.respond_to?(:open!).should     == true
       end
-      
+
       it "retains any previously defined method_missing" do
         begin
           @door.hug_me
         rescue NoMethodError => e
           e.message.should == "I'm just a door!"
-        end        
+        end
       end
-      
+
       describe "for :slam - " do
         describe "#slam" do
           it "should return an unfired StateFu::Transition" do
             t = @door.slam
             t.should be_kind_of(StateFu::Transition)
             t.fired?.should == false
-          end        
+          end
         end
 
         describe "#can_slam?" do
           it "should be true if the transition is valid for the current state" do
             @door.current_state.should == :open
             @door.can_slam?.should == true
-          end        
-          
+          end
+
           it "should be false when the transition has unmet requirements" do
             Door.machine.events[:slam].lathe do
               requires :some_impossible_condition do
@@ -152,21 +152,21 @@ describe "A door which opens and shuts:" do
             @door.shut!
             @door.current_state.should == :closed
             @door.can_slam?.should == nil
-          end          
+          end
         end
       end
-      
-    end # magic event methods 
-    
+
+    end # magic event methods
+
     describe "magic state methods" do
       it "should be defined for each state by method_missing voodoo" do
         @door.should_not respond_to(:closed?)
         @door.should_not respond_to(:open?)
         @door.open?.should == true
         @door.should respond_to(:closed?)
-        @door.should respond_to(:open?)        
+        @door.should respond_to(:open?)
       end
-      
+
       describe "for :closed - " do
         describe "#closed?" do
           it "should be true when the current_state is :closed" do
@@ -194,28 +194,28 @@ describe "A door which opens and shuts:" do
       shut_result.should be_complete
       @door.current_state.should == :closed
     end
-    
+
     it "raises a StateFu::IllegalTransition if #shut! is called when already :closed" do
       @door.current_state.should == :open
       @door.shut!.should be_true
       @door.current_state.should == :closed
-      lambda do 
+      lambda do
         t = @door.shut!
         t.origin.should == :open
       end.should raise_error(StateFu::IllegalTransition)
     end
-    
+
     it "raises StateFu::RequirementError if #open! is called when it is locked" do
       @door.shut!
       @door.locked = true
       lambda { @door.open! }.should raise_error(StateFu::RequirementError)
     end
-    
+
     it "tells you why it won't open if you ask nicely" do
       @door.shut!
       @door.locked = true
       @door.locked?.should be_true
-      
+
       transition = @door.state_fu.transition :open
       transition.requirement_errors.should == {:not_locked? => "Sorry, it's locked."}
     end
@@ -238,27 +238,27 @@ describe "A door which opens and shuts:" do
         end
       end
     end
-    
+
     describe "Transition objects" do
-      
-      # TODO refactor me 
+
+      # TODO refactor me
       def should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed(transition)
         transition.should be_kind_of(StateFu::Transition)
         transition.fired?.should == false
         transition.current_state.should == :open
         transition.event.should  == :slam
         transition.origin.should == :open
-        transition.target.should == :closed        
+        transition.target.should == :closed
       end
-    
-      it "returns a Transition on #slam" do                  
+
+      it "returns a Transition on #slam" do
         @door.slam do |transition|
           transition.should be_kind_of(StateFu::Transition)
           transition.fired?.should == false
           transition.current_state.should == :open
           transition.event.should  == :slam
           transition.origin.should == :open
-          transition.target.should == :closed        
+          transition.target.should == :closed
         end
       end
 
@@ -276,15 +276,15 @@ describe "A door which opens and shuts:" do
         transition = @door.state_fu.transition [:slam, :closed]
         should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
       end
-    
+
       it "changes the door's state when you #fire! the transition" do
         transition = @door.slam
         transition.fire!
         transition.fired?.should == true
         transition.complete?.should == true
-        @door.current_state.should == :closed      
+        @door.current_state.should == :closed
       end
-      
+
       it "can tell you its #origin and #target states" do
         transition = @door.state_fu.transition :shut
         transition.origin.should be_kind_of(StateFu::State)
@@ -299,12 +299,12 @@ describe "A door which opens and shuts:" do
         transition = @door.state_fu.transition :open
         transition.valid?.should == false
         transition.unmet_requirements.should         == [:not_locked?]
-        transition.unmet_requirement_messages.should == ["Sorry, it's locked."] 
+        transition.unmet_requirement_messages.should == ["Sorry, it's locked."]
         transition.requirement_errors.should         == {:not_locked? => "Sorry, it's locked."}
         transition.first_unmet_requirement.should    == :not_locked?
         transition.first_unmet_requirement_message.should == "Sorry, it's locked."
       end
-    end 
+    end
 
     # TODO save this for later ...............
     describe "#state_fu_binding" do
@@ -323,14 +323,14 @@ describe "A door which opens and shuts:" do
       it "have a list of #valid_transitions" do
         @door.state_fu_binding.valid_transitions.should be_kind_of(StateFu::TransitionQuery)
         @door.state_fu_binding.valid_transitions.length.should == 2
-        t = @door.state_fu_binding.valid_transitions.first
-        t.event.name.should  == :shut
-        t.origin.name.should == :open
-        t.target.name.should == :closed
-        t = @door.state_fu_binding.valid_transitions.last
-        t.event.name.should  == :slam        
-        t.origin.name.should == :open
-        t.target.name.should == :closed
+        transition = @door.state_fu_binding.valid_transitions.first
+        transition.event.name.should  == :shut
+        transition.origin.name.should == :open
+        transition.target.name.should == :closed
+        transition = @door.state_fu_binding.valid_transitions.last
+        transition.event.name.should  == :slam
+        transition.origin.name.should == :open
+        transition.target.name.should == :closed
       end
     end
 
@@ -551,7 +551,7 @@ describe "arguments given to different method signatures" do
       def b2(t,a=nil)   received[:b2] = [t,a] end
       def c2(t,*a)      received[:c2] = [t,a] end
 
-      # these method signatures get a transition, a list of arguments, 
+      # these method signatures get a transition, a list of arguments,
       # and the object which owns the machine
       def a3(t,a,o)     received[:a3] = [t,a,o] end
       def b3(t,a,o=nil) received[:b3] = [t,a,o] end
@@ -565,12 +565,12 @@ describe "arguments given to different method signatures" do
 
     end
   end # before
-  
+
   describe "the machine" do
     it "have an event :observe which is a #cycle?" do
-      Recorder.machine.events[:observe].cycle?.should be_true      
+      Recorder.machine.events[:observe].cycle?.should be_true
     end
-    
+
     it "have a list of execute hooks" do
       Recorder.machine.events[:observe].hooks[:execute].should == [:a1, :b1, :c1, :a2, :b2, :c2, :a3, :b3, :c3]
     end
@@ -587,17 +587,17 @@ describe "arguments given to different method signatures" do
       t.should be_kind_of(StateFu::Transition)
       t.should be_complete
     end
-    
+
     describe "observing method calls on #observe!" do
       before do
         @t = @recorder.observe!
         @results = @recorder.received
       end
-      
+
       it "call the event's :execute hooks on #observe!" do
         @results.keys.should =~ [:a1, :b1, :c1, :a2, :b2, :c2, :a3, :b3, :c3]
       end
-    
+
       describe "methods which expect one argument" do
         it "receive a StateFu::Transition" do
           @results[:a1].should == [@t]
@@ -618,7 +618,7 @@ describe "arguments given to different method signatures" do
         it "receive a StateFu::Transition, an argument list and the recorder object" do
           @results[:a3].should == [@t, @t.args, @recorder]
           @results[:b3].should == [@t, @t.args, @recorder]
-          @results[:c3].should == [@t, @t.args, [@recorder]]      
+          @results[:c3].should == [@t, @t.args, [@recorder]]
         end
       end
     end
@@ -630,12 +630,12 @@ end
 #
 
 describe "sitting at a poker machine" do
-  
+
   before :all do
     make_pristine_class('PokerMachine') do
-      
+
       attr_accessor :silly_noises_inflicted
-      
+
       def insert_coins n
         @credits = n * PokerMachine::CREDITS_PER_COIN
       end
@@ -644,32 +644,32 @@ describe "sitting at a poker machine" do
       def refund_coins
         (self.credits, x = 0, self.credits / PokerMachine::CREDITS_PER_COIN)[1]
       end
-                
+
       def play_a_silly_noise
         @silly_noises_inflicted << [:silly_noise]
       end
-      
-      # an array with the accessors (StateFu::Bindings) 
+
+      # an array with the accessors (StateFu::Bindings)
       # for each of the wheels' state machines, for convenience
       def wheels
-        [wheel_one, wheel_two, wheel_three] 
+        [wheel_one, wheel_two, wheel_three]
       end
 
       def wheels_spinning?
         wheels.any?(&:spinning?)
       end
-      
+
       def display
         wheels.map(&:current_state_name)
       end
-      
+
       def wait
         while wheels_spinning?
-          spin_wheels! 
-        end           
-        stop_spinning!   
+          spin_wheels!
+        end
+        stop_spinning!
       end
-                        
+
       PokerMachine::CREDITS_TO_PLAY  = 5
       PokerMachine::CREDITS_PER_COIN = 5
 
@@ -679,32 +679,32 @@ describe "sitting at a poker machine" do
         @credits                = 0
         @silly_noises_inflicted = []
       end
-      
+
       machine do
-        # adds a hook to the machine's global after slot 
+        # adds a hook to the machine's global after slot
         after_everything :play_a_silly_noise
-        
+
         # Define helper methods with 'proc' or its alias 'define'. This is
         # implicit when you supply a block and a symbol for an event or state
-        # hook, a requirement, or a requirement failure message. 
+        # hook, a requirement, or a requirement failure message.
         #
         # Named procs are "machine-local": they are available in any other
         # block evaluated by StateFu for a given machine, but are not defined
         # on the stateful class itself.
-        #     
+        #
         # Use them to extend the state machine DSL without cluttering up your
         # classes themselves.
-        #    
+        #
         # If you want a method which spans multiple machines (eg 'wheels',
         # above) or which is available to your object in any context, define
         # it as a standard method. You will then be able to access it in any
         # of your state machines.
-        named_proc(:wheel_states) { wheels.map(&:current_state) }        
+        named_proc(:wheel_states) { wheels.map(&:current_state) }
         named_proc(:wheels_stopped?) do
           !wheels.any?(&:spinning?)
         end
-                
-        state :ready do          
+
+        state :ready do
 
           event :pull_lever, :transitions_to => :spinning do
             # The execution context always provides handy access to all the
@@ -712,91 +712,91 @@ describe "sitting at a poker machine" do
             # still be qualified.
             requires(:enough_credits) { self.credits >= PokerMachine::CREDITS_TO_PLAY }
             triggers(:deduct_credits) { self.credits -= PokerMachine::CREDITS_TO_PLAY }
-            triggers(:spin_wheels)    { [wheel_one, wheel_two,wheel_three].each(&:start!) } 
+            triggers(:spin_wheels)    { [wheel_one, wheel_two,wheel_three].each(&:start!) }
             # if we enable this line, the machine will #wait automatically
             # so that merely pulling the lever causes it to return to the ready state:
             #
-            # after :wait            
-          end # :pull_lever event                    
+            # after :wait
+          end # :pull_lever event
         end # :ready state
-        
-        state :spinning do              
+
+        state :spinning do
           cycle :spin_wheels do
             # executes after the transition has been accepted
             after do
-              wheels.each do |wheel| 
+              wheels.each do |wheel|
                 if wheel.spinning?
                   wheel.spin!
                 end
-              end              
+              end
             end # execute
           end # :spinning state
 
-          event :stop_spinning, :to => :ready do 
-            requires :wheels_stopped? 
+          event :stop_spinning, :to => :ready do
+            requires :wheels_stopped?
             execute :payout do
               if wheel_states == wheel_states.uniq
                 self.credits += wheel_states.first[:value]
-              end             
+              end
             end
-          end # :stop_spinning event                    
-        end # spinning state                
-      end # default machine 
-      
+          end # :stop_spinning event
+        end # spinning state
+      end # default machine
+
       [:one, :two, :three].each do |wheel|
         machine "wheel_#{wheel}" do
-                    
+
           state :bomb,     :value => -5
           state :cherry,   :value =>  5
           state :smiley,   :value => 10
-          state :gold,     :value => 15          
+          state :gold,     :value => 15
 
           state :spinning do
             cycle :spin do
               execute do
-                silly_noises_inflicted << :spinning_noise                    
+                silly_noises_inflicted << :spinning_noise
               end
               after do
-                if rand(3) == 0                   
+                if rand(3) == 0
                   # we use binding.stop! rather than self.stop! here
                   # to disambiguate which machine we're sending the event to.
                   #
                   # .binding yields a StateFu::Binding, which has all the same
-                  # magic methods as @pokie, but is explicitly for one machine, 
+                  # magic methods as @pokie, but is explicitly for one machine,
                   # and one @pokie.
-                  # 
-                  # @pokie.stop! would always cause the same wheel to stop 
-                  # (the first one, becuase it was defined first, and automatically 
+                  #
+                  # @pokie.stop! would always cause the same wheel to stop
+                  # (the first one, becuase it was defined first, and automatically
                   # defined methods never clobber any pre-existing methods) -
                   # which isn't what we want here.
-                  binding.stop!([:bomb, :cherry, :smiley, :gold].rand) 
+                  binding.stop!([:bomb, :cherry, :smiley, :gold].rand)
                 end
               end
             end
           end
-          
+
           initial_state states.except(:spinning).rand
-                                    
+
           event :start, :from => states.except(:spinning), :to => :spinning
           event :stop,  :from => :spinning, :to => states.except(:spinning)
-          
+
         end # machine :cell_#{cell}
       end # each cell
-    end # PokerMachine  
-  end # before 
-  
+    end # PokerMachine
+  end # before
+
   describe "the state machine" do
   end
-  
+
   before :each do
     @pokie = PokerMachine.new
   end
-  
+
   # just a sanity check for method_missing
   it "doesn't talk to you" do
     lambda { @pokie.talk_to_me }.should raise_error(NoMethodError)
   end
-    
+
   it "you need credits to pull the lever" do
     @pokie.state_fu!
     @pokie.credits.should == 0
@@ -808,13 +808,13 @@ describe "sitting at a poker machine" do
   it "has three wheels" do
     @pokie.wheels.length.should == 3
   end
-  
+
   it "displays three icons" do
     @pokie.display.should be_kind_of(Array)
     @pokie.display.map(&:class).should == [Symbol, Symbol, Symbol]
     (@pokie.display - [:bomb, :cherry, :smiley, :gold]).should be_empty
   end
-  
+
   describe "putting in 20 coins" do
     before do
       @pokie.insert_coins(20)
@@ -823,7 +823,7 @@ describe "sitting at a poker machine" do
     it "gives you 100 credits" do
       @pokie.credits.should == 100
     end
-  
+
     describe "then pulling the lever" do
 
       it "spins the icons" do
@@ -840,27 +840,27 @@ describe "sitting at a poker machine" do
       it "makes a silly noise" do
         lambda { @pokie.pull_lever! }.should change(@pokie.silly_noises_inflicted, :length)
       end
-      
+
       it "wont let you pull it again while it's still spinning" do
         @pokie.pull_lever!
         @pokie.spinning?.should be_true
         @pokie.can_pull_lever?.should == nil
         lambda{ @pokie.pull_lever! }.should raise_error(StateFu::IllegalTransition)
-      end      
-      
+      end
+
       it "makes a spinning sound while you wait" do
         @pokie.pull_lever!
         noises_before = @pokie.silly_noises_inflicted
         @pokie.wait
         (@pokie.silly_noises_inflicted).should include(:spinning_noise)
       end
-            
+
       it "it stops spinning after a little #wait" do
-        @pokie.pull_lever!        
+        @pokie.pull_lever!
         @pokie.wait
         @pokie.spinning?.should be_false
       end
-      
+
       it "gives you more credits if all the icons are the same" do
         @pokie.pull_lever!
         @pokie.wheel_one.stop!   :smiley
@@ -868,9 +868,9 @@ describe "sitting at a poker machine" do
         @pokie.wheel_three.stop! :smiley
         @pokie.wait
         @pokie.credits.should == 105
-      end 
-    end        
-  end    
+      end
+    end
+  end
 end
 
 

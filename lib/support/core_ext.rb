@@ -4,6 +4,7 @@ require 'rubygems'
 # some convenience methods
 unless Object.const_defined?('ActiveSupport')  #:nodoc
   Dir[File.join(File.dirname( __FILE__), 'active_support_lite','**' )].sort.each do |lib|
+    lib = File.expand_path lib
     next unless File.file?( lib )
     require lib
   end

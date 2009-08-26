@@ -59,6 +59,36 @@ module StateFu
     alias_method :to_sym,     :current_state_name
 
     #
+    # These methods are called from methods defined by MethodFactory.
+    # 
+    
+    # event_name [target], *args
+    #
+    def find_transition(event, target=nil, *args)
+      target ||= args.last[:to].to_sym rescue nil      
+      query = transitions.for_event(event).to(target).with(*args)
+      query.find || query.valid.singular || nil 
+    end
+
+    # event_name? [target], *args
+    #
+    def can_transition?(event, target=nil, *args)
+      begin
+        if t = find_transition(event, target, *args) 
+          t.valid?(*args)
+        end
+      rescue IllegalTransition, UnknownTarget
+        nil
+      end      
+    end
+
+    # event_name! [target], *args
+    #
+    def fire_transition!(event, target=nil, *args)
+      find_transition(event, target, *args).fire!
+    end
+
+    #
     # events
     #
 
@@ -109,6 +139,7 @@ module StateFu
     def transition( event_or_array, *args, &block )
       return transitions.with(*args, &block).find(event_or_array)
     end
+    
     #
     # next_transition and friends: when there's exactly one valid move
     #
@@ -248,39 +279,6 @@ module StateFu
       s << ">"
       s
     end
-
-    # These methods are called from methods defined by MethodFactory. 
-    # You probably don't want to call them directly.
     
-    # event_name 
-    def find_transition(event, target=nil, *args)
-      target ||= args.last[:to].to_sym rescue nil      
-      query = transitions.for_event(event).to(target).with(*args)
-      query.find || query.valid.singular || NilTransition.new      
-      # transition = binding.transitions.with(*args).search([event, target])
-    end
-
-    # event_name?
-    def can_transition?(event, target=nil, *args)
-      begin
-        if t = find_transition(event, target, *args) 
-          t.valid?(*args)
-        end
-      rescue IllegalTransition, UnknownTarget
-        nil
-      end      
-    end
-
-    # event_name!
-    def fire_transition!(event, target=nil, *args)
-      find_transition(event, target, *args).fire!
-    end
-
-    #
-    # transition constructor
-    #
-    def new_transition(event, target, *args, &block)
-      Transition.new( self, event, target, *args, &block )
-    end
   end
 end

@@ -20,16 +20,19 @@ module StateFu
 
     # just turn the above into what each class needs
     # and make it into a nice hash: { :name =>[ hook, ... ], ... }
-    def self.for( me )
-      x = if    me.is_a?(State);   STATE_HOOKS
-          elsif me.is_a?(Event);   EVENT_HOOKS
-          elsif me.is_a?(Machine); MACHINE_HOOKS
-          elsif me.is_a?(Sprocket); [] # let specs pass
-          else  raise me
-          end.
-        map { |type, name| [name, [].extend( OrderedHash )] }
-      hash = x.inject({}) {|h, a| h[a.first] = a.last; h }
-      hash.extend( OrderedHash ).freeze
+    def self.for( instance )
+      case instance
+      when State
+        STATE_HOOKS
+      when Event
+        EVENT_HOOKS
+      when Machine
+        MACHINE_HOOKS
+      when Sprocket
+        []
+      end.
+        map { |type, name| [name, [].extend( OrderedHash )] }.
+        to_h.extend( OrderedHash ).freeze
     end
 
   end

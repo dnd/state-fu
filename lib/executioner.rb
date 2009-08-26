@@ -53,22 +53,12 @@ module StateFu
     alias_method :arguments,            :args
     alias_method :transition_arguments, :args
 
-    # delegate :machine, :to => :binding
-    #delegate :states,  :to => :machine
-
-
     def machine 
       binding.machine
     end
     
     def states
-      # puts binding
-      # puts binding.instance_eval() { @machine }
-      # puts binding.machine
-      # puts binding.machine.states.names
-      # puts machine
-      # puts machine.states
-      # machine.states
+      machine.states
     end
     # delegate :machine, :to => :transition
 
@@ -137,13 +127,12 @@ module StateFu
       
     end
 
-#    # Forwards any missing method call to the \target.
-#    def self.const_missing(const_name)
-#      unless __target__.class.const_defined?(const_name, true)
-#        super(const_name)
-#      end
-#      __target__.class.const_get(const_name)
-#    end
-#
+    # # Forwards any missing constant references to the \target.
+    # def self.const_missing(const_name)
+    #   unless __target__.class.const_defined?(const_name, true)
+    #     super(const_name)
+    #   end
+    #   __target__.class.const_get(const_name)
+    # end
   end
 end

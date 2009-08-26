@@ -23,13 +23,13 @@ module StateFu
                 :current_hook_slot,
                 :current_hook 
 
-    alias_method :arguments, :args
+    alias_method :arguments, :args   
     
     def initialize( binding, event, target=nil, *argument_list, &block )
       # ensure we have an Event
       event = binding.machine.events[event] if event.is_a?(Symbol)
       raise( UnknownTarget.new(self, "Not an event: #{event} #{self.inspect}" )) unless event.is_a? Event 
-
+   
       @binding    = binding
       @machine    = binding.machine
       @object     = binding.object
@@ -159,7 +159,7 @@ module StateFu
     end
 
     #
-    #
+    # Halt a transition mid-execution
     #
 
     # halt a transition with a message
@@ -169,7 +169,7 @@ module StateFu
     end
 
     #
-    #
+    # Fire!
     #
     
     # actually fire the transition
@@ -235,6 +235,7 @@ module StateFu
       binding.current_state
     end
     
+    # a little convenience for debugging / display
     def destination
       [event, target].map(&:to_sym)
     end

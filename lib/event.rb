@@ -10,9 +10,11 @@ module StateFu
       super( machine, name, options )
     end
 
-    # 
+    # Sequences: pretending events are state-local -
+    # probably a bad idea but here for a "compatibility mode"
+    # with eg the activemodel state machine
+    
     # build a hash of target => [origins]
-    #
     def add_to_sequence origin_states, target_state
       origin_states = [origin_states].flatten
       existing = origin_states.select {|s| target_for_origin(s) }
@@ -23,32 +25,25 @@ module StateFu
       end
       @sequence
     end
-    
+
+    def sequence?
+      !sequence.empty?
+    end
+
     def target_for_origin origin_state
       raise ArgumentError.new if origin_state.nil?
       name = sequence.detect do |k,v| 
         v.include?(origin_state.to_sym)
       end[0] rescue nil
       machine.states[name] if name
-      # if t
-      #   puts t.inspect + " <============================" if t
-      #   puts "======================"
-      #   puts origin_state.class
-      #   puts origin_state.name rescue origin_state.inspect
-      # end
-      # machine.states[t.first] if t
     end
     
+
     def can_transition_from?(origin_state) 
       ( origins && origins.include?(origin_state.to_sym) && !targets.blank?) ||
         target_for_origin(origin_state)
-    end
-    
-    def sequence?
-      !sequence.empty?
-    end
-    
-    
+    end    
+  
     # the names of all possible origin states
     def origin_names
       origins ? origins.map(&:to_sym) : nil
