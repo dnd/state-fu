@@ -109,46 +109,6 @@ module StateFu
     def transition( event_or_array, *args, &block )
       return transitions.with(*args, &block).find(event_or_array)
     end
-    # alias_method :firing,           :transition
-    # alias_method :trigger,          :transition
-    # alias_method :fire_event,       :transition
-    # alias_method :trigger_event,    :transition
-    # alias_method :begin_transition, :transition
-
-    # check that the event and target are valid (all requirements are
-    # met) with the given (optional) arguments
-    # def fireable?(destination, *args )
-    #     event, target = destination
-    #   begin
-    #     return nil unless t = transition( destination, *args )
-    #     !! t.requirements_met?
-    #   rescue IllegalTransition => e
-    #     nil
-    #   end
-    # end
-    #     
-    # def fireable(event, target=nil)
-    #   t = transition([event, target]) rescue nil ||  NilTransition.new 
-    # end
-    # 
-    # def fireable_with?(event, target=nil) 
-    #   begin
-    #     return NilTransition.new unless t = transition([event, target])
-    #     !! t.requirements_met?
-    #   rescue IllegalTransition => e
-    #     nil
-    #   end
-    # end
-
-    # construct an event transition and fire it, returning the transition.
-    # (which is == true if the transition completed successfully.)
-    # def fire!(destination)
-    #   event, target = destination
-    #   transition([event, target]).fire!
-    # end
-    # alias_method :trigger!,    :fire!
-    # alias_method :transition!, :fire!
-
     #
     # next_transition and friends: when there's exactly one valid move
     #
@@ -188,7 +148,7 @@ module StateFu
     alias_method :next_transition!, :next!
     alias_method :next_event!, :next!
     alias_method :next_state!, :next!
-
+  
     # if there is a next_transition, return true / false depending on
     # whether its requirements are met
     # otherwise, nil
@@ -216,11 +176,10 @@ module StateFu
     # if there is a single possible cycle() transition, fire and return it
     # otherwise raise an IllegalTransition
     def cycle!(event_or_array=nil, *args, &block )
-      if t = cycle(event_or_array, *args, &block )
+      returning cycle(event_or_array, *args, &block ) do |t|
+        raise TransitionNotFound.new( self, transitions.cyclic.with(*args,&block), "Cannot cycle! unless there is exactly one cyclic event") \
+          if t.nil?
         t.fire!
-        t
-      else
-        raise TransitionNotFound.new( self, transitions.cyclic.with(*args,&block), "Cannot cycle! unless there is exactly one cyclic event")
       end
     end
 
@@ -290,11 +249,9 @@ module StateFu
       s
     end
 
-    #
     # These methods are called from methods defined by MethodFactory. 
-    # You pobably don't want to call them directly.
-    #
-
+    # You probably don't want to call them directly.
+    
     # event_name 
     def find_transition(event, target=nil, *args)
       target ||= args.last[:to].to_sym rescue nil      
@@ -316,7 +273,7 @@ module StateFu
 
     # event_name!
     def fire_transition!(event, target=nil, *args)
-      find_transition(event, target, *args).fire! *args
+      find_transition(event, target, *args).fire!
     end
 
     #
