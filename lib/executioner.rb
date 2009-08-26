@@ -3,17 +3,7 @@ module StateFu
   # delegator class for evaluation methods / procs in the context of
   # your object.
   #
-  
-  # There's a bug in ruby 1.8.x where lambda {}.arity == -1 instead of 0
-  # To get around this, turn it into a proc if conditions are dangerous.
-  def self.get_effective_arity
-    if RUBY_VERSION[0,3] == "1.8" && proc.arity == -1
-      proc.to_proc.arity
-    else
-      proc.arity
-    end    
-  end
-  
+    
   class Executioner
 
     # give us a blank slate
@@ -29,8 +19,6 @@ module StateFu
       self
     end
 
-    # delegate :self, :to => :__target__
-
     delegate :origin,  :to => :transition, :prefix => true # transition_origin
     delegate :target,  :to => :transition, :prefix => true # transition_target
     delegate :event,   :to => :transition, :prefix => true # transition_event
@@ -45,10 +33,10 @@ module StateFu
 
     attr_reader :transition, :__target__, :__self__
 
-    alias_method :t,                  :transition
-    alias_method :current_transition, :transition
-    alias_method :context,            :transition
-    alias_method :ctx,                :transition
+    alias_method :t,                    :transition
+    alias_method :current_transition,   :transition
+    alias_method :context,              :transition
+    alias_method :ctx,                  :transition
 
     alias_method :arguments,            :args
     alias_method :transition_arguments, :args
@@ -112,7 +100,7 @@ module StateFu
     private
 
     # Forwards any missing method call to the \target.
-    # TODO / FIXME / NOTE: we don't (can't ?) handle block arguments ...    
+    # TODO / NOTE: we don't (can't ?) handle block arguments ...    
     def method_missing(method_name, *args)
       if __target__.respond_to?(method_name, true)
         begin
@@ -126,13 +114,7 @@ module StateFu
       end
       
     end
-
-    # # Forwards any missing constant references to the \target.
-    # def self.const_missing(const_name)
-    #   unless __target__.class.const_defined?(const_name, true)
-    #     super(const_name)
-    #   end
-    #   __target__.class.const_get(const_name)
-    # end
+    
+    # NOTE: const_missing is not handled.
   end
 end

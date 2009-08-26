@@ -58,6 +58,17 @@ module StateFu
       machine.lathe
     end
 
+    alias_method :context, :state_or_event
+
+    def context_state
+      state_or_event if state_or_event.is_a?(State)
+    end
+
+    def context_event
+      state_or_event if state_or_event.is_a?(Event)
+    end
+
+
     #
     # methods for extending the DSL
     #
@@ -68,11 +79,17 @@ module StateFu
     end
 
     # helpers are mixed into all binding / transition contexts
-    def tool( *modules )
+    def tool( *modules, &block )
       machine.tool *modules
+      if block_given?
+        tool = Module.new
+        tool.module_eval &block
+        machine.tools << tool
+      end
       # inject them into self for immediate use
       modules.flatten.extend( ToolArray ).inject_into( self )
     end
+    alias_method :extend_dsl, :tool
 
     #
     # event definition methods
