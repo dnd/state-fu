@@ -92,14 +92,15 @@ module StateFu
   class TransitionHalted < TransitionError
   end
 
-  class InvalidTransition < TransitionError
-    attr_reader :valid_transitions
+  # deprecated?
+  # class Invalid Transition < TransitionError
+
+  class IllegalTransition < TransitionError
+    attr_reader :legal_transitions
 
     def initialize transition, message=nil, valid_transitions=nil, options={}
       @valid_transitions = valid_transitions
       super transition, message, options
-    end
-    
+    end    
   end
-
 end

@@ -27,10 +27,10 @@ module StateFu
       @machine.helpers.inject_into( self )
     end
 
-    alias_method :o,         :object
-    alias_method :obj,       :object
-    alias_method :model,     :object
-    alias_method :instance,  :object
+    alias_method :o,             :object
+    alias_method :obj,           :object
+    alias_method :model,         :object
+    alias_method :instance,      :object
 
     alias_method :workflow,      :machine
     alias_method :state_machine, :machine
@@ -70,12 +70,6 @@ module StateFu
     end
     alias_method :events_from_current_state,  :events
 
-    # the subset of events() whose requirements for firing are NOT met
-    # (with the arguments supplied, if any)
-    def invalid_events( *args )
-      ( events - valid_events( *args ) ).extend StateArray
-    end
-
     # all states which can be reached from the current_state. 
     # Does not check transition requirements, etc.
     def next_states
@@ -95,12 +89,17 @@ module StateFu
     end
 
     def valid_next_states(*args)
-      transitions.with(*args).targets
+      valid_transitions(*args).targets
     end
 
     def valid_events(*args)
-      transitions.with(*args).events
+      valid_transitions(*args).events
     end
+    
+    def invalid_events(*args)
+      (events - valid_events(*args)).extend StateArray
+    end
+    
 
     # initializes a new Transition to the given destination, with the
     # given *args (to be passed to requirements and hooks).
@@ -110,32 +109,45 @@ module StateFu
     def transition( event_or_array, *args, &block )
       return transitions.with(*args, &block).find(event_or_array)
     end
-    alias_method :fire,             :transition
-    alias_method :fire_event,       :transition
-    alias_method :trigger,          :transition
-    alias_method :trigger_event,    :transition
-    alias_method :begin_transition, :transition
+    # alias_method :firing,           :transition
+    # alias_method :trigger,          :transition
+    # alias_method :fire_event,       :transition
+    # alias_method :trigger_event,    :transition
+    # alias_method :begin_transition, :transition
 
     # check that the event and target are valid (all requirements are
     # met) with the given (optional) arguments
-    def fireable?( event_or_array, *args )
-      begin
-        return nil unless t = transition( event_or_array, *args )
-        !! t.requirements_met?
-      rescue InvalidTransition => e
-        nil
-      end
-    end
+    # def fireable?(destination, *args )
+    #     event, target = destination
+    #   begin
+    #     return nil unless t = transition( destination, *args )
+    #     !! t.requirements_met?
+    #   rescue IllegalTransition => e
+    #     nil
+    #   end
+    # end
+    #     
+    # def fireable(event, target=nil)
+    #   t = transition([event, target]) rescue nil ||  NilTransition.new 
+    # end
+    # 
+    # def fireable_with?(event, target=nil) 
+    #   begin
+    #     return NilTransition.new unless t = transition([event, target])
+    #     !! t.requirements_met?
+    #   rescue IllegalTransition => e
+    #     nil
+    #   end
+    # end
 
     # construct an event transition and fire it, returning the transition.
     # (which is == true if the transition completed successfully.)
-    def fire!( event_or_array, *args, &block)
-      # TODO rather than die, try to find the next valid transition and fire that
-      t = transition(event_or_array, *args, &block )
-      t.fire!
-    end
-    alias_method :trigger!,    :fire!
-    alias_method :transition!, :fire!
+    # def fire!(destination)
+    #   event, target = destination
+    #   transition([event, target]).fire!
+    # end
+    # alias_method :trigger!,    :fire!
+    # alias_method :transition!, :fire!
 
     #
     # next_transition and friends: when there's exactly one valid move
@@ -155,7 +167,7 @@ module StateFu
     # if there is exactly one state reachable via a transition which
     # is valid with the given optional arguments, return it.
     def next_state(*args, &block)
-      transitions.with(*args, &block).next_state
+      transitions.with(*args, &block).next_state 
     end
 
     # if there is exactly one event which is valid with the given
@@ -165,7 +177,7 @@ module StateFu
     end
     
     # if there is a next_transition, create, fire & return it
-    # otherwise raise an InvalidTransition
+    # otherwise raise an IllegalTransition
     def next!( *args, &block )
       if t = next_transition( *args, &block )
         t.fire!
@@ -202,7 +214,7 @@ module StateFu
     end
 
     # if there is a single possible cycle() transition, fire and return it
-    # otherwise raise an InvalidTransition
+    # otherwise raise an IllegalTransition
     def cycle!(event_or_array=nil, *args, &block )
       if t = cycle(event_or_array, *args, &block )
         t.fire!
@@ -267,31 +279,44 @@ module StateFu
       self
     end
 
-    # This method is called from methods defined by MethodFactory. 
-    # You don't want to call it directly.
-    def _event_method(action, event, *args)
-      target_or_options = args.shift
-      options           = {}
-      case target_or_options
-      when Hash
-        options = target_or_options.symbolize_keys!
-        target  = target_or_options.delete[:to]
-      when Symbol, String
-        target  = target_or_options.to_sym
-      when nil
-        target  = nil
-      end
+    def inspect
+      s = self.to_s
+      s = s[0,s.length-1]
+      s << " object=#{object.class} of #{object}" 
+      s << " current_state=#{current_state.to_sym rescue nil}" 
+      s << " events=#{events.map(&:to_sym).inspect rescue nil}" 
+      s << " machine=#{machine.inspect}" 
+      s << ">"
+      s
+    end
 
-      case action
-      when :get_transition
-        transition [event, target], *args, &lambda {|t| t.options = options}
-      when :query_transition
-        fireable?  [event, target], *args, &lambda {|t| t.options = options}
-      when :fire_transition
-        fire!      [event, target], *args, &lambda {|t| t.options = options}
-      else
-        raise ArgumentError.new(action)
-      end
+    #
+    # These methods are called from methods defined by MethodFactory. 
+    # You pobably don't want to call them directly.
+    #
+
+    # event_name 
+    def find_transition(event, target=nil, *args)
+      target ||= args.last[:to].to_sym rescue nil      
+      query = transitions.for_event(event).to(target).with(*args)
+      query.find || query.valid.singular || NilTransition.new      
+      # transition = binding.transitions.with(*args).search([event, target])
+    end
+
+    # event_name?
+    def can_transition?(event, target=nil, *args)
+      begin
+        if t = find_transition(event, target, *args) 
+          t.valid?(*args)
+        end
+      rescue IllegalTransition, UnknownTarget
+        nil
+      end      
+    end
+
+    # event_name!
+    def fire_transition!(event, target=nil, *args)
+      find_transition(event, target, *args).fire! *args
     end
 
     #

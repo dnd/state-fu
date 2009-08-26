@@ -68,6 +68,7 @@ require 'rubygems'
   'machine',
   'lathe',
   'method_factory',
+  'nil_transition',
   'binding',
   'persistence',
   'persistence/base',

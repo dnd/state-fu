@@ -8,6 +8,19 @@
 
 todo standardize: == / === 
 
+
+-- simple
+go( address ).fire!( args )
+go( address ).with( args ).valid?
+can_go?
+here?
+
+fire!(event, target=nil)
+
+
+
+
+
 #
 # DOCUMENTATION: Reference state machines -- poker game; message queue; protocol parser / syntax
 #

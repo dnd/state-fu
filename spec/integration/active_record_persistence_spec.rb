@@ -142,7 +142,7 @@ describe "an ActiveRecord model with StateFu included:" do
         ex = ExampleRecord.create!( :name => "exemplar" )
         ex.state_fu.state.name.should == :initial
         ex.state_fu_field.should == 'initial'
-        t =  ex.state_fu.fire!( :change )
+        t = ex.state_fu.change!
         t.should be_accepted
         ex.state_fu.state.name.should == :final
         ex.state_fu_field.should == 'final'

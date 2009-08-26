@@ -46,7 +46,7 @@ describe StateFu::TransitionHalted do
   end
 end
 
-describe StateFu::InvalidTransition do
+describe StateFu::IllegalTransition do
   before do
     @binding = Object.new
     @origin  = Object.new
@@ -55,24 +55,24 @@ describe StateFu::InvalidTransition do
   end
 
   describe "constructor" do
-    it "should create an InvalidTransition given a binding, event, origin & target" do
+    it "should create an IllegalTransition given a binding, event, origin & target" do
       pending
-      e = StateFu::InvalidTransition.new( @binding, @event, @origin, @target )
-      e.should be_kind_of( StateFu::InvalidTransition )
-      e.message.should == StateFu::InvalidTransition::DEFAULT_MESSAGE
+      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target )
+      e.should be_kind_of( StateFu::IllegalTransition )
+      e.message.should == StateFu::IllegalTransition::DEFAULT_MESSAGE
     end
 
     it "should allow a custom message" do
       pending
       msg = 'helo'
-      e = StateFu::InvalidTransition.new( @binding, @event, @origin, @target, msg )
-      e.should be_kind_of( StateFu::InvalidTransition )
+      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target, msg )
+      e.should be_kind_of( StateFu::IllegalTransition )
       e.message.should == msg
     end
 
     it "should allow access to the binding, event, origin, and target" do
       pending
-      e = StateFu::InvalidTransition.new( @binding, @event, @origin, @target )
+      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target )
       e.binding.should == @binding
       e.event.should   == @event
       e.origin.should  == @origin

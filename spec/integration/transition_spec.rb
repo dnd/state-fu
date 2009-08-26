@@ -88,15 +88,6 @@ describe StateFu::Transition do
           @t.should_not be_halted
         end
 
-        it "should not be testing" do
-          @t.should_not be_test
-          @t.should_not be_testing
-        end
-
-        it "should be live" do
-          @t.should be_live
-        end
-
         it "should not be accepted" do
           @t.should_not be_accepted
         end
@@ -141,15 +132,6 @@ describe StateFu::Transition do
 
         it "should not be halted" do
           @t.should_not be_halted
-        end
-
-        it "should not be testing" do
-          @t.should_not be_test
-          @t.should_not be_testing
-        end
-
-        it "should be live" do
-          @t.should be_live
         end
 
         it "should be accepted" do
@@ -204,14 +186,8 @@ describe StateFu::Transition do
           trans.args.should    == []
         end
 
-        it "should be a live? transition, not a test?" do
-          trans = @obj.state_fu.transition( :transfer )
-          trans.should be_live
-          trans.should_not be_test
-        end
-
         it "should define any methods declared in a block given to .transition" do
-          trans = @obj.state_fu.transition( :transfer ) do
+          trans = @obj.state_fu.transition( :transfer ) do 
             def snoo
               return [self]
             end
@@ -232,25 +208,14 @@ describe StateFu::Transition do
 
       describe "state_fu.fire!( :transfer )" do
         it "should change the state when called" do
-          @obj.state_fu.should respond_to( :fire! )
+          @obj.state_fu.should respond_to( :fire_transition! )
           @obj.state_fu.state.should == @origin
-          @obj.state_fu.fire!( :transfer )
+          @obj.state_fu.fire_transition!( :transfer )
           @obj.state_fu.state.should == @target
         end
 
-        it "should define any methods declared in the .fire! block" do
-          trans = @obj.state_fu.fire!( :transfer ) do
-            def snoo
-              return [self]
-            end
-          end
-          trans.should be_kind_of( StateFu::Transition )
-          trans.should respond_to(:snoo)
-          trans.snoo.should == [trans]
-        end
-
         it "should return a transition object" do
-          @obj.state_fu.fire!( :transfer ).should be_kind_of( StateFu::Transition )
+          @obj.state_fu.fire_transition!( :transfer ).should be_kind_of( StateFu::Transition )
         end
 
       end # state_fu.fire!
@@ -306,14 +271,6 @@ describe StateFu::Transition do
           it "should set args and options on the transition" do
             t = @obj.state_fu.transition( :transfer, *@args )
             t.args.should    == [ :a, :b, {:c => :d} ]
-            t.options.should == { :c => :d }
-          end
-        end
-
-        describe "calling fire!( :transfer, :a, :b, :c => :d )" do
-          it "should set args and options on the transition" do
-            t = @obj.state_fu.fire!( :transfer, *@args )
-            t.args.should    == [ :a, :b, {:c =>:d} ]
             t.options.should == { :c => :d }
           end
         end
@@ -443,14 +400,14 @@ describe StateFu::Transition do
         end
       end  # state_fu.transition
 
-      describe "state_fu.fire!" do
+      describe "state_fu.fire_transition!" do
         it "should raise an StateFu::UnknownTarget unless a valid targets state is supplied" do
           lambda do
-            @obj.state_fu.fire!( :go )
+            @obj.state_fu.fire_transition!( :go )
           end.should raise_error( StateFu::UnknownTarget )
 
           lambda do
-            @obj.state_fu.fire!( [ :go, :awol ] )
+            @obj.state_fu.fire_transition!( [ :go, :awol ] )
           end.should raise_error( StateFu::UnknownTarget )
         end
       end # state_fu.fire!
@@ -797,7 +754,7 @@ describe StateFu::Transition do
         #stub( @binding ).ok? { false }
         @obj.ok = false
         lambda do
-          @obj.state_fu.fire!( :go )
+          @obj.state_fu.fire_transition!( :go )
         end.should raise_error( StateFu::RequirementError )
       end
 
@@ -1065,8 +1022,8 @@ describe StateFu::Transition do
           t.should be_nil
         end
 
-        it "should raise an InvalidTransition if next! is called" do
-          lambda { @binding.next! }.should raise_error( StateFu::InvalidTransition )
+        it "should raise an IllegalTransition if next! is called" do
+          lambda { @binding.next! }.should raise_error( StateFu::IllegalTransition )
         end
       end
 

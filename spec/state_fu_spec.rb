@@ -22,7 +22,7 @@ describe "A door which opens and shuts:" do
       end
       
       def method_missing(method_name, *args, &block)
-        raise NoMethodError.new("I'm just a door!")
+        raise NoMethodError.new("I'm just a door!" )
       end
 
       machine do
@@ -181,6 +181,7 @@ describe "A door which opens and shuts:" do
 
     it "#can_shut? when the current state is open" do
       @door.current_state.should == :open
+      # @door.state_fu.valid_transitions.map(&:destination).inspect
       @door.can_shut?.should     == true
       @door.can_open?.should     == nil # not a valid transition from this state -> nil
     end
@@ -194,14 +195,14 @@ describe "A door which opens and shuts:" do
       @door.current_state.should == :closed
     end
     
-    it "raises a StateFu::InvalidTransition if #shut! is called when already :closed" do
+    it "raises a StateFu::IllegalTransition if #shut! is called when already :closed" do
       @door.current_state.should == :open
       @door.shut!.should be_true
       @door.current_state.should == :closed
       lambda do 
         t = @door.shut!
         t.origin.should == :open
-      end.should raise_error(StateFu::InvalidTransition)
+      end.should raise_error(StateFu::IllegalTransition)
     end
     
     it "raises StateFu::RequirementError if #open! is called when it is locked" do
@@ -250,9 +251,15 @@ describe "A door which opens and shuts:" do
         transition.target.should == :closed        
       end
     
-      it "returns a Transition on #slam" do
-        transition = @door.slam
-        should_be_an_unfired_transition_with_the_event_slam_from_open_to_closed( transition )
+      it "returns a Transition on #slam" do                  
+        @door.slam do |transition|
+          transition.should be_kind_of(StateFu::Transition)
+          transition.fired?.should == false
+          transition.current_state.should == :open
+          transition.event.should  == :slam
+          transition.origin.should == :open
+          transition.target.should == :closed        
+        end
       end
 
       it "returns a Transition on #state_fu.slam" do
@@ -396,10 +403,10 @@ describe "a simple machine, a heart which beats:" do
       @heart.heartbeats.should == [:thumpthump]
     end
 
-    it "raise an InvalidTransition if it tries to beat after it's stopped" do
+    it "raise an IllegalTransition if it tries to beat after it's stopped" do
       @heart.stop!
       @heart.current_state.should == :stopped
-      lambda { @heart.beat! }.should raise_error(StateFu::InvalidTransition)
+      lambda { @heart.beat! }.should raise_error(StateFu::IllegalTransition)
     end
 
     it "transition to :stopped on #next!" do
@@ -838,7 +845,7 @@ describe "sitting at a poker machine" do
         @pokie.pull_lever!
         @pokie.spinning?.should be_true
         @pokie.can_pull_lever?.should == nil
-        lambda{ @pokie.pull_lever! }.should raise_error(StateFu::InvalidTransition)
+        lambda{ @pokie.pull_lever! }.should raise_error(StateFu::IllegalTransition)
       end      
       
       it "makes a spinning sound while you wait" do

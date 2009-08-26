@@ -138,7 +138,7 @@ describe StateFu::Binding do
   describe "Instance methods" do
     before do
     end
-    describe "fireable?" do
+    describe "can_transition?" do
       before do
         reset!
         make_pristine_class("Klass")
@@ -147,7 +147,7 @@ describe StateFu::Binding do
         end
         @machine = Klass.state_fu_machine do
           state :snoo do
-            event :am_fireable, :to => :wizz do
+            event :fire, :to => :wizz do
               requires :tissue?
             end
           end
@@ -160,16 +160,15 @@ describe StateFu::Binding do
 
       describe "when called with arguments which would return a valid transition from .transition()" do
         it "should return true" do
-          @obj.state_fu.fireable?(:am_fireable).should == true
+          @obj.state_fu.can_transition?(:fire).should == true
         end
       end
 
-      describe "when called with arguments which would raise an InvalidTransition from .transition()" do
+      describe "when called with arguments which would raise an IllegalTransition from .transition()" do
         it "should return nil" do
           @obj.state_fu.name.should == :snoo
-          lambda { @obj.state_fu.transition(:not_fireable) }.should raise_error( StateFu::InvalidTransition )
-          lambda { @obj.state_fu.fireable?(:not_fireable) }.should_not raise_error( StateFu::InvalidTransition )
-          @obj.state_fu.fireable?(:not_fireable).should == nil
+          lambda { @obj.state_fu.can_transition?(:not_fire) }.should_not raise_error( StateFu::IllegalTransition )
+          @obj.state_fu.can_transition?(:not_fire).should == nil
         end
       end
 
@@ -178,10 +177,12 @@ describe StateFu::Binding do
         # This would make very little sense to someone trying to understand how to use the library.
         it "should pass the arguments to any requirements to determine transition availability" do
           pending
-          mock(@obj).tissue?() do
-            current_transition.should be_kind_of(StateFu::Transition)
+          t = nil
+          mock(@obj).tissue?(anything) do
+            # current_transition.should be_kind_of(StateFu::Transition)
+            t << current_transition
           end #{|tr| tr.args.should == [:a,:b] }
-          @obj.state_fu.am_fireable?(:a, :b)
+          @obj.state_fu.can_fire?(:a, :b)
         end
       end
 

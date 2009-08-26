@@ -28,16 +28,13 @@ module StateFu
     def initialize( binding, event, target=nil, *argument_list, &block )
       # ensure we have an Event
       event = binding.machine.events[event] if event.is_a?(Symbol)
-      raise( ArgumentError, "Not an event: #{event}" ) unless event.is_a? Event 
+      raise( UnknownTarget.new(self, "Not an event: #{event} #{self.inspect}" )) unless event.is_a? Event 
 
       @binding    = binding
       @machine    = binding.machine
       @object     = binding.object
       @origin     = binding.current_state
             
-      self.args= argument_list
-      apply!(argument_list, &block ) 
-      
       # ensure we have a target
       target = find_event_target( event, target ) || raise( UnknownTarget.new(self, "target cannot be determined: #{target.inspect} #{self.inspect}"))
 
@@ -53,26 +50,40 @@ module StateFu
       else
         # ensure target is valid for the event
         unless event.targets.include? target 
-          raise InvalidTransition.new self, "Illegal target #{target} for #{event}" 
+          raise IllegalTransition.new self, "Illegal target #{target} for #{event}" 
         end
 
         # ensure current_state is a valid origin for the event
         unless event.origins.include? origin 
-          raise InvalidTransition.new( self, "Illegal event #{event.name} for current state #{binding.state_name}" )
+          raise IllegalTransition.new( self, "Illegal event #{event.name} for current state #{binding.state_name}" )
         end
       end 
       
       machine.inject_helpers_into( self )
+      self.args = argument_list            
+      apply!(argument_list, &block )       
     end
-
+    
+    
+    def valid?(*args)
+      self.args = args unless args.empty?      
+      requirements_met?(true, true) # revalidate; exit on first failure
+    end
+    
     def args=(args)      
       @args = args.extend(TransitionArgsArray).init(self)    
       apply!(args) if args.last.is_a?(Hash) unless options.nil?
     end
     
     def with(*args)
-      self.args = args      
+      self.args = args unless args.empty?
+      self
     end
+
+    def with?(*args)
+      valid?
+    end
+    alias_method :valid_with?, :with?
     
     #
     # Requirements
@@ -88,12 +99,14 @@ module StateFu
       else
         return @unmet_requirements if @unmet_requirements
       end
-      result = requirements.uniq.inject([]) do |unmet, requirement|
-        next if fail_fast && !unmet.empty?
+      result = [requirements].flatten.uniq.inject([]) do |unmet, requirement|
         unmet << requirement unless evaluate(requirement)
+        break(unmet) if fail_fast && !unmet.empty?
         unmet
       end
-      @unmet_requirements = result if (!fail_fast || unmet_requirements.length != 1)
+      raise self.inspect if result.nil?
+      # don't cache result if it might 
+      @unmet_requirements = result unless (fail_fast && unmet_requirements.length != 0)
       result
     end
     
@@ -103,25 +116,23 @@ module StateFu
 
     def unmet_requirement_messages(revalidate=false, fail_fast=false) # TODO
       unmet_requirements(revalidate, fail_fast).map do |requirement|
-        evaluate_requirement_message requirement 
+        evaluate_requirement_message(requirement, revalidate)
       end.extend MessageArray
     end
     alias_method :error_messages, :unmet_requirement_messages
-    
+
+    # return a hash of requirement_name => evaluated message
     def requirement_errors(revalidate=false, fail_fast=false)
       unmet_requirements(revalidate, fail_fast).
         map { |requirement| [requirement, evaluate_requirement_message(requirement)]}.
         to_h
     end
-
-    def first_unmet_requirement(revalidate=false)
-      unmet_requirements(revalidate, fail_fast=true)[0]
-    end
-
+    
     def first_unmet_requirement_message(revalidate=false)
-      unmet_requirement_messages(revalidate, fail_fast=true)[0]
+      evaluate_requirement_message(first_unmet_requirement(revalidate), revalidate)
     end
 
+    # raise a RequirementError unless all requirements are met.
     def check_requirements!(revalidate=false, fail_fast=true) # TODO
       raise RequirementError.new( self, unmet_requirement_messages.inspect ) unless requirements_met?(revalidate, fail_fast)
     end
@@ -129,7 +140,6 @@ module StateFu
     def requirements_met?(revalidate=false, fail_fast=false) # TODO
       unmet_requirements(revalidate, fail_fast).empty?
     end
-    alias_method :valid?, :requirements_met?
     
     #
     # Hooks
@@ -290,20 +300,22 @@ module StateFu
       executioner.evaluate(method_name_or_proc)
     end
 
-    def evaluate_requirement_message( name )
-      msg = machine.requirement_messages[name]
-      case msg
-      when String
-        msg
-      when nil
-        name
-      when Symbol, Proc
-        evaluate msg 
-      else
-        raise msg.class.to_s
-      end
+    def evaluate_requirement_message( name, revalidate=false)
+      @requirement_messages ||= {}
+      name   = name.to_sym
+      return @requirement_messages[name] if @requirement_messages[name] && !revalidate      
+      msg    = machine.requirement_messages[name.to_sym]
+      result =  case msg
+                when String
+                  msg
+                when Symbol, Proc
+                  evaluate msg 
+                else
+                  name
+                end
+      @requirement_messages[name] = result    
     end
-
+    
     def find_event_target( evt, tgt )
       case tgt
       when StateFu::State

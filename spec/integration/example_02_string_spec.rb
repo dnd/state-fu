@@ -28,7 +28,7 @@ describe String do
         klone = clone
         begin
           klone.shell.escape!
-        rescue StateFu::InvalidTransition
+        rescue StateFu::IllegalTransition
         end
         klone
       end
@@ -55,11 +55,11 @@ describe String do
     @str.should be_clean
   end
 
-  it "should raise an InvalidTransition if shell.escape! is called more than once" do
+  it "should raise an IllegalTransition if shell.escape! is called more than once" do
     @str.shell.escape!
     @str.shell.state_name.should == :clean
 
-    lambda { @str.shell.escape! }.should raise_error( StateFu::InvalidTransition )
+    lambda { @str.shell.escape! }.should raise_error( StateFu::IllegalTransition )
   end
 
   it "should modify the string when shell.escape is called" do

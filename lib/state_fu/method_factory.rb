@@ -6,63 +6,103 @@ module StateFu
   # complex events will be called as: event_name! :state, *args
   
   class MethodFactory
-
+    attr_accessor :method_definitions
+    attr_reader   :binding
+    
     # An instance of MethodFactory is created to define methods on a specific StateFu::Binding, and
-    # the object it is bound to.
-    #
-    # During the initializer, it will call define_event_methods_on(the binding), which installs
-    #
+    # on the object it is bound to.
+    
     def initialize( _binding )
-      # store @binding in a local variable so it's accessible within
-      # the closures below (for define_singleton_method ).
+      @binding                      = _binding  
+      simple_events, complex_events = @binding.machine.events.partition(&:simple?)
+      @method_definitions           = {}
+      
+      # simple event methods
+      # all arguments are passed into the transition / transition query
+      
+      simple_events.each do |event|
+        method_definitions["#{event.name}"]      = lambda do |*args| 
+          _binding.find_transition(event, event.target, *args) 
+        end
+        
+        method_definitions["can_#{event.name}?"] = lambda do |*args|
+          _binding.can_transition?(event, event.target, *args)
+        end
 
-      # i.e, we're embedding a reference to @binding inside the method
-      @binding = _binding      
-      @defs    = {}
+        method_definitions["#{event.name}!"]     = lambda do |*args|
+          _binding.fire_transition!(event, event.target, *args)
+        end
+      end
 
-      @binding.machine.states.each do |state|
-        @defs[:"#{state.name}?"] = lambda { _binding.current_state.name == state.name }
+      # complex event methods
+      # the first argument is the target state
+      # any remaining arguments are passed into the transition / transition query
+
+      # object.event_name [:target], *arguments
+      #
+      # returns a new transition. Will raise an IllegalTransition if 
+      # it is not given arguments which result in a valid combination
+      # of event and target state being deducted.
+      #
+      # object.event_name [nil] suffices if the event has only one valid 
+      # target (ie only one transition which would not raise a 
+      # RequirementError if fired) 
+      
+      # object.event_name! [:target], *arguments
+      #
+      # as per the method above, except that it also fires the event
+
+      # object.can_event_name? [:target], *arguments
+      #
+      # tests that calling event_name or event_name! would not raise an error
+      # ie, the transition is legal and is valid with the arguments supplied
+      
+      complex_events.each do |event|
+        method_definitions["#{event.name}"]      = lambda do |target, *args|
+          _binding.find_transition(event, target, *args) 
+        end
+        
+        method_definitions["can_#{event.name}?"] = lambda do |target, *args|
+          begin 
+            t = _binding.find_transition(event, target, *args) 
+            t.valid?
+          rescue IllegalTransition
+            false
+          end
+        end
+
+        method_definitions["#{event.name}!"]     = lambda do |target, *args|
+          _binding.fire_transition!(event, target, *args)
+        end
       end
       
-      # method definitions for simple events (only one possible target)
-      @binding.machine.events.each do |event|
-        @defs[event.name]           = lambda \
-        {|*args| _binding._event_method :get_transition,   event, args.shift, *args }
-        @defs[:"can_#{event.name}?"] = lambda \
-          {|*args| _binding._event_method :query_transition, event, args.shift, *args }
-        @defs[:"#{event.name}!"]     = lambda \
-          {|*args| _binding._event_method :fire_transition,  event, args.shift, *args }
-        
-        #if !event.targets.blank? # && event.targets.length > 1
-        event.targets.each do |target_state|
-          method_name = "#{event.name}_to_#{target_state.name}"
+      # methods dedicated to a combination of event and target
+      # all arguments are passed into the transition / transition query
+      
+      (simple_events + complex_events).each do |event|
+        event.targets.each do |target|
+          method_definitions["#{event.name}_to_#{target.name}"]      = lambda do |*args| 
+            _binding.find_transition(event, target, *args) 
+          end
 
-          # object.event_name [:target], *arguments
-          #
-          # returns a new transition. Will raise an InvalidTransition if 
-          # it is not given arguments which result in a valid combination
-          # of event and target state being deducted.
-          #
-          # object.event_name suffices without any arguments if the event 
-          # has only one possible target, or only one valid target for 
-          
-          # object.event_name! [:target], *arguments
-          #
-          # as per the method above, except that it also
-          
-          @defs[method_name.to_sym]     = lambda \
-            {|*args| _binding._event_method :get_transition,   event, target_state, *args }
-            
-          # object.event_name! [:]
-          @defs[:"can_#{method_name}?"] = lambda \
-            {|*args| _binding._event_method :query_transition, event, target_state, *args }
-            
-          @defs[:"#{method_name}!"]     = lambda \
-            {|*args| _binding._event_method :fire_transition,  event, target_state, *args }          
-            
+          method_definitions["can_#{event.name}_to_#{target.name}?"] = lambda do |*args|
+            _binding.can_transition?(event, target, *args)
+          end
+
+          method_definitions["#{event.name}_to_#{target.name}!"]     = lambda do |*args|
+            _binding.fire_transition!(event, target, *args)
+          end          
         end unless event.targets.nil?
-      end    
-    end
+      end
+      
+      @binding.machine.states.each do |state|
+        method_definitions["#{state.name}?"] = lambda do 
+         _binding.current_state == state
+        end
+      end
+      
+    end 
+          
 
     #
     # Class Methods
@@ -163,7 +203,7 @@ module StateFu
     # as with simple event methods.
     #
     def define_event_methods_on( obj )
-      @defs.each do |method_name, method_body|
+      method_definitions.each do |method_name, method_body|
         define_singleton_method( obj, method_name, &method_body)
       end
     end # define_event_methods_on
@@ -196,7 +236,7 @@ module StateFu
       end
     end
     alias_method :define_singleton_method, :define_singleton_method
-
+    
   end # class MethodFactory
 end # module StateFu
 

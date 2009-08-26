@@ -90,7 +90,7 @@ describe "Transition requirement reflection" do
       end # unmet requirements
 
       describe "given transition.unmet_requirement_messages" do
-        it "should return a list of nils" do
+        it "should return a list of symbols" do
           @obj.state_fu.catch_plane(:america).unmet_requirement_messages.should ==
             [:papers_in_order?, :money_for_bribe?, :no_turban?, :us_visa?, :no_arrest_warrant?]
         end

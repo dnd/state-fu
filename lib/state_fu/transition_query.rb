@@ -1,5 +1,5 @@
 module StateFu
-  class TransitionQuery #< Array
+  class TransitionQuery
     attr_accessor :binding, :options, :result, :args, :block
 
     def initialize(binding, options={})
@@ -23,19 +23,45 @@ module StateFu
     end
             
     #
-    #
+    # 
     #
     
-    def find( event_or_array )
-      event, target = parse_destination(event_or_array)
+    # same as find, except that if there is more than one target for the event
+    # and only one is valid, it will return that one.
+    # def search(destination=nil, &block)
+    #   # use the prepared event & target if none are supplied
+    #   event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
+    #   query         = for_event(event).to(target)
+    #   query.find || query.valid.singular || NilTransition.new
+    # end
+
+    # find a transition by event and optionally (optional if it can be inferred) target.
+    def find(destination=nil, &block)
+      # use the prepared event & target if none are supplied
+      event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
       _args, _block = @args, @block
-      returning binding.new_transition(event, target) do |t|
-        t.apply!(&_block) if _block
+      returning binding.new_transition(event, target) do |transition|
+        # return NilTransition.new if transition.nil?
+        transition.apply!(&_block) if _block
         if _args
-          t.args = _args 
+          transition.args = _args 
         end
       end        
     end
+    
+    # def legal?(destination=nil, &block)
+    #   # use the prepared event & target if none are supplied
+    #   event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
+    #   begin
+    #     !!search(destination, &block)
+    #   rescue IllegalTransition
+    #     false
+    #   end
+    # end
+
+    #
+    #
+    #     
     
     def cyclic
       @options.merge! :cyclic => true
@@ -63,7 +89,7 @@ module StateFu
       self
     end
 
-    def for event
+    def for_event event
       @options.merge! :event => event
       self
     end
@@ -77,8 +103,13 @@ module StateFu
     #
     #
     
-    def singular
+    def only_one
       result.first if result.length == 1
+    end
+    alias_method :singular, :only_one
+
+    def only_one?
+      !!singular
     end
 
     def next
@@ -118,7 +149,7 @@ module StateFu
 
     def with(*args, &block)
       @args  = args
-      @block = block
+      @block = block if block_given?
       self
     end
     
@@ -196,17 +227,19 @@ module StateFu
     # takes a single, simple (one target only) event,
     # or an array of [event, target],
     # or one of the above with symbols in place of the objects themselves.    
-    def parse_destination(event_or_array)
-      case event_or_array
-      when Event, Symbol
-        event  = event_or_array
-        target = nil
-      when Array
-        event, target = *event_or_array
+    def parse_destination(destination)
+      event, target = destination
+
+      unless event.is_a?(Event)
+        event = binding.machine.events[event]
       end
+      
+      unless target.is_a?(State)
+        target = binding.machine.states[target] rescue nil
+      end
+        
       raise ArgumentError.new( [event,target].inspect ) unless
-        [Event, Symbol].include?(event.class) &&
-        [State, Symbol, NilClass].include?(target.class)
+        [[Event, State],[Event, NilClass]].include?( [event,target].map(&:class) )
       [event, target]
     end # parse_destination
 
