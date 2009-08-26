@@ -204,13 +204,13 @@ module StateFu
 
     # display something sensible that doesn't take up the whole screen
     def inspect
-      '|<= ' + self.class.to_s + ' ' +
+      '<#' + self.class.to_s + ' ' +
         attrs = [[:current_state, state_name.inspect],
                  [:object_type , @object.class],
                  [:method_name , method_name.inspect],
                  [:field_name  , field_name.inspect],
-                 [:machine     , machine.inspect]].
-        map {|x| x.join('=') }.join( " " ) + ' =>|'
+                 [:machine     , machine.to_s]].
+        map {|x| x.join('=') }.join( " " ) + '>'
     end
 
     # let's be == (and hence ===) the current_state_name as a symbol.
@@ -241,10 +241,10 @@ module StateFu
     def inspect
       s = self.to_s
       s = s[0,s.length-1]
-      s << " object=#{object.class} of #{object}" 
-      s << " current_state=#{current_state.to_sym rescue nil}" 
+      s << " object=#{object}" 
+      s << " current_state=#{current_state.to_sym.inspect rescue nil}" 
       s << " events=#{events.map(&:to_sym).inspect rescue nil}" 
-      s << " machine=#{machine.inspect}" 
+      s << " machine=#{machine.to_s}" 
       s << ">"
       s
     end
