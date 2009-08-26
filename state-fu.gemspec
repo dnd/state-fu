@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.10.0"
+  s.version = "0.11.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
-  s.date = %q{2009-08-25}
+  s.date = %q{2009-08-26}
   s.description = %q{A rich library for state-oriented programming with state machines / workflows}
   s.email = %q{david@rubyist.net.au}
   s.extra_rdoc_files = [
@@ -52,6 +52,7 @@ Gem::Specification.new do |s|
      "lib/state_fu/machine.rb",
      "lib/state_fu/method_factory.rb",
      "lib/state_fu/methodical.rb",
+     "lib/state_fu/nil_transition.rb",
      "lib/state_fu/persistence.rb",
      "lib/state_fu/persistence/active_record.rb",
      "lib/state_fu/persistence/attribute.rb",
@@ -71,6 +72,7 @@ Gem::Specification.new do |s|
      "spec/features/method_missing_only_once_spec.rb",
      "spec/features/not_requirements_spec.rb",
      "spec/features/plotter_spec.rb",
+     "spec/features/sensible_magic_method_signatures_spec.rb",
      "spec/features/shared_log_spec.rb",
      "spec/features/singleton_machine_spec.rb",
      "spec/features/state_and_array_options_accessor_spec.rb",
@@ -113,6 +115,7 @@ Gem::Specification.new do |s|
      "spec/features/method_missing_only_once_spec.rb",
      "spec/features/not_requirements_spec.rb",
      "spec/features/plotter_spec.rb",
+     "spec/features/sensible_magic_method_signatures_spec.rb",
      "spec/features/shared_log_spec.rb",
      "spec/features/singleton_machine_spec.rb",
      "spec/features/state_and_array_options_accessor_spec.rb",
