@@ -4,7 +4,7 @@ thisdir = File.expand_path(File.dirname(__FILE__))
 # ensure we require state-fu from lib, not gems
 $LOAD_PATH.unshift( "#{thisdir}/../lib" )
 require 'state-fu'
-require 'no_stdout'
+require 'support/no_stdout'
 require 'fileutils'
 require 'rubygems'
 require 'spec'
