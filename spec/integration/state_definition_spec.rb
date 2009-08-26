@@ -161,23 +161,3 @@ describe "Adding states to a Machine" do
   end
 end
 
-describe "adding events inside a state block" do
-  before do
-    @lambda = lambda{ Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}}
-  end
-
-  it "should not throw an error" do
-    @lambda.should_not raise_error
-  end
-
-  describe "Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}}" do
-    before() do
-      Klass.state_fu_machine(){ state(:egg){ event(:hatch, :to => :chick) }}
-    end
-    it "should add an event :hatch to the machine" do
-    end
-  end
-end
-
-
-
