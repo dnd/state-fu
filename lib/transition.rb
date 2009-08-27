@@ -256,6 +256,10 @@ module StateFu
     alias_method :original_state, :origin
     alias_method :initial_state,  :origin
     alias_method :from,           :origin
+    
+    def cycle?
+      origin == target
+    end
 
     # an accepted transition == true
     # an unaccepted transition == false

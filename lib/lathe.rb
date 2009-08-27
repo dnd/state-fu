@@ -531,7 +531,7 @@ module StateFu
             end
       args.map do |name|
         self.send type, name, options.dup, &block
-      end.extend mod
+      end.extend(mod)
     end
 
   end

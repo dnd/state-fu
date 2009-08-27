@@ -873,5 +873,76 @@ describe "sitting at a poker machine" do
   end
 end
 
+describe "Chameleon" do
+  
+  before do
+    make_pristine_class('Chameleon') do
+      
+      machine :location do
+        initial_state :outside
+        
+        event :go_outside, :from => {:inside => :outside}
+        event :go_inside,  :from => {:outside => :inside}
+      end 
+      
+      machine :skin do
+        initial_state :green
+        
+        states :plaid, :paisley, :tartan, :location => :indoors
+        states :bark, :pebbles, :foliage, :location => :outdoors
+        
+        define :change_according_to_surroundings? do |transition|
+          if transition.cycle?
+            false
+          else
+            case transition.target[:location]
+            when :indoors
+              inside?
+            when :outdoors
+              outside?
+            else
+              true
+            end
+          end
+        end
+        
+        event :camoflage, :from => states.all, :to => states.all do
+          requires :change_according_to_surroundings?, :message => lambda { |t| "It's no good looking like #{t.target.name} when you're #{t.object.location.current_state_name}!"}
+        end
+        
+      end
+    end # Chameleon
+  end # before    
+  
+  describe "changing its skin" do
+    before do
+      @chameleon = Chameleon.new
+    end
+    
+    it "should change its skin according to its surroundings" do
+      @chameleon.current_state(:location).should == :outside
+      @chameleon.current_state(:skin).should     == :green
+
+      @chameleon.outside?.should == true
+      
+      @chameleon.skin.valid_transitions.targets.names.should == [:bark, :pebbles, :foliage]
+      @chameleon.camoflage!(:bark)
+      @chameleon.skin.should == :bark
+      
+      @chameleon.go_inside!
+      @chameleon.skin.valid_transitions.targets.names.should == [:green, :plaid, :paisley, :tartan]
+      
+      @chameleon.camoflage!(:tartan)
+      @chameleon.skin.should == :tartan
+
+      @chameleon.camoflage!(:green)
+      @chameleon.skin.should == :green
+      
+      lambda { @chameleon.camoflage!(:bark) }.should raise_error(StateFu::RequirementError)
+      @chameleon.camoflage(:bark).error_messages.should == ["It's no good looking like bark when you're inside!"]      
+    end
+    
+  end
+end
 
 

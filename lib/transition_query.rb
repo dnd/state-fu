@@ -127,11 +127,11 @@ module StateFu
     end
     
     def events
-      map {|t| t.event }
+      map {|t| t.event }.extend EventArray
     end
 
     def targets
-      map {|t| t.target }
+      map {|t| t.target }.extend StateArray
     end
 
     private

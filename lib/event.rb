@@ -65,7 +65,7 @@ module StateFu
     end
     
     def cycle?
-      origin && origin == target
+      origin && (origin == target)
     end
 
     # *adds to* the origin states given a list of symbols / States
