@@ -16,9 +16,6 @@
 #
 # It is also delightfully elegant and easy to use for simple things.
 
-
-require 'rubygems'
-
 [ 'support/core_ext',
   'support/logger',
   'support/applicable',

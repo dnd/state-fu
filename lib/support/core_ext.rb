@@ -1,5 +1,3 @@
-require 'rubygems'
-
 # if ActiveSupport is absent, install a very small subset of it for
 # some convenience methods
 unless Object.const_defined?('ActiveSupport')  #:nodoc
