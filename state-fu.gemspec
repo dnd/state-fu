@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.11.1"
+  s.version = "0.12.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
-  s.date = %q{2009-08-26}
+  s.date = %q{2009-09-26}
   s.description = %q{A rich library for state-oriented programming with state machines / workflows}
   s.email = %q{david@rubyist.net.au}
   s.extra_rdoc_files = [
@@ -67,6 +67,7 @@ Gem::Specification.new do |s|
      "lib/transition_query.rb",
      "spec/custom_formatter.rb",
      "spec/features/binding_and_transition_helper_mixin_spec.rb",
+     "spec/features/machine_alias_spec.rb",
      "spec/features/method_missing_only_once_spec.rb",
      "spec/features/not_requirements_spec.rb",
      "spec/features/plotter_spec.rb",
@@ -74,6 +75,7 @@ Gem::Specification.new do |s|
      "spec/features/singleton_machine_spec.rb",
      "spec/features/state_and_array_options_accessor_spec.rb",
      "spec/features/transition_boolean_comparison_spec.rb",
+     "spec/features/when_methods_are_defined_spec.rb",
      "spec/helper.rb",
      "spec/integration/active_record_persistence_spec.rb",
      "spec/integration/binding_extension_spec.rb",
@@ -109,6 +111,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/custom_formatter.rb",
      "spec/features/binding_and_transition_helper_mixin_spec.rb",
+     "spec/features/machine_alias_spec.rb",
      "spec/features/method_missing_only_once_spec.rb",
      "spec/features/not_requirements_spec.rb",
      "spec/features/plotter_spec.rb",
@@ -116,6 +119,7 @@ Gem::Specification.new do |s|
      "spec/features/singleton_machine_spec.rb",
      "spec/features/state_and_array_options_accessor_spec.rb",
      "spec/features/transition_boolean_comparison_spec.rb",
+     "spec/features/when_methods_are_defined_spec.rb",
      "spec/helper.rb",
      "spec/integration/active_record_persistence_spec.rb",
      "spec/integration/binding_extension_spec.rb",
