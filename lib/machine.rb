@@ -4,7 +4,7 @@ module StateFu
     def self.BINDINGS
       @@_bindings ||= {}
     end
-
+    
     include Applicable
     include HasOptions
     
@@ -17,10 +17,9 @@ module StateFu
     def self.for_class(klass, name, options={}, &block)
       options.symbolize_keys!
       name = name.to_sym
-
       unless machine = klass.state_fu_machines[ name ]
         machine = new(options)
-        machine.bind! klass, name, options[:field_name] 
+        machine.bind! klass, name, options
       end
       if block_given?
         machine.apply! &block 
@@ -30,26 +29,36 @@ module StateFu
 
     # make it so that a class which has included StateFu has a binding to
     # this machine
-    def self.bind!( machine, owner, name, field_name)
+    def self.bind!(machine, owner, name, options={})      
       name = name.to_sym
+      options[:define_methods] = (name == DEFAULT) unless options.symbolize_keys!.has_key?(:define_methods)
+      options[:field_name] ||= Persistence.default_field_name(name)
+      options[:singleton] = true unless owner.is_a?(Class)
       # define an accessor method with the given name
-      if owner.class == Class
-        owner.state_fu_machines[name]    = machine
-        owner.state_fu_field_names[name] = field_name
+      if options[:singleton]
+        _binding = StateFu::Binding.new machine, owner, name, options
+        MethodFactory.define_singleton_method(owner, name) { _binding }
+        if alias_name = options[:alias] || options[:as]
+          MethodFactory.define_singleton_method(owner, alias_name) { _binding }
+        end      
+      else
+        owner.state_fu_machines[name] = machine
+        owner.state_fu_options[name]  = options
         # method_missing to catch NoMethodError for event methods, etc
-        StateFu::MethodFactory.define_once_only_method_missing( owner )
-        unless owner.respond_to?(name)
+        StateFu::MethodFactory.define_once_only_method_missing owner 
+        unless owner.respond_to? name          
           owner.class_eval do
             define_method name do
-              state_fu( name )
+              state_fu name
+            end
+            # allow aliases to be set up, e.g. machine(:as => :status)
+            if alias_name = options[:alias] || options[:as]
+              alias_method alias_name, name
             end
           end
         end
         # prepare the persistence field
-        StateFu::Persistence.prepare_field owner, field_name 
-      else
-        _binding = StateFu::Binding.new machine, owner, name, :field_name => field_name, :singleton => true 
-        MethodFactory.define_singleton_method(owner, name) { _binding }
+        StateFu::Persistence.prepare_field owner, options[:field_name]
       end
     end
 
@@ -116,9 +125,8 @@ module StateFu
 
     # make it so a class which has included StateFu has a binding to
     # this machine
-    def bind!( owner, name= DEFAULT, field_name = nil )
-      field_name ||= Persistence.default_field_name( name )
-      self.class.bind!(self, owner, name, field_name)
+    def bind!(owner, name=DEFAULT, options={})
+      self.class.bind!(self, owner, name, options)
     end
 
     def empty?

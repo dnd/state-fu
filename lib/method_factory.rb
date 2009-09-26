@@ -7,14 +7,15 @@ module StateFu
   
   class MethodFactory
     attr_accessor :method_definitions
-    attr_reader   :binding
-    
+    attr_reader   :binding, :machine
+
     # An instance of MethodFactory is created to define methods on a specific StateFu::Binding, and
     # on the object it is bound to.
     
-    def initialize( _binding )
-      @binding                      = _binding  
-      simple_events, complex_events = @binding.machine.events.partition(&:simple?)
+    def initialize(_binding)
+      @binding                      = _binding
+      @machine                      = binding.machine
+      simple_events, complex_events = machine.events.partition &:simple?
       @method_definitions           = {}
       
       # simple event methods
@@ -95,7 +96,7 @@ module StateFu
         end unless event.targets.nil?
       end
       
-      @binding.machine.states.each do |state|
+      machine.states.each do |state|
         method_definitions["#{state.name}?"] = lambda do 
          _binding.current_state == state
         end
@@ -114,9 +115,9 @@ module StateFu
     # Note this happens when a machine is first bound to the class,
     # not when StateFu is included.
 
-    def self.prepare_class( klass )
+    def self.prepare_class(klass)
       raise caller.inspect
-      self.define_once_only_method_missing( klass )
+      self.define_once_only_method_missing(klass)
     end # prepare_class
 
     # When triggered, method_missing will first call state_fu!,
@@ -137,7 +138,7 @@ module StateFu
     # or thoroughly understand what's happening in
     # MethodFactory#define_once_only_method_missing.
 
-    def self.define_once_only_method_missing( klass )
+    def self.define_once_only_method_missing(klass)
       raise ArgumentError.new(klass.to_s) unless klass.is_a?(Class)      
       
       klass.class_eval do                
@@ -160,14 +161,14 @@ module StateFu
           end
         
           # call the newly defined method, or the original method_missing
-          if respond_to?(method_name, true) 
+          if respond_to? method_name, true
             # it was defined by calling state_fu!, which instantiated bindings
             # for its state machines, which defined singleton methods for its
             # states & events when it was constructed.
-            __send__( method_name, *args, &block )
+            __send__ method_name, *args, &block
           else 
             # call the original method_missing (method_missing_before_state_fu)
-            method_missing( method_name, *args, &block )
+            method_missing method_name, *args, &block
           end
         end # method_missing
       end # class_eval
@@ -177,8 +178,8 @@ module StateFu
     # object.  Any existing methods will not be tampered with, but a
     # warning will be issued in the logs if any methods cannot be defined.
     def install!
-      define_event_methods_on( @binding )
-      define_event_methods_on( @binding.object )
+      define_event_methods_on @binding       
+      define_event_methods_on @binding.object if @binding.options[:define_methods]
     end
 
     #
@@ -202,13 +203,13 @@ module StateFu
     # itself.  The remaining arguments are passed into the transition,
     # as with simple event methods.
     #
-    def define_event_methods_on( obj )
+    def define_event_methods_on(obj)
       method_definitions.each do |method_name, method_body|
-        define_singleton_method( obj, method_name, &method_body)
+        define_singleton_method obj, method_name, &method_body
       end
     end # define_event_methods_on
 
-    def define_singleton_method( object, method_name, &block )
+    def define_singleton_method(object, method_name, &block)
       MethodFactory.define_singleton_method object, method_name, &block
     end
 
@@ -221,8 +222,8 @@ module StateFu
     #
     # existing methods will never be overwritten.
 
-    def self.define_singleton_method( object, method_name, options={}, &block )
-      if object.respond_to?(method_name, true) 
+    def self.define_singleton_method(object, method_name, options={}, &block)
+      if object.respond_to? method_name, true
         msg = !options[:force]
         Logger.info "Existing method #{method(method_name) rescue [method_name].inspect} "\
           "for #{object.class} #{object} "\
@@ -231,7 +232,7 @@ module StateFu
       else
         metaclass = class << object; self; end
         metaclass.class_eval do
-          define_method( method_name, &block )
+          define_method method_name, &block
         end
       end
     end

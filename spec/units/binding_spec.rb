@@ -18,12 +18,6 @@ describe StateFu::Binding do
   #
   #
 
-
-
-  #
-  #
-  #
-
   before do
     reset!
     make_pristine_class('Klass')
@@ -33,8 +27,10 @@ describe StateFu::Binding do
 
   describe "constructor" do
     before do
-      mock(Klass).state_fu_field_names.at_most(1) do
-        { :example => :example_field }
+      mock(Klass).state_fu_options.at_most(2) do
+        { 
+          :example => {:field_name => :example_field} 
+        }
       end
     end
 
@@ -50,7 +46,7 @@ describe StateFu::Binding do
       b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example,
                                 :colour => :red,
                                 :style  => [:robust, :fruity] )
-      b.options.should == { :colour => :red, :style  => [:robust, :fruity] }
+      b.options.should == { :colour => :red, :style  => [:robust, :fruity], :field_name => :example_field }
     end
 
     describe "persister initialization" do
@@ -63,10 +59,12 @@ describe StateFu::Binding do
       end
 
       describe "when StateFu::Persistence.active_record_column? is true" do
+        
         before do
           mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(1) { true }
           mock( Klass ).before_create( :state_fu!) { }
         end
+        
         it "should get an ActiveRecord persister" do
           mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
           b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )

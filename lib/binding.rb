@@ -3,13 +3,12 @@ module StateFu
 
     attr_reader :object, :machine, :method_name, :field_name, :persister, :transitions, :options, :target
 
-
     # the constructor should not be called manually; a binding is
     # returned when an instance of a class with a StateFu::Machine
     # calls:
     #
     # instance.#state_fu (for the default machine which is called :state_fu),
-    # instance.#state_fu( :<machine_name> ) ,or
+    # instance.#state_fu(:<machine_name>) ,or
     # instance.#<machine_name>
     #
     def initialize( machine, object, method_name, options={} )
@@ -18,13 +17,18 @@ module StateFu
       @method_name   = method_name
       @transitions   = []
       @options       = options.symbolize_keys!
-      @target        = singleton? ? object : object.class
-      @field_name    = options[:field_name] || @target.state_fu_field_names[method_name]
-      @persister     = Persistence.for( self )
+      if options[:singleton]
+        @target      = object
+      else 
+        @target      = object.class
+        @options     = @target.state_fu_options[@method_name].merge(options)
+      end 
+      @field_name    = @options[:field_name] || raise("No field_name supplied in #{@options.inspect}")      
+      @persister     = Persistence.for self
 
       # define event methods on this binding and its @object
-      MethodFactory.new( self ).install!
-      @machine.helpers.inject_into( self )
+      MethodFactory.new(self).install!
+      @machine.helpers.inject_into self 
     end
 
     alias_method :o,             :object

@@ -2,21 +2,19 @@ module StateFu
   module Interface
     module SoftAlias
 
-      # define aliases that won't clobber existing methods - 
-      # so we can be liberal with them.
-      def soft_alias(x)
-        aliases  = [ x.to_a[0] ].flatten
-        original = aliases.shift
+      def soft_alias(hash)
         existing_method_names = (self.instance_methods | self.protected_instance_methods | self.private_instance_methods).map(&:to_sym)
-        taken, ok = aliases.partition { |a| existing_method_names.include?(a.to_sym) }
-        StateFu::Logger.debug("#{self.to_s} alias for ## #{original} already taken: #{taken.inspect}")  unless taken.empty?
-        ok.each { |a| alias_method a, original}
-      end
-      
+        hash.each do |original, aliases|
+          aliases.
+            reject { |a| existing_method_names.include?(a.to_sym) }.
+            each { |a| alias_method a, original}
+        end
+      end      
     end
 
     module Aliases
-
+      # define aliases that won't clobber existing methods - 
+      # so we can be liberal with them.
       def self.extended(base)
         base.extend SoftAlias
         base.class_eval do
@@ -70,8 +68,8 @@ module StateFu
       end
       alias_method :machine, :state_fu_machine
 
-      def state_fu_field_names
-        @_state_fu_field_names ||= {}
+      def state_fu_options
+        @_state_fu_options ||= {}
       end
 
       def state_fu_machines
@@ -97,7 +95,7 @@ module StateFu
       # can access a StateFu::Machine, the object's current state, the
       # methods which trigger event transitions, etc.
 
-      def state_fu_binding( name = DEFAULT )
+      def state_fu_binding(name = DEFAULT)
         name = name.to_sym 
         if machine = self.class.state_fu_machines[name]
           state_fu_bindings[name] ||= StateFu::Binding.new( machine, self, name )

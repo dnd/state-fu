@@ -20,22 +20,19 @@ describe StateFu::Machine do
         before do
           reset!
           make_pristine_class 'Klass'
-  #        mock( Klass ).machines() { {} }
         end
 
         it "should create a new machine and bind! it" do
           @machine = Object.new
-          mock( @machine ).bind!( Klass, :moose, nil )
-          mock( StateFu::Machine ).new( {} ) { @machine }
-          StateFu::Machine.for_class( Klass, :moose )
+          mock(@machine).bind!(Klass, :moose, {})
+          mock(StateFu::Machine).new({}) { @machine }
+          StateFu::Machine.for_class Klass, :moose
         end
 
         it "should apply the block (via lathe) if one is given" do
-          @m = StateFu::Machine.for_class( Klass, :snoo ) do
+          @m = StateFu::Machine.for_class Klass, :snoo do
             state :porpoise
           end
-#          mock( Klass ).machines() { {} }
- #         @m.states.map(&:name).should == [:porpoise]
         end
       end
 
@@ -85,7 +82,7 @@ describe StateFu::Machine do
         name       = :StinkJuice
         field_name = 'stink_juice_field'
         @m.bind!( Klass, name )
-        Klass.state_fu_field_names[name].should == 'stink_juice_field'
+        Klass.state_fu_options[name][:field_name].should == 'stink_juice_field'
       end
     end
 

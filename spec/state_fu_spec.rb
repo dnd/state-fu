@@ -885,7 +885,23 @@ describe "Chameleon" do
         event :go_inside,  :from => {:outside => :inside}
       end 
       
-      machine :skin do
+      # With :define_methods => true, we can create methods for the :skin
+      # machine directly on our Chameleon, so we can type e.g. 
+      #        
+      # @chameleon.comoflage! :bark
+      # instead of:
+      # @chameleon.skin.camoflage! :bark
+      #
+      # This is the usual behaviour for the default machine, but not for any
+      # machine given an explicit name. Otherwise, it would cause confusion
+      # when (like the PokerMachine example) multiple machines would compete
+      # for the same methods.
+      #
+      # Hint for the masochistic: state / event methods will never overwrite a
+      # pre-existing method, so in the event of overlap, the first machine
+      # defined will take precedence.
+      
+      machine :skin, :define_methods => true do
         initial_state :green
         
         states :plaid, :paisley, :tartan, :location => :indoors
@@ -897,9 +913,9 @@ describe "Chameleon" do
           else
             case transition.target[:location]
             when :indoors
-              inside?
+              location.inside?
             when :outdoors
-              outside?
+              location.outside?
             else
               true
             end
@@ -923,13 +939,13 @@ describe "Chameleon" do
       @chameleon.current_state(:location).should == :outside
       @chameleon.current_state(:skin).should     == :green
 
-      @chameleon.outside?.should == true
+      @chameleon.location.outside?.should == true
       
       @chameleon.skin.valid_transitions.targets.names.should == [:bark, :pebbles, :foliage]
       @chameleon.camoflage!(:bark)
       @chameleon.skin.should == :bark
       
-      @chameleon.go_inside!
+      @chameleon.location.go_inside!
       @chameleon.skin.valid_transitions.targets.names.should == [:green, :plaid, :paisley, :tartan]
       
       @chameleon.camoflage!(:tartan)
@@ -943,6 +959,7 @@ describe "Chameleon" do
     end
     
   end
+    
 end
 
 

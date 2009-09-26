@@ -39,7 +39,7 @@ module StateFu
     end
 
     # returns the appropriate persister class for the given class & field name.
-    def self.class_for( klass, field_name )
+    def self.class_for(klass, field_name)
       raise ArgumentError if [klass, field_name].any?(&:nil?)
       @@class_for[klass] ||= {}
       @@class_for[klass][field_name] ||=
@@ -52,7 +52,7 @@ module StateFu
         end
     end
 
-    def self.for_class( klass, binding, field_name )
+    def self.for_class(klass, binding, field_name)
       persister_class = class_for klass, field_name
       prepare_field( klass, field_name, persister_class)
       returning persister_class.new( binding, field_name ) do |persister|
@@ -60,7 +60,7 @@ module StateFu
       end
     end
 
-    def self.for_instance( binding, field_name )
+    def self.for_instance(binding, field_name)
       metaclass = class << binding.object; self; end
       for_class( metaclass, binding, field_name )
     end
@@ -69,7 +69,7 @@ module StateFu
     # also ensures the persister class method :prepare_field has been called
     # once for the given class & field name so the field can be set up; eg an
     # attr_accessor or a before_save hook defined
-    def self.for( binding )
+    def self.for(binding)
       field_name = binding.field_name.to_sym
       if binding.singleton?
         for_instance( binding, field_name )
@@ -95,21 +95,21 @@ module StateFu
     # checks to see if the field_name for persistence is a
     # RelaxDB attribute.
     # Safe to use (skipped) if RelaxDB is not included.
-    def self.relaxdb_document_property?( klass, field_name )
+    def self.relaxdb_document_property?(klass, field_name)
       Object.const_defined?('RelaxDB') &&
         klass.ancestors.include?( ::RelaxDB::Document ) &&
-        klass.properties.map(&:to_s).include?( field_name.to_s )
+        klass.properties.map(&:to_s).include?(field_name.to_s)
     end
 
     # checks to see if the field_name for persistence is an
     # ActiveRecord column.
     # Safe to use (skipped) if ActiveRecord is not included.
-    def self.active_record_column?( klass, field_name )
+    def self.active_record_column?(klass, field_name)
       Object.const_defined?("ActiveRecord") &&
         ::ActiveRecord.const_defined?("Base") &&
-        klass.ancestors.include?( ::ActiveRecord::Base ) &&
+        klass.ancestors.include?(::ActiveRecord::Base) &&
         klass.table_exists? &&
-        klass.columns.map(&:name).include?( field_name.to_s )
+        klass.columns.map(&:name).include?(field_name.to_s)
     end
 
   end
