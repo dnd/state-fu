@@ -46,7 +46,7 @@ describe StateFu::Binding do
       b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example,
                                 :colour => :red,
                                 :style  => [:robust, :fruity] )
-      b.options.should == { :colour => :red, :style  => [:robust, :fruity], :field_name => :example_field }
+      b.options.should == { :colour => :red, :style  => [:robust, :fruity] }
     end
 
     describe "persister initialization" do

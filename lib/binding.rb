@@ -23,7 +23,7 @@ module StateFu
         @target      = object.class
         @options     = @target.state_fu_options[@method_name].merge(options)
       end 
-      @field_name    = @options[:field_name] || raise("No field_name supplied in #{@options.inspect}")      
+      @field_name    = @options.delete(:field_name) || raise("No field_name supplied")      
       @persister     = Persistence.for self
 
       # define event methods on this binding and its @object
