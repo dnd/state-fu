@@ -1,4 +1,3 @@
-
 require 'logger'
 module StateFu
   #
@@ -32,9 +31,9 @@ module StateFu
     @@shared    = false
     @@log_level = nil
 
-    def self.new( logger = $stdout, options={} )
-      self.suppress = false
-      self.logger   = logger, options
+    def self.new( logger=nil, options={} )
+      @@suppress = false
+      set_logger(logger, options)
       self
     end
 
@@ -55,19 +54,19 @@ module StateFu
     end
 
     def self.shared?
-      !! @@shared
+      !!@@shared
     end
 
     def self.prefix
       shared? ? @@prefix : nil
     end
 
-    def self.logger= logger
-      set_logger logger
+    def self.logger= new_logger
+      set_logger new_logger
     end
 
     def self.instance
-      @@logger ||= set_logger(Logger.default_logger)
+      @@logger ||= default_logger
     end
 
     def self.suppress!
@@ -108,7 +107,7 @@ module StateFu
       when Logger.activesupport_logger_available? && ActiveSupport::BufferedLogger
         @@logger = logger
       else
-        raise ArgumentError.new
+        default_logger
       end
       self.shared = !!options.symbolize_keys![:shared]
       if shared?
@@ -123,27 +122,19 @@ module StateFu
 
     private
     
-    def self.get_logger( logr = $stdout )
-      if Object.const_defined?( "RAILS_DEFAULT_LOGGER" )
-        set_logger RAILS_DEFAULT_LOGGER, :shared => true
-      else
-        if Object.const_defined?( 'ActiveSupport' ) && ActiveSupport.const_defined?('BufferedLogger')
-          set_logger( ActiveSupport::BufferedLogger.new( logr ))
-        else
-          set_logger ::Logger.new( logr )
-        end
-      end
-    end
-
     def self.activesupport_logger_available?
       Object.const_defined?( 'ActiveSupport' ) && ActiveSupport.const_defined?('BufferedLogger')
     end
     
-    def self.default_logger
-      if Object.const_defined?( "RAILS_DEFAULT_LOGGER" )
-        RAILS_DEFAULT_LOGGER
-      else
-        $stdout
+    def self.default_logger(target=$stdout)
+      if activesupport_logger_available?
+        if Object.const_defined?("RAILS_DEFAULT_LOGGER")
+          RAILS_DEFAULT_LOGGER
+        else
+          ActiveSupport::BufferedLogger.new(target)
+        end
+      else      
+        ::Logger.new(target)
       end
     end
     
@@ -156,7 +147,7 @@ module StateFu
       when nil
         level
       else
-        raise ArgumentError
+        raise ArgumentError.new(input.inspect)
       end
     end
     
