@@ -180,7 +180,7 @@ It is also delightfully elegant and easy to use for simple things:
                                          # the author requirement prevented the transition
   my_doc.status.name      => :draft      # see? still a draft.
   my_doc.author = "Susan"                # so let's satisfy it ...
-  my_doc.publish!                        # and try again.
+  my_doc.status.publish!                 # and try again.
   "new feed!"                            # aha - our event hook fires!
   my_doc.status.name      => :published  # and the state has been updated.
 
