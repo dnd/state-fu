@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.12.2"
+  s.version = "0.12.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
-  s.date = %q{2009-10-01}
+  s.date = %q{2009-10-08}
   s.description = %q{A rich library for state-oriented programming with state machines / workflows}
   s.email = %q{david@rubyist.net.au}
   s.extra_rdoc_files = [
