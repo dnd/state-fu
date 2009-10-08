@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 begin
-  require File.join(File.dirname(__FILE__), '/state_fu/core_ext' )
+  require File.join(File.dirname(__FILE__), 'core_ext' )
 rescue LoadError
   require 'activesupport'
 end
