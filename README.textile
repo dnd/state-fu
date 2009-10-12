@@ -165,7 +165,7 @@ It is also delightfully elegant and easy to use for simple things:
       # this wants to be last, as it iterates over each state which is
       # already defined.
       states do
-        accepted { object.save! }
+        accepted { save! }
       end
     end
   end
