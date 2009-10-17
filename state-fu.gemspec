@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{state-fu}
-  s.version = "0.12.3"
+  s.version = "0.13.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Lee"]
-  s.date = %q{2009-10-08}
+  s.date = %q{2009-10-17}
   s.description = %q{A rich library for state-oriented programming with state machines / workflows}
   s.email = %q{david@rubyist.net.au}
   s.extra_rdoc_files = [
@@ -65,6 +65,7 @@ Gem::Specification.new do |s|
      "lib/transition.rb",
      "lib/transition_query.rb",
      "spec/custom_formatter.rb",
+     "spec/features/active_record_auto_save_spec.rb",
      "spec/features/binding_and_transition_helper_mixin_spec.rb",
      "spec/features/machine_alias_spec.rb",
      "spec/features/not_requirements_spec.rb",
@@ -108,6 +109,7 @@ Gem::Specification.new do |s|
   s.summary = %q{A rich library for state-oriented programming with state machines / workflows}
   s.test_files = [
     "spec/custom_formatter.rb",
+     "spec/features/active_record_auto_save_spec.rb",
      "spec/features/binding_and_transition_helper_mixin_spec.rb",
      "spec/features/machine_alias_spec.rb",
      "spec/features/not_requirements_spec.rb",
