@@ -10,7 +10,7 @@ module StateFu
     attr_reader   :binding, :machine
 
     # An instance of MethodFactory is created to define methods on a specific StateFu::Binding, and
-    # on the object it is bound to.
+    # on the object / class it is bound to.
 
     def initialize(_binding)
       @binding            = _binding
@@ -113,8 +113,10 @@ module StateFu
     # Class Methods
     #
 
-    # This should be called once per class using StateFu. It aliases and redefines
-    # method_missing for the class.
+    # This should be called once per machine bound to a class.
+    # It defines methods for the machine as standard methods, 
+    # if the machine is the default machine or the options passed to the machine include 
+    # :define_methods => true .
     #
     # Note this happens when a machine is first bound to the class,
     # not when StateFu is included.
@@ -140,6 +142,8 @@ module StateFu
       define_event_methods_on @binding.object if @binding.options[:define_methods] && @binding.options[:singleton]
     end
 
+    private 
+    
     #
     # For each event, on the given object, define three methods.
     # - The first method is the same as the event name.
