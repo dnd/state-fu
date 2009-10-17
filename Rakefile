@@ -67,7 +67,7 @@ namespace :spec do
   desc "Run all specs with profiling & backtrace" 
   Spec::Rake::SpecTask.new(:prof) do |t|
     t.spec_files = FileList["spec/**/*_spec.rb"]
-    t.spec_opts = ['-c','-b','-u','-f','profile','-R','-L','mtime']
+    t.spec_opts = ['-c','-b','-f','profile','-R','-L','mtime'] 
   end
 
   desc "Print Specdoc for all specs (eaxcluding plugin specs)"
