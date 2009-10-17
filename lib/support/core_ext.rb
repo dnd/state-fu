@@ -38,53 +38,31 @@ class Array
 end
 
 class Object
+  unless defined? instance_exec # 1.9
+    module InstanceExecMethods #:nodoc:
+    end
+    include InstanceExecMethods
 
-  def self.__define_method( method_name, &block )
-    self.class.class_eval do
-      define_method method_name, &block
+    # Evaluate the block with the given arguments within the context of
+    # this object, so self is set to the method receiver.
+    #
+    # From Mauricio's http://eigenclass.org/hiki/bounded+space+instance_exec
+    def instance_exec(*args, &block)
+      begin
+        old_critical, Thread.critical = Thread.critical, true
+        n = 0
+        n += 1 while respond_to?(method_name = "__instance_exec#{n}")
+        InstanceExecMethods.module_eval { define_method(method_name, &block) }
+      ensure
+        Thread.critical = old_critical
+      end
+
+      begin
+        send(method_name, *args)
+      ensure
+        InstanceExecMethods.module_eval { remove_method(method_name) } rescue nil
+      end
     end
   end
-
-  def __define_singleton_method( method_name, &block )
-    (class << self; self; end).class_eval do
-      define_method method_name, &block
-    end
-  end
-
-
-  def with_methods_on(other)
-    (class << self; self; end).class_eval do
-      # we need some accounting to ensure that everything behaves itself when
-      # .with_methods_on is called more than once.
-      @_with_methods_on ||= []
-      if !@_with_methods_on.include?("method_missing_before_#{other.__id__}")
-        alias_method "method_missing_before_#{other.__id__}", :method_missing
-      end     
-      @_with_methods_on << "method_missing_before_#{other.__id__}"
-        
-      define_method :method_missing do |method_name, *args|
-        if _other.respond_to?(method_name, true)
-          _other.__send__( method_name, *args )
-        else
-          send "method_missing_before_#{other.__id__}", method_name, *args
-        end
-      end      
-    end
-
-    result = yield
-
-    (class << self; self; end).class_eval do
-      # heal the damage
-      if @_with_methods_on.pop != "method_missing_before_#{other.__id__}"
-        raise "there is no god"
-      end        
-      if !@_with_methods_on.include?("method_missing_before_#{other.__id__}")
-        alias_method :method_missing, "method_missing_before_#{other.__id__}"
-        undef_method "method_missing_before_#{other.__id__}"
-      end     
-    end
-
-    result
-  end # with_methods_on
 end
 

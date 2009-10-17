@@ -165,7 +165,7 @@ module StateFu
     # halt a transition with a message
     # can be used to back out of a transition inside eg a state entry hook
     def halt! message 
-      raise TransitionHalted.new( self, message )
+      raise StateFu::TransitionHalted.new( self, message )
     end
 
     #
@@ -292,17 +292,15 @@ module StateFu
       s
     end
 
+    def evaluate(method_name_or_proc)
+      executioner.evaluate(method_name_or_proc)
+    end
+    alias_method :call, :evaluate
+
     private
 
     def executioner
-      @executioner ||= Executioner.new( self ) do |ex|
-        machine.inject_helpers_into( ex )
-        machine.inject_methods_into( ex )
-      end
-    end
-
-    def evaluate(method_name_or_proc)
-      executioner.evaluate(method_name_or_proc)
+      @executioner ||= Executioner.new( self )
     end
 
     def evaluate_requirement_message( name, revalidate=false)

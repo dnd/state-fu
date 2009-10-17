@@ -27,7 +27,7 @@ describe StateFu::Binding do
 
   describe "constructor" do
     before do
-      mock(Klass).state_fu_options.at_most(2) do
+      mock(Klass).state_fu_options.at_most(3) do
         { 
           :example => {:field_name => :example_field} 
         }

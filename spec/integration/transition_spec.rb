@@ -660,8 +660,8 @@ describe StateFu::Transition do
         before do
           Klass.state_fu_machine do
             event( :go ) do
-              execute do 
-                halt!("stop")
+              execute do |transition|
+                transition.halt!("stop")
               end
             end
           end

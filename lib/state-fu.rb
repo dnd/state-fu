@@ -23,7 +23,6 @@ end
   'support/logging',
   'support/applicable',
   'support/arrays',
-  'support/methodical',
   'support/has_options',
   'support/vizier',
   'support/plotter',

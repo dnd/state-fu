@@ -4,10 +4,10 @@ module StateFu
     def self.BINDINGS
       @@_bindings ||= {}
     end
-    
+
     include Applicable
     include HasOptions
-    
+
     attr_reader :hooks
 
     #
@@ -19,17 +19,17 @@ module StateFu
       name = name.to_sym
       unless machine = klass.state_fu_machines[ name ]
         machine = new(options)
-        machine.bind! klass, name, options
       end
       if block_given?
-        machine.apply! &block 
+        machine.apply! &block
       end
+      machine.bind! klass, name, options
       machine
     end
 
     # make it so that a class which has included StateFu has a binding to
     # this machine
-    def self.bind!(machine, owner, name, options={})      
+    def self.bind!(machine, owner, name, options={})
       name = name.to_sym
       options[:define_methods] = (name == DEFAULT) unless options.symbolize_keys!.has_key?(:define_methods)
       options[:field_name] ||= Persistence.default_field_name(name)
@@ -40,14 +40,17 @@ module StateFu
         MethodFactory.define_singleton_method(owner, name) { _binding }
         if alias_name = options[:alias] || options[:as]
           MethodFactory.define_singleton_method(owner, alias_name) { _binding }
-        end      
+        end
       else
-        owner.state_fu_machines[name] = machine
-        owner.state_fu_options[name]  = options
-        # method_missing to catch NoMethodError for event methods, etc
-        StateFu::MethodFactory.define_once_only_method_missing owner 
-        unless owner.respond_to? name          
-          owner.class_eval do
+        klass = owner
+        klass.state_fu_machines[name] = machine
+        klass.state_fu_options[name]  = options
+
+        # prepare the state machine accessor method
+        if owner.respond_to? name
+          raise "FIXME " + name
+        else
+          klass.class_eval do
             define_method name do
               state_fu name
             end
@@ -57,6 +60,10 @@ module StateFu
             end
           end
         end
+
+        # prepare event / state class methods
+        StateFu::MethodFactory.prepare_class_machine klass, machine, name, options
+
         # prepare the persistence field
         StateFu::Persistence.prepare_field owner, options[:field_name]
       end
@@ -97,10 +104,6 @@ module StateFu
 
     def inject_tools_into( obj )
       tools.inject_into( obj )
-    end
-
-    def inject_methods_into( obj )
-      #puts 'inject_methods_into'
     end
 
     # the modules listed here will be mixed into Binding and

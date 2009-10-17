@@ -172,28 +172,10 @@ describe "Transition requirement reflection" do
         stub( @obj ).spacesuit?() { false }
         stub( @obj ).fuel?() { false }
       end
+
       describe "when the arity of the proc is 1" do
         before do
-          @msg = lambda { |trans| "I am a #{trans.class} and I fail it" }
-          @machine.requirement_messages[:spacesuit?] = @msg
-        end
-
-        it "should return an array with the requirement message and nil" do
-          t = @obj.state_fu.fly_spaceship(:moon)
-          t.unmet_requirements.length.should == 2
-          messages = t.unmet_requirement_messages
-          messages.should be_kind_of( Array )
-          messages.length.should == 2
-          messages.strings.length.should == 1
-          messages.strings.first.should be_kind_of( String )
-          messages.strings.first.should == "I am a StateFu::Transition and I fail it"
-          messages.symbols.first.should == :fuel?
-        end
-      end # arity 1
-
-      describe "when the arity of the proc is 0" do
-        before do
-          @msg = lambda { "No #{t.target.name} for you!" }
+          @msg = lambda { |transition| "No #{transition.target.name} for you!" }
           @machine.requirement_messages[:spacesuit?] = @msg
         end
 
@@ -206,6 +188,25 @@ describe "Transition requirement reflection" do
           messages.strings.length.should == 1
           messages.strings.first.should be_kind_of( String )
           messages.strings.first.should == "No moon for you!"
+          messages.symbols.first.should == :fuel?
+        end
+      end # arity 1
+
+      describe "when the arity of the proc is 0" do
+        before do
+          @msg = lambda { "No soup for you!" }
+          @machine.requirement_messages[:spacesuit?] = @msg
+        end
+
+        it "should return an array with the requirement message and nil" do
+          t = @obj.state_fu.fly_spaceship(:moon)
+          t.unmet_requirements.length.should == 2
+          messages = t.unmet_requirement_messages
+          messages.should be_kind_of( Array )
+          messages.length.should == 2
+          messages.strings.length.should == 1
+          messages.strings.first.should be_kind_of( String )
+          messages.strings.first.should == "No soup for you!"
           messages.symbols.first.should == :fuel?
         end
       end # arity 1

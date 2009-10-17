@@ -19,16 +19,16 @@ module StateFu
       @options       = options.symbolize_keys!
       if options[:singleton]
         @target      = object
-      else 
+      else
         @target      = object.class
         @options     = @target.state_fu_options[@method_name].merge(options)
-      end 
-      @field_name    = @options.delete(:field_name) || raise("No field_name supplied")      
+      end
+      @field_name    = @options.delete(:field_name) || raise("No field_name supplied")
       @persister     = Persistence.for self
 
       # define event methods on this binding and its @object
       MethodFactory.new(self).install!
-      @machine.helpers.inject_into self 
+      @machine.helpers.inject_into self
     end
 
     alias_method :o,             :object
@@ -143,7 +143,6 @@ module StateFu
     def transition( event_or_array, *args, &block )
       return transitions.with(*args, &block).find(event_or_array)
     end
-
     #
     # next_transition and friends: when there's exactly one valid move
     #
@@ -292,5 +291,11 @@ module StateFu
       s
     end
 
+    # little kludge - allows the binding to reuse the same method definitions as 'object'
+    # in MethodFactory#method_definitions_for
+    def state_fu(name=nil)
+      self
+    end
+    
   end
 end

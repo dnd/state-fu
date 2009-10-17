@@ -106,12 +106,13 @@ describe "Document" do
       #   lambda { @doc.status_field }.should raise_error()
       # end
 
-      it "should be defined before state_fu is called" do
-        @doc.send( :status_field ).should == 'draft'
+      it "should be nil before state_fu is called" do
+        @doc.send(:status_field).should == nil
       end
 
-      it "should have an initial value of 'draft'" do
-        @doc.instance_eval { status_field }.should == "draft"
+      it "should have an initial value of 'draft' once the binding is referenced" do
+        @doc.status # initialize the machine
+        @doc.send(:status_field).should == 'draft'
       end
 
       it "should be set to 'published' after publish! is called successfully" do

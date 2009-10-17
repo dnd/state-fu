@@ -79,41 +79,35 @@ describe "A door which opens and shuts:" do
 
     describe "magic event methods" do
 
-      it "doesn't normally have a method #shut!" do
-        @door.respond_to?(:shut!).should == false
-      end
+      # it "doesn't normally have a method #shut!" do
+      #   @door.respond_to?(:shut!).should == false
+      # end
+      # 
+      # it "will define #shut! when method_missing is called for the first time" do
+      #   begin
+      #     @door.play_the_ukelele
+      #   rescue NoMethodError
+      #   end
+      #   @door.respond_to?(:shut!).should == true
+      # end
 
-      it "will define #shut! when method_missing is called for the first time" do
-        begin
-          @door.play_the_ukelele
-        rescue NoMethodError
-        end
-        @door.respond_to?(:shut!).should == true
-      end
-
-      it "will keep any existing methods when method_missing is triggered" do
-        @door.respond_to?(:shut).should == true
-        @door.respond_to?(:can_shut?).should == false
-        @door.shut.should == "I don't know how to shut!"
-        @door.can_shut?.should               == true      # triggers method_missing
-        @door.respond_to?(:shut).should      == true
-        @door.respond_to?(:can_shut?).should == true      # new methods defined
-        @door.shut.should == "I don't know how to shut!"  # old method retained
-      end
-
-      it "gets a set of new methods when any magic method is called" do
-        @door.respond_to?(:shut).should      == true  # already defined
-        @door.respond_to?(:open).should      == false
-        @door.respond_to?(:can_shut?).should == false
-        @door.respond_to?(:can_open?).should == false
-        @door.respond_to?(:shut!).should     == false
-        @door.respond_to?(:open!).should     == false
-        @door.can_shut?.should               == true  # call one of them (triggers method_missing)
-        @door.respond_to?(:open).should      == false # a private method: Kernel#open
-        @door.respond_to?(:can_shut?).should == true  # but these are all newly defined public methods
-        @door.respond_to?(:can_open?).should == true
-        @door.respond_to?(:shut!).should     == true
-        @door.respond_to?(:open!).should     == true
+      # it "will keep any existing methods when method_missing is triggered" do
+      #   @door.respond_to?(:shut).should == true
+      #   @door.respond_to?(:can_shut?).should == false
+      #   @door.shut.should == "I don't know how to shut!"
+      #   @door.can_shut?.should               == true      # triggers method_missing
+      #   @door.respond_to?(:shut).should      == true
+      #   @door.respond_to?(:can_shut?).should == true      # new methods defined
+      #   @door.shut.should == "I don't know how to shut!"  # old method retained
+      # end
+      
+      it "TODO RENAME THIS SPEC" do
+        @door.respond_to?(:open).should       == false # a private method: Kernel#open
+        @door.respond_to?(:open, true).should == true
+        @door.respond_to?(:can_shut?).should  == true  # but these are all newly defined public methods
+        @door.respond_to?(:can_open?).should  == true
+        @door.respond_to?(:shut!).should      == true
+        @door.respond_to?(:open!).should      == true
       end
 
       it "retains any previously defined method_missing" do
@@ -160,9 +154,6 @@ describe "A door which opens and shuts:" do
 
     describe "magic state methods" do
       it "should be defined for each state by method_missing voodoo" do
-        @door.should_not respond_to(:closed?)
-        @door.should_not respond_to(:open?)
-        @door.open?.should == true
         @door.should respond_to(:closed?)
         @door.should respond_to(:open?)
       end
@@ -181,7 +172,6 @@ describe "A door which opens and shuts:" do
 
     it "#can_shut? when the current state is open" do
       @door.current_state.should == :open
-      # @door.state_fu.valid_transitions.map(&:destination).inspect
       @door.can_shut?.should     == true
       @door.can_open?.should     == nil # not a valid transition from this state -> nil
     end
@@ -208,7 +198,7 @@ describe "A door which opens and shuts:" do
     it "raises StateFu::RequirementError if #open! is called when it is locked" do
       @door.shut!
       @door.locked = true
-      lambda { @door.open! }.should raise_error(StateFu::RequirementError)
+      lambda { @door.open! }.should raise_error( StateFu::RequirementError )
     end
 
     it "tells you why it won't open if you ask nicely" do
@@ -551,15 +541,14 @@ describe "arguments given to different method signatures" do
       def b2(t,a=nil)   received[:b2] = [t,a] end
       def c2(t,*a)      received[:c2] = [t,a] end
 
-      # these method signatures get a transition, a list of arguments,
-      # and the object which owns the machine
+      # these method signatures take too many arguments and will cause an ArgumentError
       def a3(t,a,o)     received[:a3] = [t,a,o] end
       def b3(t,a,o=nil) received[:b3] = [t,a,o] end
       def c3(t,a,*o)    received[:c3] = [t,a,o] end
 
       machine do
         cycle :state => :observing, :on => :observe do
-          trigger :a1, :b1, :c1, :a2, :b2, :c2, :a3, :b3, :c3
+          trigger :a1, :b1, :c1, :a2, :b2, :c2
         end
       end
 
@@ -572,7 +561,7 @@ describe "arguments given to different method signatures" do
     end
 
     it "have a list of execute hooks" do
-      Recorder.machine.events[:observe].hooks[:execute].should == [:a1, :b1, :c1, :a2, :b2, :c2, :a3, :b3, :c3]
+      Recorder.machine.events[:observe].hooks[:execute].should == [:a1, :b1, :c1, :a2, :b2, :c2]
     end
   end
 
@@ -595,7 +584,7 @@ describe "arguments given to different method signatures" do
       end
 
       it "call the event's :execute hooks on #observe!" do
-        @results.keys.should =~ [:a1, :b1, :c1, :a2, :b2, :c2, :a3, :b3, :c3]
+        @results.keys.should =~ [:a1, :b1, :c1, :a2, :b2, :c2]
       end
 
       describe "methods which expect one argument" do
@@ -615,10 +604,13 @@ describe "arguments given to different method signatures" do
       end
 
       describe "methods which expect three arguments" do
-        it "receive a StateFu::Transition, an argument list and the recorder object" do
-          @results[:a3].should == [@t, @t.args, @recorder]
-          @results[:b3].should == [@t, @t.args, @recorder]
-          @results[:c3].should == [@t, @t.args, [@recorder]]
+        it "raise an ArgumentError" do
+          [:a1, :b1, :c1, :a2, :b2, :c2].each do |meth|
+            @t.call(meth)
+          end
+          [:a3, :b3, :c3].each do |meth|
+            lambda { @t.call(:a3) }.should raise_error(ArgumentError)
+          end
         end
       end
     end
@@ -734,7 +726,8 @@ describe "sitting at a poker machine" do
 
           event :stop_spinning, :to => :ready do
             requires :wheels_stopped?
-            execute :payout do
+            execute :payout do |transition|
+              wheel_states = transition.call(:wheel_states)
               if wheel_states == wheel_states.uniq
                 self.credits += wheel_states.first[:value]
               end
@@ -756,7 +749,7 @@ describe "sitting at a poker machine" do
               execute do
                 silly_noises_inflicted << :spinning_noise
               end
-              after do
+              after do |transition, *args|
                 if rand(3) == 0
                   # we use binding.stop! rather than self.stop! here
                   # to disambiguate which machine we're sending the event to.
@@ -769,7 +762,7 @@ describe "sitting at a poker machine" do
                   # (the first one, becuase it was defined first, and automatically
                   # defined methods never clobber any pre-existing methods) -
                   # which isn't what we want here.
-                  binding.stop!([:bomb, :cherry, :smiley, :gold].rand)
+                  transition.binding.stop!([:bomb, :cherry, :smiley, :gold].rand)
                 end
               end
             end

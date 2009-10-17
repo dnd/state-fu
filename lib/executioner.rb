@@ -1,65 +1,40 @@
 module StateFu
   #
-  # delegator class for evaluation methods / procs in the context of
-  # your object.
+  # class that handles executing stuff in the context of your 'object'
   #
     
   class Executioner
 
-    # give us a blank slate
-    # instance_methods.each { |m| undef_method m unless m =~ /(^__|^self|^nil\?$|^send$|proxy_|^object_id|^respond_to\?|^instance_exec|^instance_eval|^method$)/ }
+    attr_reader :transition, :object
 
     def initialize transition, &block
-      @transition     = transition
-      @__target__     = transition.object
-      @__self___      = self
-      yield self if block_given?
-      # forces method_missing to snap back to its pre-state-fu condition:
-      # @__target__.initialize_state_fu!
+      @transition = transition
+      @object     = transition.object
       self
     end
 
-    delegate :origin,  :to => :transition, :prefix => true # transition_origin
-    delegate :target,  :to => :transition, :prefix => true # transition_target
-    delegate :event,   :to => :transition, :prefix => true # transition_event
-
-    delegate :halt!,   :to => :transition
-    delegate :args,    :to => :transition
-    delegate :options, :to => :transition
-
-    def binding
-      transition.binding
-    end
-
-    attr_reader :transition, :__target__, :__self__
-
-    alias_method :t,                    :transition
-    alias_method :current_transition,   :transition
-    alias_method :context,              :transition
-    alias_method :ctx,                  :transition
-
-    alias_method :arguments,            :args
-    alias_method :transition_arguments, :args
-
-    def machine 
-      binding.machine
+    def evaluate method_name_or_proc
+      args = [transition, transition.arguments]
+      evaluate_with_arguments(method_name_or_proc, *args)
     end
     
-    def states
-      machine.states
-    end
-    # delegate :machine, :to => :transition
-
-    def evaluate_with_arguments method_name_or_proc, *arguments
-      if method_name_or_proc.is_a?(Proc) && meth = method_name_or_proc
-      elsif meth = transition.machine.named_procs[method_name_or_proc]
-      elsif respond_to?( method_name_or_proc) && meth = method(method_name_or_proc)        
+    private
+    
+    def evaluate_with_arguments method_name_or_proc, *arguments      
+      if method_name_or_proc.is_a?(Proc) && 
+        meth = method_name_or_proc 
+        # got a proc
+      elsif meth = transition.machine.named_procs[method_name_or_proc] 
+        # got a named proc belonging to the machine
+      elsif object.__send__(:respond_to?, method_name_or_proc, true) && 
+        meth = object.__send__(:method, method_name_or_proc)
+        # got the name of a method on 'object'
       elsif method_name_or_proc.to_s =~ /^not?_(.*)$/
-        # special case: prefix a method with no_ or not_ and get the 
-        # boolean opposite of its evaluation result
-        return !( evaluate_with_arguments $1, *args )
+        # special case: given a method name prefixed with no_ or not_ 
+        # return the boolean opposite of its evaluation result
+        return !( evaluate_with_arguments $1.to_sym, *arguments )
       else
-        raise NoMethodError.new( "undefined method_name `#{method_name_or_proc.to_s}' for \"#{__target__}\":#{__target__.class.to_s}" )
+        raise NoMethodError.new( "undefined method_name `#{method_name_or_proc.to_s}' for \"#{object}\":#{object.class.to_s}" )
       end      
 
       if arguments.length < meth.arity.abs && meth.arity != -1
@@ -71,50 +46,8 @@ module StateFu
       end
       
       # execute it!
-      __target__.with_methods_on(self) do
-        self.instance_exec *arguments, &meth
-      end
-    end
-
-    def evaluate method_name_or_proc
-      arguments = [transition, args, __target__]
-      evaluate_with_arguments(method_name_or_proc, *arguments)
-    end
-
-    alias_method :executioner_respond_to?, :respond_to?
-
-    def respond_to? method_name, include_private = false
-      executioner_respond_to?(method_name, include_private) ||
-      __target__.__send__( :respond_to?, method_name, include_private )
-    end
-
-    alias_method :executioner_method, :method
-    def method method_name
-      begin
-        executioner_method(method_name)
-      rescue NameError
-        __target__.__send__ :method, method_name
-      end
-    end
-
-    private
-
-    # Forwards any missing method call to the \target.
-    # TODO / NOTE: we don't (can't ?) handle block arguments ...    
-    def method_missing(method_name, *args)
-      if __target__.respond_to?(method_name, true)
-        begin
-          meth = __target__.__send__ :method, method_name
-        rescue NameError
-          super
-        end
-        __target__.instance_exec( *args, &meth)
-      else # let's hope it's a named proc
-        evaluate_with_arguments(method_name, *args)
-      end
-      
+      object.__send__(:instance_exec, *arguments, &meth)
     end
     
-    # NOTE: const_missing is not handled.
   end
 end
