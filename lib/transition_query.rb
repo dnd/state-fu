@@ -15,8 +15,10 @@ module StateFu
     end
 
     # calling result() will cause the set of transitions to be calculated -
-    # the cat will then be either dead or alive; until then it's a litte from
-    # column A, a little from column B.
+    # the cat will then be either dead or alive; until then it's anyone's guess.
+    
+    # this is a cheap way of passing any call to #each, #length, etc to result().
+    # TODO: be explicit, eg using delegate, and remove method_missing.   
     def method_missing(method_name, *args, &block)
       if result.respond_to?(method_name, true)
         result.__send__(method_name, *args, &block)
@@ -33,16 +35,6 @@ module StateFu
       self
     end
     
-    # build a list of possible transition destinations ([event, target])
-    # without actually constructing any transition objects
-    # def all_destinations
-    #   binding.events.inject([]){ |arr, evt| arr += evt.targets.map{|tgt| [evt,tgt] }; arr}.uniq
-    # end
-    # 
-    # def all_destination_names
-    #   all_destinations.map {|tuple| tuple.map(&:to_sym) }
-    # end
-
     #
     # Chainable Filters
     #     
