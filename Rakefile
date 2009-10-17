@@ -7,12 +7,6 @@ require "rubygems"
 
 load File.join( File.dirname(__FILE__),"/lib/tasks/state_fu.rake" )
 
-module Rakefile
-  def self.windows?
-    /djgpp|(cyg|ms|bcc)win|mingw/ =~ RUBY_PLATFORM
-  end
-end
-
 load 'lib/tasks/spec_last.rake'
 load 'lib/tasks/state_fu.rake'
 

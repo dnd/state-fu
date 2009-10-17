@@ -40,7 +40,7 @@ module StateFu
           end
         end
 
-        # complex event methods
+        # "complex" event methods (for events with more than one possible target)
         # the first argument is the target state
         # any remaining arguments are passed into the transition / transition query
 
@@ -58,7 +58,7 @@ module StateFu
         #
         # as per the method above, except that it also fires the event
 
-        # object.can_event_name? [:target], *arguments
+        # object.can_<event_name>? [:target], *arguments
         #
         # tests that calling event_name or event_name! would not raise an error
         # ie, the transition is legal and is valid with the arguments supplied
@@ -82,9 +82,10 @@ module StateFu
           end
         end
 
-        # methods dedicated to a combination of event and target
-        # all arguments are passed into the transition / transition query
-
+        # methods for a "complex" event with a specific target
+        # eg progress_to_deleted!(*args)
+        # is equivalent to progress!(:deleted, *args)
+        
         (simple_events + complex_events).each do |event|
           event.targets.each do |target|
             method_definitions["#{event.name}_to_#{target.name}"]      = lambda do |*args|
@@ -100,6 +101,8 @@ module StateFu
             end
           end unless event.targets.nil?
         end
+        
+        # sugar: query methods for determining the current state
 
         machine.states.each do |state|
           method_definitions["#{state.name}?"] = lambda do
