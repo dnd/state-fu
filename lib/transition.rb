@@ -184,10 +184,10 @@ module StateFu
         StateFu::Hooks::ALL_HOOKS.map do |owner, slot|
           [ [owner, slot], send(owner).hooks[slot] ]
         end.each do |address, hooks|
-          Logger.info("running #{address.inspect} hooks for #{object.class} #{object}")
+          Logging.info("running #{address.inspect} hooks for #{object.class} #{object}")
           owner,slot = *address
           hooks.each do |hook|
-            Logger.info("running hook #{hooks} for #{object.class} #{object}")
+            Logging.info("running hook #{hooks} for #{object.class} #{object}")
             @current_hook_slot = address
             @current_hook      = hook
             run_hook hook 
@@ -195,14 +195,14 @@ module StateFu
           if slot == :entry
             @accepted                        = true
             @binding.persister.current_state = @target
-            Logger.info("State is now :#{@target.name} for #{object.class} #{object}")
+            Logging.info("State is now :#{@target.name} for #{object.class} #{object}")
           end
         end
         # transition complete
         @current_hook_slot               = nil
         @current_hook                    = nil
       rescue TransitionHalted => e
-        Logger.info("Transition halted for #{object.class} #{object}: #{e.inspect}")
+        Logging.info("Transition halted for #{object.class} #{object}: #{e.inspect}")
         @errors << e
       end
       self

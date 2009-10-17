@@ -4,7 +4,7 @@ describe "an ActiveRecord model with StateFu included:" do
 
   include MySpecHelper
 
-  before(:each) do
+  before(:all) do
     reset!
     prepare_active_record() do
       def self.up
@@ -48,7 +48,8 @@ describe "an ActiveRecord model with StateFu included:" do
     before do
       ExampleRecord.class_eval do
         state_fu_machine do
-                              state :initial do
+          state :initial do
+            # an after transition hook saves the record
             event( :change, :to => :final ) { after :save! }
           end
         end
@@ -84,9 +85,9 @@ describe "an ActiveRecord model with StateFu included:" do
       it "should return false for ExampleRecord, :not_a_column" do
         StateFu::Persistence.active_record_column?( ExampleRecord, :not_a_column ).should == false
       end
+
       it "should not clobber activerecord accessors" do
         @ex.noodle! rescue nil
-        #        lambda { @ex.description }.should_not raise_error()
         @ex.description.should be_nil
         @ex.description= 'foo'
         @ex.description.should == 'foo'
@@ -120,12 +121,6 @@ describe "an ActiveRecord model with StateFu included:" do
         @ex.should be_new_record
         mock.proxy( @ex ).state_fu!.at_least( 1 ) { }
         @ex.save!
-      end
-
-      it "should fail to save if state_fu! does not instantiate the binding before create" do
-        mock( @ex ).state_fu!.at_least( 1 ) { }
-        lambda { @ex.save! }.should raise_error( ActiveRecord::StatementInvalid )
-        @ex.state_fu_field.should == nil
       end
 
       it "should create a record given only a name, with the field set to the initial state" do
@@ -166,7 +161,7 @@ describe "an ActiveRecord model with StateFu included:" do
         end
       end # saved record after transition
 
-      describe "when a second machine named :status is defined with :field_name => 'status' " do
+      describe "when a second machine named :status is defined with :field_name => 'status'" do
         before do
           ExampleRecord.state_fu_machine(:status, :field_name => 'status') do
             event( :go, :from => :initial, :to => :final )
@@ -196,7 +191,20 @@ describe "an ActiveRecord model with StateFu included:" do
           @ex.status= 'damp'
           lambda { @ex.status }.should raise_error( StateFu::InvalidStateName )
         end
+      end # second machine
+      
+      describe "coexisting with an attribute-backed machine" do
+        it "should get along merrily" do
+          ExampleRecord.machine(:temporary, :field_name => 'temp') do
+            state :new
+          end
+          @ex = ExampleRecord.new()
+          @ex.temporary.should == :new
+          @ex.instance_variable_get("@temp").should == 'new'
+          @ex.temporary.persister.class.should == StateFu::Persistence::Attribute
+        end
       end
-    end # second machine
-  end   # with before_create filter
-end     # default machine
+      
+    end 
+  end   
+end     

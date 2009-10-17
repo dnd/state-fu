@@ -26,7 +26,7 @@ module StateFu
 
       # define this method in subclasses to do any preparation
       def self.prepare_field( klass, field_name )
-        Logger.warn("Abstract method in #{self}.prepare_field called. Override me!")
+        Logging.warn("Abstract method in #{self}.prepare_field called. Override me!")
       end
 
       def initialize( binding, field_name )
@@ -36,11 +36,11 @@ module StateFu
         @current_state = find_current_state()
 
         if current_state.nil?
-          Logger.warn("undefined state for binding #{binding} on #{object} with field_name #{field_name.inspect}")
-          Logger.warn("Machine for #{object} has no states: #{machine}") if machine.states.empty?
+          Logging.warn("undefined state for binding #{binding} on #{object} with field_name #{field_name.inspect}")
+          Logging.warn("Machine for #{object} has no states: #{machine}") if machine.states.empty?
         else
           persist!
-          Logger.debug("#{object} resumes #{binding.method_name} at #{current_state.name}")
+          Logging.debug("#{object} resumes #{binding.method_name} at #{current_state.name}")
         end
       end
 

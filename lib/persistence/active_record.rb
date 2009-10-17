@@ -4,7 +4,7 @@ module StateFu
 
       def self.prepare_field( klass, field_name )
         _field_name = field_name
-        Logger.debug("Preparing ActiveRecord field #{klass}.#{field_name}")
+        Logging.debug("Preparing ActiveRecord field #{klass}.#{field_name}")
 
         # this adds a before_save hook to ensure that the field is initialized 
         # (and the initial state set) before create.
@@ -20,12 +20,12 @@ module StateFu
       # Attribute version, so just do the simplest thing we can.
 
       def read_attribute
-        Logger.debug "Read attribute #{field_name}, got #{object.send(:read_attribute,field_name)} for #{object.inspect}"
+        Logging.debug "Read attribute #{field_name}, got #{object.send(:read_attribute,field_name)} for #{object.inspect}"
         object.send( :read_attribute, field_name )
       end
 
       def write_attribute( string_value )
-        Logger.debug "Write attribute #{field_name} to #{string_value} for #{object.inspect}"
+        Logging.debug "Write attribute #{field_name} to #{string_value} for #{object.inspect}"
         object.send( :write_attribute, field_name, string_value )
       end
 

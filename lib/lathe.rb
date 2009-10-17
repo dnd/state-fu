@@ -442,7 +442,7 @@ module StateFu
 
       # allow requirements and messages to be added as options
       if k = [:requires, :guard, :must, :must_be, :needs].detect {|k| options.has_key?(k) }
-        # Logger.debug("removing option #{k} - will use as requirement ..")
+        # Logging.debug("removing option #{k} - will use as requirement ..")
         req = options.delete(k)
         msg = options.delete(:message) || options.delete(:msg)
         raise ArgumentError unless msg.nil? || req.is_a?(Symbol)

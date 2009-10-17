@@ -7,7 +7,7 @@ module StateFu
   # Use Rails' log if running as a rails plugin; allow independent control of 
   # StateFu log level.
   
-  class Logger
+  class Logging
     cattr_accessor :prefix   # prefix for log messages
     cattr_accessor :suppress # set true to send messages to /dev/null
     cattr_accessor :shared
@@ -101,10 +101,10 @@ module StateFu
       case logger
       when String
         file     = File.open(logger, File::WRONLY | File::APPEND)        
-        @@logger = Logger.activesupport_logger_available? ? ActiveSupport::BufferedLogger.new(file) : ::Logger.new(file)
-      when ::Logger
+        @@logger = activesupport_logger_available? ? ActiveSupport::BufferedLogger.new(file) : Logger.new(file)
+      when Logger
         @@logger = logger
-      when Logger.activesupport_logger_available? && ActiveSupport::BufferedLogger
+      when activesupport_logger_available? && ActiveSupport::BufferedLogger
         @@logger = logger
       else
         default_logger
@@ -134,7 +134,7 @@ module StateFu
           ActiveSupport::BufferedLogger.new(target)
         end
       else      
-        ::Logger.new(target)
+        Logger.new(target)
       end
     end
     

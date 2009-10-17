@@ -15,9 +15,12 @@
 # extend the core features.
 #
 # It is also delightfully elegant and easy to use for simple things.
+%w( support support/active_support_lite ).each do |path|
+  $LOAD_PATH.unshift(File.expand_path(File.join(File.dirname(__FILE__), path)))
+end
 
 [ 'support/core_ext',
-  'support/logger',
+  'support/logging',
   'support/applicable',
   'support/arrays',
   'support/methodical',

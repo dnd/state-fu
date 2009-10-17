@@ -56,7 +56,7 @@ Gem::Specification.new do |s|
      "lib/support/core_ext.rb",
      "lib/support/exceptions.rb",
      "lib/support/has_options.rb",
-     "lib/support/logger.rb",
+     "lib/support/logging.rb",
      "lib/support/methodical.rb",
      "lib/support/no_stdout.rb",
      "lib/support/plotter.rb",

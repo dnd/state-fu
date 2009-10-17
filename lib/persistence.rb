@@ -20,7 +20,7 @@ module StateFu
   #    end
   #
   #    def write_attribute( string_value )
-  #      Logger.debug "magnetising ( #{field_name} => #{string_value} on #{object.inspect}"
+  #      Logging.debug "magnetising ( #{field_name} => #{string_value} on #{object.inspect}"
   #      object.send "magnetised_#{field_name}=", string_value
   #    end
   #  end
@@ -56,7 +56,7 @@ module StateFu
       persister_class = class_for klass, field_name
       prepare_field( klass, field_name, persister_class)
       returning persister_class.new( binding, field_name ) do |persister|
-        Logger.debug( "#{persister_class}: method #{binding.method_name} as field #{persister.field_name}" )
+        Logging.debug( "#{persister_class}: method #{binding.method_name} as field #{persister.field_name}" )
       end
     end
 

@@ -225,7 +225,7 @@ module StateFu
     def self.define_singleton_method(object, method_name, options={}, &block)
       if object.respond_to? method_name, true
         msg = !options[:force]
-        Logger.info "Existing method #{method(method_name) rescue [method_name].inspect} "\
+        Logging.info "Existing method #{method(method_name) rescue [method_name].inspect} "\
           "for #{object.class} #{object} "\
           "#{options[:force] ? 'WILL' : 'won\'t'} "\
           "be overwritten."
