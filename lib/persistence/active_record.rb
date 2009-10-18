@@ -8,7 +8,7 @@ module StateFu
 
         # this adds a before_save hook to ensure that the field is initialized 
         # (and the initial state set) before create.
-        klass.send :before_create, :state_fu!
+        klass.send :before_validation_on_create, :state_fu!
                 
         # it's usually a good idea to do this:
         # validates_presence_of _field_name
