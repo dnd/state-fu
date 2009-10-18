@@ -62,7 +62,7 @@ describe StateFu::Binding do
         
         before do
           mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(1) { true }
-          mock( Klass ).before_create( :state_fu!) { }
+          mock( Klass ).before_validation_on_create( :state_fu!) { }
         end
         
         it "should get an ActiveRecord persister" do

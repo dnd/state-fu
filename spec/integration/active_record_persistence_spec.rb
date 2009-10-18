@@ -125,8 +125,9 @@ describe "an ActiveRecord model with StateFu included:" do
 
       it "should create a record given only a name, with the field set to the initial state" do
         ex = ExampleRecord.new( :name => "exemplar" )
-        ex.should be_valid
         ex.state_fu_field.should == nil
+        ex.should be_valid
+        ex.state_fu_field.should == 'initial'
         ex.save!
         ex.should_not be_new_record
         ex.state_fu_field.should == 'initial'
