@@ -26,6 +26,26 @@ describe "an ActiveRecord model with StateFu included:" do
     # end class ExampleRecord
   end
 
+  describe 'a machine with the same name as the database field' do
+    before do
+      make_pristine_class( 'IdentityCrisis', ActiveRecord::Base )
+      IdentityCrisis.class_eval do
+        set_table_name 'example_records'
+        validates_presence_of :name
+        machine(:state_fu_field, :field_name => :state_fu_field) do
+          connect :a, :b, :c
+        end
+      end      
+    end
+    
+    it 'should not include a StateFu::Binding in record#changes' do
+      record = IdentityCrisis.new :name => 'coexisting field and machine name'
+      record.save!
+      record.state_fu_field.next!      
+      record.changes['state_fu_field'].last.class.should == String
+    end
+  end
+
   it "should be a subclass of ActiveRecord::Base" do
     ExampleRecord.superclass.should == ActiveRecord::Base
   end

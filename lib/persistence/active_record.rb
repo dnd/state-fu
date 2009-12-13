@@ -12,6 +12,19 @@ module StateFu
                 
         # it's usually a good idea to do this:
         # validates_presence_of _field_name
+                
+        klass.class_eval do
+          # this is a hack to ensure that when you use the same field for the database
+          # column and the machine name, you don't end up with an unserializable 
+          # StateFu::Binding in record#changes() ...
+          def attribute_change(column)
+            change = super
+            if self.class.respond_to?(:machines) && self.class.machines.keys.include?(column.to_sym) 
+              change[1] = read_attribute(column)
+            end
+            change
+          end                
+        end
       end
 
       private
