@@ -111,17 +111,8 @@ describe "an ActiveRecord model with StateFu included:" do
     # satisfy the not null constraint
     describe "automagic state_fu! before_save filter and validations" do
 
-      it "should call state_fu! before a record is created" do
-        @ex.should be_new_record
-        mock.proxy( @ex ).state_fu!.at_least( 1 ) { }
-        @ex.save!
-      end
-
-      it "should call state_fu! before a record is updated" do
-        @ex.should be_new_record
-        mock.proxy( @ex ).state_fu!.at_least( 1 ) { }
-        @ex.save!
-      end
+      it "should call state_fu! before a record is created"
+      it "should call state_fu! before a record is updated"
 
       it "should create a record given only a name, with the field set to the initial state" do
         ex = ExampleRecord.new( :name => "exemplar" )

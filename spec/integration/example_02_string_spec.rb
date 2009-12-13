@@ -49,7 +49,8 @@ describe String do
   it "should call sanitize_for_shell! when shell.escape! is called, and be clean afterwards " do
     @str.should be_dirty
     @str.should_not be_clean
-    mock( @str ).sanitize_for_shell!(anything) {}
+    @str.should_receive(:sanitize_for_shell!)
+    
     @str.shell.escape!
     @str.should_not be_dirty
     @str.should be_clean

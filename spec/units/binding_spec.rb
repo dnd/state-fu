@@ -27,11 +27,9 @@ describe StateFu::Binding do
 
   describe "constructor" do
     before do
-      mock(Klass).state_fu_options.at_most(3) do
-        { 
-          :example => {:field_name => :example_field} 
-        }
-      end
+      Klass.should_receive(:state_fu_options).at_most(3).times.and_return({
+        :example => {:field_name => :example_field}         
+      })
     end
 
     it "should create a new Binding given valid arguments" do
@@ -61,12 +59,12 @@ describe StateFu::Binding do
       describe "when StateFu::Persistence.active_record_column? is true" do
         
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field).times(1) { true }
-          mock( Klass ).before_validation_on_create( :state_fu!) { }
+          StateFu::Persistence.should_receive(:active_record_column?).with(Klass, :example_field).and_return true
+          Klass.should_receive(:before_validation_on_create).with(:state_fu!)
         end
         
         it "should get an ActiveRecord persister" do
-          mock( StateFu::Persistence::ActiveRecord ).new( anything, :example_field ) { @p }
+          StateFu::Persistence::ActiveRecord.should_receive(:new).with(anything, :example_field).and_return(@p)
           b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )
           b.persister.should == @p
         end
@@ -74,10 +72,10 @@ describe StateFu::Binding do
 
       describe "when StateFu::Persistence.active_record_column? is false" do
         before do
-          mock( StateFu::Persistence ).active_record_column?(Klass, :example_field) { false }
+          StateFu::Persistence.should_receive(:active_record_column?).with(Klass, :example_field).and_return false
         end
         it "should get an Attribute persister" do
-          mock( StateFu::Persistence::Attribute ).new( anything, :example_field ) { @p }
+          StateFu::Persistence::Attribute.should_receive(:new).with(anything, :example_field).and_return @p
           b = StateFu::Binding.new( Klass.state_fu_machine, @obj, :example )
           b.persister.should == @p
         end
@@ -173,6 +171,7 @@ describe StateFu::Binding do
       describe "when called with additional arguments after the destination event/state" do
 
         # This would make very little sense to someone trying to understand how to use the library.
+        # figure out how to spec it properly.
         it "should pass the arguments to any requirements to determine transition availability" do
           pending
           t = nil

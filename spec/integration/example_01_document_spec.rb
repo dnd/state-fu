@@ -89,7 +89,7 @@ describe "Document" do
     end
 
     it "should call update_rss when publish! is called" do
-      mock( @doc ).update_rss(anything) {}
+      @doc.should_receive(:update_rss)
       @doc.status.publish!
     end
 
@@ -125,7 +125,7 @@ describe "Document" do
   describe "delete!" do
 
     it "should execute destroy()" do
-      mock( @doc ).destroy(anything) {}
+      @doc.should_receive(:destroy)
       @doc.status.delete!
     end
 

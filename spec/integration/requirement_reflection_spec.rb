@@ -51,18 +51,14 @@ describe "Transition requirement reflection" do
 
   describe "transition.valid? / transition.requirements_met?" do
     it "should be true if all requirements are met (return truth)" do
-      #@obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
-      
-      #@obj.state_fu.fireable?([:fly_spaceship,:moon]).should == true
+      @obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]      
       @obj.can_fly_spaceship?(:moon).should == true
-      #@obj.fly_spaceship(:moon).requirements_met?.should == true
-      #@obj.fly_spaceship(:moon).should be_valid
+      @obj.fly_spaceship(:moon).should be_valid
     end
 
     it "should be false if not all requirements are met" do
-      stub( @obj ).spacesuit?() { false }
+      @obj.should_receive(:spacesuit?).any_number_of_times.and_return(false)
       @obj.state_fu.next_states[:moon].entry_requirements.should == [:spacesuit?]
-      # @obj.state_fu.evaluate(:spacesuit?).should == false
       @obj.can_fly_spaceship?(:moon).should == false
       @obj.fly_spaceship(:moon).requirements_met?.should == false
       @obj.fly_spaceship(:moon).should_not be_valid
@@ -71,11 +67,9 @@ describe "Transition requirement reflection" do
 
   describe "flying from russia to america without one's affairs in order while wearing a turban" do
     before do
-      mock( @obj ).us_visa?(anything) { false }
-      mock( @obj ).no_turban?(anything) { false }
-      mock( @obj ).no_arrest_warrant?(anything) { false }
-      mock( @obj ).money_for_bribe?(anything) { false }
-      mock( @obj ).papers_in_order?(anything) { false }
+      %w(us_visa? no_turban? no_arrest_warrant? money_for_bribe? papers_in_order?).each do |meth|
+        @obj.should_receive(meth).any_number_of_times.and_return(false)
+      end
     end
 
     describe "when no messages are supplied for the requirements" do
@@ -136,9 +130,9 @@ describe "Transition requirement reflection" do
     end
 
     describe "when a message is supplied for the requirement" do
-      it "should contain a list of the requirement failure messages as strings" do
-        mock( @obj ).spacesuit?(anything) { false }
-        mock( @obj ).fuel?(anything) { false }
+      it "should contain a list of the requirement failure messages as strings" do        
+        @obj.should_receive(:spacesuit?).and_return(false)
+        @obj.should_receive(:fuel?).and_return(false)
         @obj.state_fu.fly_spaceship(:moon).unmet_requirements.should == [:spacesuit?, :fuel?]
       end
     end
@@ -148,8 +142,8 @@ describe "Transition requirement reflection" do
   describe "transition.unmet_requirement_messages" do
     describe "when a string message is defined for one of two unmet_requirements" do
       before do
-        stub( @obj ).spacesuit?() { false }
-        stub( @obj ).fuel?() { false }
+        @obj.should_receive(:spacesuit?).and_return(false)
+        @obj.should_receive(:fuel?).and_return(false)
         @msg = "You got no spacesuit."
         @machine.requirement_messages[:spacesuit?] = @msg
       end
@@ -169,8 +163,8 @@ describe "Transition requirement reflection" do
 
     describe "when a proc message is defined for one of two unmet_requirements" do
       before do
-        stub( @obj ).spacesuit?() { false }
-        stub( @obj ).fuel?() { false }
+        @obj.should_receive(:spacesuit?).any_number_of_times.and_return(false)
+        @obj.should_receive(:fuel?).any_number_of_times.and_return(false)
       end
 
       describe "when the arity of the proc is 1" do
@@ -239,9 +233,7 @@ describe "Transition requirement reflection" do
         it "should call t.evaluate_named_proc_or_method(:no_spacesuit_msg_method)" do
           t = @obj.state_fu.fly_spaceship(:moon)
           t.unmet_requirements.length.should == 2
-          stub( t ).evaluate( anything) { false }
-
-          mock( t ).evaluate(:no_spacesuit_msg_method){ ":)" }
+          t.should_receive(:evaluate).with(:no_spacesuit_msg_method).and_return ':)'
           messages = t.unmet_requirement_messages
           messages.should include( ":)" )
         end

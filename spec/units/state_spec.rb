@@ -48,8 +48,8 @@ describe StateFu::State do
 
       it "should call machine.events.from(self)" do
         machine_events = Object.new
-        mock( @machine ).events { machine_events }          
-        mock( machine_events ).from( @state ) { nil }
+        @machine.should_receive(:events).and_return machine_events
+        machine_events.should_receive(:from).with(@state).and_return nil
         @state.events
       end
 

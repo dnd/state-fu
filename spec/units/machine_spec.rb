@@ -24,8 +24,8 @@ describe StateFu::Machine do
 
         it "should create a new machine and bind! it" do
           @machine = Object.new
-          mock(@machine).bind!(Klass, :moose, {})
-          mock(StateFu::Machine).new({}) { @machine }
+          @machine.should_receive(:bind!).with(Klass, :moose, {})
+          StateFu::Machine.should_receive(:new).and_return @machine
           StateFu::Machine.for_class Klass, :moose
         end
 
@@ -73,7 +73,7 @@ describe StateFu::Machine do
     describe ".bind!" do
       it "should call StateFu::Machine.bind! with itself and its arguments" do
         field_name = :my_field_name
-        mock( StateFu::Machine ).bind!( @m, Klass, :newname, field_name ) {}
+        StateFu::Machine.should_receive(:bind!).with @m, Klass, :newname, field_name 
         @m.bind!( Klass, :newname, field_name )
       end
 
@@ -119,7 +119,7 @@ describe StateFu::Machine do
       end
 
       it "should return the first state if one exists" do
-        stub( @m ).states() {  [:a, :b, :c] }
+        @m.should_receive(:states).and_return [:a, :b, :c] 
         @m.initial_state.should == :a
       end
 

@@ -25,6 +25,7 @@ module Vizier  #:nodoc:all
     end
 
     def legal?( str )
+      str = str.to_s
       str =~ /^[#{LEGAL_CHARS}]+$/ && str == str.split
     end
 

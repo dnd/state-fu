@@ -10,12 +10,12 @@ describe StateFu::Lathe do
     @state   = Object.new()
     @event   = Object.new()
 
-    stub(@machine).tools() { [].extend( StateFu::ToolArray ) }
+    @machine.should_receive(:tools).any_number_of_times.and_return([].extend( StateFu::ToolArray ))
     @lathe = StateFu::Lathe.new( @machine )
-    @states = [].extend StateFu::StateArray
-    stub( @machine ).states() { @states }
+    @states = [].extend StateFu::StateArray    
+    @machine.should_receive(:states).any_number_of_times.and_return(@states)
     @events = [].extend StateFu::EventArray
-    stub( @machine ).events() { @events }
+    @machine.should_receive(:events).any_number_of_times.and_return(@events)
   end
 
   describe "constructor" do
@@ -29,7 +29,7 @@ describe StateFu::Lathe do
 
     it "should accept a state_or_event (state / event ) and if given one, be a child" do
       options = {}
-      mock( @state ).apply!( options ) {}
+      @state.should_receive(:apply!).with(options)
       lathe = StateFu::Lathe.new( @machine, @state )
       lathe.should be_kind_of( StateFu::Lathe )
       lathe.machine.should  == @machine
@@ -63,10 +63,9 @@ describe StateFu::Lathe do
         options = {:banana => :flower}
         @state = Object.new()
         @child = Object.new()
-        # can't mock the block :(
-        mock( StateFu::State ).new( @machine, :wobble, options ) { @state }
-        mock( StateFu::Lathe ).new( @machine, @state, options ) { @child }
-        mock( @child )
+        StateFu::State.should_receive(:new).with(@machine, :wobble, options).and_return(@state)
+        StateFu::Lathe.should_receive(:new).with(@machine, @state, options).and_return(@child)        
+        # TODO mock the block 
         @lathe.state( :wobble, options )
       end
 
@@ -183,10 +182,9 @@ describe StateFu::Lathe do
         options = {:banana => :flower}
         @event = Object.new()
         @child = Object.new()
-        # can't mock the block :(
-        mock( StateFu::Event ).new( @machine, :wobble, options ) { @event }
-        mock( StateFu::Lathe ).new( @machine, @event, options ) { @child }
-        mock( @child )
+        # TODO mock the block 
+        StateFu::Event.should_receive(:new).with(@machine, :wobble, options).and_return(@event)
+        StateFu::Lathe.should_receive(:new).with(@machine, @event, options).and_return(@child)                
         @lathe.event( :wobble, options )
       end
 
@@ -327,7 +325,7 @@ describe StateFu::Lathe do
 
     describe "helper" do
       it "should call machine.helper *args" do
-        mock( @machine ).helper( :fee, :fi, :fo, :fum )
+        @machine.should_receive(:helper).with( :fee, :fi, :fo, :fum )
         @lathe.helper( :fee, :fi, :fo, :fum )
       end
     end
@@ -380,7 +378,7 @@ describe StateFu::Lathe do
 
     describe ".event(:name)" do
       before do
-        mock( @machine ).find_or_create_states_by_name( @lathe.state_or_event ).at_least(1) { @lathe.state_or_event }
+        @machine.should_receive(:find_or_create_states_by_name).with(@lathe.state_or_event).at_least(1).times.and_return(@lathe.state_or_event)        
       end
 
       it "should create the named event if it does not exist" do
@@ -477,25 +475,23 @@ describe StateFu::Lathe do
       @master = @lathe
       @event  = @lathe.event( :go )
       @lathe  = StateFu::Lathe.new( @machine, @event )
-      stub( @machine ).find_or_create_states_by_name(:a) { [:a] }
-      stub( @machine ).find_or_create_states_by_name(:b) { [:b] }
     end
 
     describe ".from" do
       it "should create any states mentioned which do not exist" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
         @lathe.from( :a, :b )
       end
 
       it "should set the origins to the result of machine.find_or_create_states_by_name" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
         @lathe.from( :a, :b )
         @event.origins.should == [:a, :b]
       end
 
       it "should accumulate @origins on successive invocations" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
-        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
+        @machine.should_receive(:find_or_create_states_by_name).with(:x, :y).and_return([:x, :y])
         @lathe.from( :a, :b )
         @event.origins.should == [:a, :b]
         @lathe.from( :x, :y )
@@ -503,10 +499,10 @@ describe StateFu::Lathe do
       end
 
       it "should set / update both origin and target if a hash is given" do
-        mock( @machine ).find_or_create_states_by_name(:a) { [:a] }
-        mock( @machine ).find_or_create_states_by_name(:b) { [:b] }
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
-        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a).and_return [:a] 
+        @machine.should_receive(:find_or_create_states_by_name).with(:b).and_return [:b] 
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
+        @machine.should_receive(:find_or_create_states_by_name).with(:x, :y).and_return([:x, :y])
         @lathe.from( :a => :b )
         @event.origin.should == :a
         @event.target.should == :b
@@ -519,20 +515,20 @@ describe StateFu::Lathe do
     end
 
     describe ".to" do
-      it "should create any states mentioned which do not exist" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+      it "should create any states mentioned which do not exist" do        
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
         @lathe.to( :a, :b )
       end
 
       it "should set the targets to the result of machine.find_or_create_states_by_name" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
         @lathe.to( :a, :b )
         @event.targets.should == [:a, :b]
       end
 
       it "should update @origins on successive invocations" do
-        mock( @machine ).find_or_create_states_by_name(:a, :b) { [:a, :b] }
-        mock( @machine ).find_or_create_states_by_name(:x, :y) { [:x, :y] }
+        @machine.should_receive(:find_or_create_states_by_name).with(:a, :b).and_return([:a, :b])
+        @machine.should_receive(:find_or_create_states_by_name).with(:x, :y).and_return([:x, :y])
         @lathe.to( :a, :b )
         @event.targets.should == [:a, :b]
         @lathe.to( :x, :y )

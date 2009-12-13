@@ -47,29 +47,29 @@ describe StateFu::Plotter do
     describe ".generate" do
 
       it "should call generate_dot!" do
-        mock( @plotter ).generate_dot!() { "dot" }
+        @plotter.should_receive(:generate_dot!).and_return("dot")
         @plotter.generate
       end
 
       it "should store the result in the dot attribute" do
-        mock( @plotter).generate_dot!() { "dot" }
+        @plotter.should_receive(:generate_dot!).and_return("dot")
         @plotter.generate
         @plotter.dot.should == "dot"
       end
 
       describe ".save_as(filename)" do
         it "should save the string to a file" do
-          mock( File).open( 'filename', 'w' ).yields( @fh = Object.new() )
-          mock( @fh ).write( @plotter.output )
+          File.should_receive(:open).with('filename', 'w').and_yield(@fh = Object.new())
+          @fh.should_receive(:write).with(@plotter.output)
           @plotter.output.save_as( 'filename' )
         end
       end
 
       describe ".save!" do
         it "should save the string in a tempfile and return the path" do
-          mock(@tempfile = Object.new).path {"path"}.subject
-          mock(Tempfile).new(['state_fu_graph','.dot']).yields( @fh = Object.new() ) { @tempfile }
-          mock( @fh ).write( @plotter.output )
+          (@tempfile = Object.new).should_receive(:path).and_return('path')
+          (@fh = Object.new()).should_receive(:write).with(@plotter.output)          
+          Tempfile.should_receive(:new).with(['state_fu_graph','.dot']).and_yield(@fh).and_return(@tempfile)
           @plotter.output.save!.should == 'path'
         end
       end

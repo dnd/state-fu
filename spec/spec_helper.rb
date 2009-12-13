@@ -20,16 +20,16 @@ module MySpecHelper
 
   def prepare_active_record( options={}, &migration )
     if skip_slow_specs?
-      skip_slow_specs and return false
+      skip_slow_specs and return 
     end
 
     begin
-      require 'activesupport'
+      require 'active_support'
       require 'active_record'
       require 'sqlite3'
     rescue LoadError => e
       pending "skipping specifications due to load error: #{e}"
-      return false
+      return 
     end
 
     options.symbolize_keys!
