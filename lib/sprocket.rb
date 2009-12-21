@@ -53,6 +53,10 @@ module StateFu
       self.to_sym === other.to_sym || super(other)
     end
     
+    def serializable?
+      !hooks.values.flatten.map(&:class).include?(Proc) && !!(options.to_yaml rescue false)
+    end
+    
   end
 end
 

@@ -176,9 +176,6 @@ module StateFu
       end
     end
 
-
-    #####################################
-
     # define an event or state requirement.
     # options:
     #  :on => :entry|:exit|array (state only) - check requirement on state entry, exit or both?
@@ -283,6 +280,7 @@ module StateFu
 
     # set the target state(s) of an event
     # to :destination
+    # to :target_a, :target_b
     # to [:end, :finale, :intermission]
     def to *args, &block
       valid_in_context Event

@@ -222,5 +222,26 @@ describe StateFu::Machine do
 
     end # named_procs
 
+    describe "#serializable?" do
+      it "should be true if the machine has no procs / lambdas" do
+        StateFu::Machine.new.should be_serializable
+      end
+
+      it "should be false if it has a named_proc" do
+        other_machine = StateFu::Machine.new do
+          named_proc(:do_stuff) { puts "I has a proc" }
+        end
+        other_machine.serializable?.should == false
+      end
+
+      it "should be false if any states / events are not seralizable" do
+        other_machine = StateFu::Machine.new do
+          state :red
+        end
+        other_machine.states.first.should_receive(:serializable?).and_return(false)
+        other_machine.serializable?.should == false      
+      end
+    end
+
   end # instance methods
 end

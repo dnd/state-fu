@@ -34,9 +34,10 @@ module StateFu
       options[:define_methods] = (name == DEFAULT) unless options.symbolize_keys!.has_key?(:define_methods)
       options[:field_name] ||= Persistence.default_field_name(name)
       options[:singleton] = true unless owner.is_a?(Class)
-      # define an accessor method with the given name
       if options[:singleton]
         _binding = StateFu::Binding.new machine, owner, name, options
+
+        # define an accessor method with the given name
         MethodFactory.define_singleton_method(owner, name) { _binding }
         if alias_name = options[:alias] || options[:as]
           MethodFactory.define_singleton_method(owner, alias_name) { _binding }
@@ -191,5 +192,18 @@ module StateFu
       @graphviz ||= Plotter.new(self).output
     end
 
+    def to_yaml
+      StateFu::Blueprint.to_yaml(self)
+    end
+    
+    # TODO simplify this by adding serializable? to state & event
+    def serializable?
+      named_procs.empty? && (states + events).all?(&:serializable?) 
+    end
+    
+    def self.load_yaml(yaml)
+      StateFu::Blueprint.load_yaml(yaml)
+    end
+    
   end
 end

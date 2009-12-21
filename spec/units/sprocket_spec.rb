@@ -65,5 +65,11 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
       end
     end
 
+    describe "#serializable?" do
+      it "should be true if hooks contains no procs and options are empty"
+      it "should be false if hooks contains any procs"
+      it "should be false if options contains anything which cannot be turned into yaml"
+    end
+    
   end
 end

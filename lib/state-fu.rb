@@ -29,6 +29,7 @@ end
   'support/exceptions',
   'executioner',
   'machine',
+  'blueprint',
   'lathe',
   'method_factory',
   'binding',
