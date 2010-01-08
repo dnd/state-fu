@@ -1,30 +1,56 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../helper")
 
+module MockTransitionHelper
+  def mock_transition
+    transition = Object.new()
+    # hmm, seems we have to stub #binding ourselves ...
+    transition.instance_eval do
+      (class << self; self; end).class_eval do
+        def binding
+          @binding ||= Object.new
+        end        
+      end
+    end
+    transition
+  end
+end
+
 describe StateFu::RequirementError do
+  include MockTransitionHelper
 
   describe "constructor" do
     before do
-      @transition = Object.new()
+      @transition = mock_transition
     end
 
+    it "should create an exception given a transition" do
+      e = StateFu::RequirementError.new(@transition)
+      e.should be_kind_of(StateFu::RequirementError)
+    end
+    
+    it "should become an array of requirement messages with #to_a" do
+      e = StateFu::RequirementError.new(@transition)
+      e.should be_kind_of(StateFu::RequirementError)
+      @transition.should_receive(:unmet_requirement_messages).and_return(['oshit'])
+      e.to_a.should == ['oshit']
+    end
   end
 end
 
 describe StateFu::TransitionHalted do
+  include MockTransitionHelper
 
   describe "constructor" do
     before do
-      @transition = Object.new()
+      @transition = mock_transition
     end
 
     it "should create a TransitionHalted given a transition" do
-      pending
       e = StateFu::TransitionHalted.new( @transition )
       e.should be_kind_of( StateFu::TransitionHalted )
     end
 
     it "should allow a custom message" do
-      pending
       msg = 'helo'
       e = StateFu::TransitionHalted.new( @transition, msg )
       e.should be_kind_of( StateFu::TransitionHalted )
@@ -32,14 +58,12 @@ describe StateFu::TransitionHalted do
     end
 
     it "should allow a message to be omitted" do
-      pending
       e = StateFu::TransitionHalted.new( @transition )
       e.should be_kind_of( StateFu::TransitionHalted )
-      e.message.should == StateFu::TransitionHalted::DEFAULT_MESSAGE
+      e.message.should == "StateFu::TransitionHalted"
     end
 
     it "should allow access to the transition" do
-      pending
       e = StateFu::TransitionHalted.new( @transition )
       e.transition.should == @transition
     end
@@ -47,36 +71,31 @@ describe StateFu::TransitionHalted do
 end
 
 describe StateFu::IllegalTransition do
+  include MockTransitionHelper
+
   before do
-    @binding = Object.new
-    @origin  = Object.new
-    @event   = Object.new
-    @target  = Object.new
+    @transition = mock_transition
   end
 
   describe "constructor" do
-    it "should create an IllegalTransition given a binding, event, origin & target" do
-      pending
-      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target )
+    it "should create an IllegalTransition given a transition" do
+      e = StateFu::IllegalTransition.new( @transition)
       e.should be_kind_of( StateFu::IllegalTransition )
-      e.message.should == StateFu::IllegalTransition::DEFAULT_MESSAGE
-    end
+      e.transition.should == @transition
+      e.message.should == "StateFu::IllegalTransition"
+    end    
 
     it "should allow a custom message" do
-      pending
-      msg = 'helo'
-      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target, msg )
+      e = StateFu::IllegalTransition.new( @transition, 'danger' )
       e.should be_kind_of( StateFu::IllegalTransition )
-      e.message.should == msg
+      e.transition.should == @transition
+      e.message.should == 'danger'
     end
 
-    it "should allow access to the binding, event, origin, and target" do
-      pending
-      e = StateFu::IllegalTransition.new( @binding, @event, @origin, @target )
-      e.binding.should == @binding
-      e.event.should   == @event
-      e.origin.should  == @origin
-      e.target.should  == @target
+    it "should allow access to a list of valid transitions if provided" do
+      e = StateFu::IllegalTransition.new( @transition, 'danger', [:a, :b] )
+      e.should be_kind_of( StateFu::IllegalTransition )
+      e.legal_transitions.should == [:a, :b]
     end
   end
 end

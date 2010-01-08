@@ -36,7 +36,7 @@ module StateFu
     attr_reader :transition
 
     def initialize transition, message=nil, options={}
-      raise caller.inspect unless transition.is_a?(Transition)
+      # raise caller.inspect unless transition.is_a?(Transition)
       @transition = transition 
       super transition.binding, message, options
     end
@@ -99,7 +99,7 @@ module StateFu
     attr_reader :legal_transitions
 
     def initialize transition, message=nil, valid_transitions=nil, options={}
-      @valid_transitions = valid_transitions
+      @legal_transitions = valid_transitions
       super transition, message, options
     end    
   end

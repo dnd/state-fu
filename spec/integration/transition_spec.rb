@@ -525,42 +525,37 @@ describe StateFu::Transition do
 
     describe "fire! calling hooks" do
       before do
-        @t      = @obj.state_fu.transition( :go )
+        @t = @obj.state_fu.transition(:go)
       end
 
-      it "should update the object's state after state:entering and before event:after" do
-        @binding  = @obj.state_fu
-        pending
-        @t.fire!
-      end
-
-      it "should be accepted after state:entering and before event:after" do
-        pending
-        mock( @obj ).entering_b( @t ) { @t.should_not be_accepted }
-        mock( @obj ).after_go(@t)     { @t.should be_accepted }
-        mock( @obj ).accepted_b(@t)   { @t.should be_accepted }
+      it "should change state between state:entering and event:after" do        
+        @binding = @obj.state_fu
+        @obj.should_receive(:entering_b).and_return do
+          @obj.current_state.name.should == :a    
+        end
+        @obj.should_receive(:after_go).and_return do
+          @obj.current_state.name.should == :b
+        end
         @t.fire!
       end
 
       it "should call the method for each hook on @obj in order, with the transition" do
-        pending
-        mock( @obj ).before_go(@t)  { @called << :before_go  }
-        mock( @obj ).exiting_a(@t)  { @called << :exiting_a  }
-        mock( @obj ).execute_go(@t) { @called << :execute_go }
-        mock( @obj ).entering_b(@t) { @called << :entering_b }
-        mock( @obj ).after_go(@t)   { @called << :after_go   }
-        mock( @obj ).accepted_b(@t) { @called << :accepted_b }
-
+        hooks = [:before_go, :exiting_a, :execute_go, :entering_b, :after_go, :accepted_b]
+        hooks.each do |hook|
+          @obj.should_receive(hook).and_return do
+            @obj.called hook
+          end
+        end
         @t.fire!()
+        @obj.calls.should == hooks
       end
 
       describe "adding an anonymous hook for event.hooks[:execute]" do
         before do
-          called = @called # get us a ref for the closure
           Klass.state_fu_machine do
             event( :go ) do
               execute do |ctx|
-                called( :execute_proc )
+                called :execute_proc
               end
             end
           end
@@ -581,76 +576,63 @@ describe StateFu::Transition do
         end
 
         it "should be replace the previous proc for a slot if redefined" do
-          pending
           called = @called # get us a ref for the closure
           Klass.state_fu_machine do
             event( :go ) do
               execute do |ctx|
-                called << :execute_proc_2
+                called(:updated)
               end
             end
           end
-
-          @event.hooks[:execute].length.should == 2
-          @event.hooks[:execute].first.class.should == Symbol
-          @event.hooks[:execute].last.class.should == Proc
-
-          @t.fire!()
-          @called.should == [ :before_go,
-                              :exiting_a,
-                              :execute_go,
-                              :execute_proc_2,
-                              :entering_b,
-                              :after_go,
-                              :accepted_b ]
+          @t.fire!
+          @obj.calls.should == [:before_go, 
+                                :exiting_a, 
+                                :execute_go, 
+                                :updated, 
+                                :entering_b, 
+                                :after_go, 
+                                :accepted_b]
         end
       end   # anonymous hook
 
       describe "adding a named hook with a block" do
         describe "with arity of -1/0" do
           it "should call the block in the context of the transition" do
-            pending
-            called = @called # get us a ref for the closure
             Klass.state_fu_machine do
               event( :go ) do
                 execute(:named_execute) do
-                  raise self.class.inspect unless self.is_a?( StateFu::Transition )
-                  called << :execute_named_proc
+                  called :execute_named_proc
                 end
               end
             end
             @t.fire!()
-            @called.should == [ :before_go,
-                                :exiting_a,
-                                :execute_go,
-                                :execute_named_proc,
-                                :entering_b,
-                                :after_go,
-                                :accepted_b ]
+            @obj.calls.should == [ :before_go,
+                                   :exiting_a,
+                                   :execute_go,
+                                   :execute_named_proc,
+                                   :entering_b,
+                                   :after_go,
+                                   :accepted_b ]
           end
         end # arity 0
 
         describe "with arity of 1" do
           it "should call the proc in the context of the object, passing the transition as the argument" do
-            pending
-            called = @called # get us a ref for the closure
             Klass.state_fu_machine do
               event( :go ) do
-                execute(:named_execute) do |ctx|
-                  raise ctx.class.inspect unless ctx.is_a?( StateFu::Transition )
-                  raise self.class.inspect unless self.is_a?( Klass )
-                  called << :execute_named_proc
+                execute(:named_execute) do |t|
+                  called [:execute_named_proc, t]
                 end
               end
             end
             @t.fire!()
-            @called.should == [ :before_go,
-                                :exiting_a,
-                                :execute_go,
-                                :execute_named_proc,
-                                :entering_b,
-                                :after_go,
-                                :accepted_b ]
+            @obj.calls.should == [:before_go,
+                                  :exiting_a,
+                                  :execute_go,
+                                  [:execute_named_proc, @t],
+                                  :entering_b,
+                                  :after_go,
+                                  :accepted_b]
           end
         end # arity 1
       end   # named proc
@@ -714,7 +696,6 @@ describe StateFu::Transition do
       @event = @machine.events[:go]
       @a = @machine.states[:a]
       @b = @machine.states[:b]
-      # stub(@obj).ok? { true }
     end
 
     describe "when no block is supplied for the requirement" do
@@ -735,8 +716,6 @@ describe StateFu::Transition do
 
 
       it "should contain the event in @binding.valid_events if @obj.ok? is true" do
-        # stub( @binding ).ok?() {  true }
-#        set_method_arity(@binding,:ok, 0)
         @obj.ok = true
         @binding.current_state.should == @machine.initial_state
         @binding.events.should == @machine.events
@@ -744,14 +723,12 @@ describe StateFu::Transition do
       end
 
       it "should not contain :go in @binding.valid_events if !@obj.ok?" do
-        # stub( @binding ).ok?() { false }
         @obj.ok = false
         @binding.events.should == @machine.events
         @binding.valid_events.should == []
       end
 
       it "should raise a RequirementError if requirements are not satisfied" do
-        #stub( @binding ).ok? { false }
         @obj.ok = false
         lambda do
           @obj.state_fu.fire_transition!( :go )
@@ -814,14 +791,12 @@ describe StateFu::Transition do
       end
 
       it "should be invalid if @obj.entry_ok? is false" do
-        #mock( @obj ).entry_ok? { false }
         @obj.entry_ok = false
         @b.entry_requirements.should == [:entry_ok?]
         @binding.valid_next_states.should == []
       end
 
       it "should be valid if @obj.entry_ok? is true" do
-        # mock( @obj ).entry_ok? { true }
         @obj.entry_ok = true
         @binding.valid_next_states.should == [@b]
       end
@@ -863,18 +838,6 @@ describe StateFu::Transition do
 
     describe "a method defined on the stateful object" do
 
-      it "should be able to conditionally execute code based on whether the transition is a test" do
-        pending
-        testing = nil
-        @obj.__define_singleton_method(:run_exec) do
-          testing = t.testing?
-        end
-        @obj.state_fu.fire! :run do |t|
-          t.test_only = true
-        end
-        testing.should == true
-      end
-
       it "should be able to call methods on the transition mixed in via machine.helper" do
         t1 = @obj.state_fu.transition( :run)
         t1.should_not respond_to(:my_rad_method)
@@ -901,31 +864,25 @@ describe StateFu::Transition do
       end
 
       it "should be able to access the args / options passed to fire! via transition.args" do
-        pending
         # NOTE a trailing hash gets munged into options - not args
         args = [:a, :b, { 'c' => :d }]
-        @obj.__define_singleton_method(:run_exec) do
-          t.args.should == [:a, :b,{'c' => :d}]
-          t.options.should == {}
+        Klass.state_fu_machine do
+          event(:run, :from => :start, :to => :finish ) do
+            execute( :run_exec ) do |t|
+              t.args.should == [:a, :b, {'c' => :d}]
+              t.options.should == {:c => :d} # options are symbolized
+            end
+          end
         end
-        trans = @obj.state_fu.fire!( :run, *args )
+        trans = @obj.state_fu.run!( *args )
         trans.should be_accepted
       end
     end # method defined on object
 
     describe "a block passed to binding.transition" do
-      it "should execute in the context of the transition initializer after it's set up" do
-        pending
-        @obj.__define_singleton_method(:run_exec) do
-          t.args.should == ['who','yo','daddy?']
-          t.options.should == {:hi => :mum}
-        end
-        trans = @obj.state_fu.transition( :run ) do
-          @args    = %w/ who yo daddy? /
-          @options = {:hi => :mum}
-
-        end
-        trans.fire!()
+      
+      it "should not be possible unless it's made less confusing" do
+        pending "wtf is the use case?"
       end
     end
 
@@ -934,7 +891,6 @@ describe StateFu::Transition do
   describe "next_transition" do
     describe "when there are multiple events but only one is fireable?" do
       before do
-        pending
         reset!
         make_pristine_class("Klass")
         @machine = Klass.state_fu_machine do
@@ -954,8 +910,6 @@ describe StateFu::Transition do
         @obj     = Klass.new()
         @binding = @obj.state_fu
         @binding.events.length.should == 2
-        #@machine.events[:impossibility].fireable_by?( @binding ).should == false
-        #@machine.events[:inevitability].fireable_by?( @binding ).should == true
       end
 
       describe "when the fireable? event has only one target" do
@@ -1022,8 +976,8 @@ describe StateFu::Transition do
           t.should be_nil
         end
 
-        it "should raise an IllegalTransition if next! is called" do
-          lambda { @binding.next! }.should raise_error( StateFu::IllegalTransition )
+        it "should raise TransitionNotFound if next! is called" do
+          lambda { @binding.next! }.should raise_error( StateFu::TransitionNotFound )
         end
       end
 

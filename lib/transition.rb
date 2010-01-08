@@ -61,7 +61,7 @@ module StateFu
       
       machine.inject_helpers_into( self )
       self.args = argument_list            
-      apply!(argument_list, &block )       
+      apply!(argument_list, &block ) # initialize arguments and eval block last       
     end
     
     

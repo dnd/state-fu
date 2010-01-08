@@ -66,9 +66,26 @@ describe "Common features / functionality for StateFu::State & StateFu::Event" d
     end
 
     describe "#serializable?" do
-      it "should be true if hooks contains no procs and options are empty"
-      it "should be false if hooks contains any procs"
-      it "should be false if options contains anything which cannot be turned into yaml"
+      it "should be true if hooks contains no procs and options are empty" do
+        @sprocket.hooks.values.flatten.map(&:class).include?(Proc).should == false
+        @sprocket.options = {}
+        @sprocket.serializable?.should == true
+      end
+      
+      it "should be false if hooks contains any procs" do
+        pending 
+        # ...
+        @sprocket.serializable?.should == false
+      end
+      
+      it "should be false if options contains anything which cannot be turned into yaml" do
+        @sprocket.serializable?.should == true
+        @sprocket.options[:whut] = Class
+        lambda do
+          @sprocket.options.to_yaml
+        end.should raise_error
+        @sprocket.serializable?.should == false   
+      end
     end
     
   end

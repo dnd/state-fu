@@ -93,9 +93,7 @@ module MySpecHelper
       RelaxDB.replicate_db "relaxdb_spec_base", "relaxdb_spec"
       RelaxDB.enable_view_creation
     rescue => e
-      puts "\n===== Run rake create_base_db before the first spec run ====="
-      puts
-      exit!
+      puts "\n===== Run rake create_base_db in the relaxdb gem folder before the first spec run ====="
     end
     #
   end
