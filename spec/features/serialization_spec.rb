@@ -52,10 +52,10 @@ describe "serializing a state machine" do
       @yaml[:events][0][:requirements].should == [:title]
     end    
     it "should have state hooks" do
-      @yaml[:states][0][:hooks].should == {:exit=>[:bump_version], :entry=>[], :accepted=>[]}
+      @yaml[:states][0][:hooks].should == {:exit=>[:bump_version]}
     end
     it "should have event hooks" do
-      @yaml[:events][0][:hooks].should == {:before=>[], :after=>[], :execute=>[:generate_publicity]}
+      @yaml[:events][0][:hooks].should == {:execute=>[:generate_publicity]}
     end
    
     it "should have helpers"
