@@ -3,7 +3,7 @@ module StateFu
 
     def self.load_yaml(yaml)
       hash = YAML.load(yaml) 
-      returning Machine.new(hash[:options] || {}) do |machine|
+      Machine.new(hash[:options] || {}).tap do |machine|
         add_states machine, hash
         add_events machine, hash
         hash[:requirement_messages] &&

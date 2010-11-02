@@ -210,7 +210,7 @@ module StateFu
     # if there is a single possible cycle() transition, fire and return it
     # otherwise raise an IllegalTransition
     def cycle!(event_or_array=nil, *args, &block )
-      returning cycle(event_or_array, *args, &block ) do |t|
+      cycle(event_or_array, *args, &block ).tap do |t|
         raise TransitionNotFound.new( self, transitions.cyclic.with(*args,&block), "Cannot cycle! unless there is exactly one cyclic event") \
           if t.nil?
         t.fire!

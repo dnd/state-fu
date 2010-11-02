@@ -1,11 +1,11 @@
 require 'fileutils'
 
 unless Object.const_defined?('STATE_FU_APP_PATH')
-  STATE_FU_APP_PATH = Object.const_defined?('RAILS_ROOT') ? RAILS_ROOT : File.join( File.dirname(__FILE__), '/../..')
+  STATE_FU_APP_PATH = Object.const_defined?('Rails') ? ::Rails.root.to_s : File.join( File.dirname(__FILE__), '/../..')
 end
 
 unless Object.const_defined?('STATE_FU_PLUGIN_PATH')
-  STATE_FU_PLUGIN_PATH = Object.const_defined?('RAILS_ROOT') ? File.join( RAILS_ROOT, '/vendor/plugins/state-fu' ) : STATE_FU_APP_PATH
+  STATE_FU_PLUGIN_PATH = Object.const_defined?('Rails') ? File.join( ::Rails.root.to_s, '/vendor/plugins/state-fu' ) : STATE_FU_APP_PATH
 end
 
 begin

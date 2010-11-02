@@ -15,7 +15,7 @@ module StateFu
         end
 
         @options = @options.nil?? _options : @options.merge(_options)
-        returning self do
+        self.tap do
           if block_given?
             case block.arity.abs
             when 1, -1

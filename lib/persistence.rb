@@ -55,7 +55,7 @@ module StateFu
     def self.for_class(klass, binding, field_name)
       persister_class = class_for klass, field_name
       prepare_field( klass, field_name, persister_class)
-      returning persister_class.new( binding, field_name ) do |persister|
+      persister_class.new( binding, field_name ).tap do |persister|
         Logging.debug( "#{persister_class}: method #{binding.method_name} as field #{persister.field_name}" )
       end
     end

@@ -84,7 +84,7 @@ module StateFu
       # use the prepared event & target, and block, if none are supplied
       event, target = destination.nil? ? [options[:event], options[:target]] : parse_destination(destination)
       block ||= @block
-      returning Transition.new(binding, event, target, &block) do |transition|
+      Transition.new(binding, event, target, &block).tap do |transition|
         if @args
           transition.args = @args 
         end
@@ -158,7 +158,7 @@ module StateFu
         end
       end.map do |event|
         next if options[:event] and event != options[:event]
-        returning [] do |ts|
+        [].tap do |ts|
 
           # TODO hmm ... "sequences" ... undecided on these. see Event / Lathe for more detail          
           if options[:sequences]

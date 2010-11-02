@@ -20,7 +20,7 @@ module StateFu
     end
 
     def self.method_definitions_for(machine, name)
-      returning Hash.new do |method_definitions|
+      {}.tap do |method_definitions|
         simple_events, complex_events = machine.events.partition &:simple?
 
         # simple event methods

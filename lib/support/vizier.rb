@@ -194,13 +194,13 @@ module Vizier  #:nodoc:all
     end
 
     def add_node( n, a={} )
-      returning Node.new(n,a) do |n|
+      Node.new(n,a).tap do |n|
         @nodes << n
       end
     end
 
     def add_link(from, to, a={})
-      returning Link.new( from, to, a) do |l|
+      Link.new( from, to, a).tap do |l|
         @links << l
       end
     end
@@ -274,7 +274,7 @@ module Vizier  #:nodoc:all
     end
 
     def subgraph(name, a = {})
-      returning( SubGraph.new(name, a)) do |g|
+      SubGraph.new(name, a).tap do |g|
         @subgraphs << g
         yield g if block_given?
       end
